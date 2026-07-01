@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Würfelspiele — Die Spielecke</title>
+<link rel="stylesheet" href="../styles/base.css">
+<link rel="stylesheet" href="../styles/spielecke.css">
+</head>
+<body>
+
+<header class="sp-header">
+  <div class="sp-logo">🎲 Würfelspiele <span>Die Spielecke — Klasse 5 &amp; 6</span></div>
+  <div class="sp-header-btns">
+    <button class="btn btn-ghost" onclick="location.href='index.html'">← Spielecke</button>
+  </div>
+</header>
+
+<div class="station-main">
+
+  <!-- Stage -->
+  <div class="station-stage">
+    <div class="station-titel-row">🎲 Würfel-Labor</div>
+    <p class="station-frage" id="frageText">Würfle und beobachte, welche Zahl am häufigsten erscheint.</p>
+
+    <div class="anzahl-select">
+      <span>Würfel-Anzahl:</span>
+      <button class="anzahl-btn active" id="btn1" onclick="setModus(1)">1 Würfel</button>
+      <button class="anzahl-btn" id="btn2" onclick="setModus(2)">2 Würfel (Summe)</button>
+    </div>
+
+    <div class="wuerfel-stage" id="wuerfelStage"></div>
+
+    <div id="ergebnisText" style="font-family:'Fredoka One',cursive;font-size:1.3rem;min-height:1.8rem;color:var(--yellow)"></div>
+
+    <div class="station-actions">
+      <button class="btn btn-orange" onclick="wuerfeln()">🎲 Würfeln</button>
+      <button class="btn btn-mint"   onclick="wuerfelSerie(10)">⚡ 10× würfeln</button>
+      <button class="btn btn-mint"   onclick="wuerfelSerie(50)">⚡⚡ 50× würfeln</button>
+    </div>
+
+    <div class="prozent-callout" id="callout">
+      <strong>Wahrscheinlichkeit:</strong> Bei einem Würfel hat jede Zahl von 1 bis 6 die gleiche Chance:
+      <strong>1 von 6 ≈ 16,7%</strong>.
+    </div>
+  </div>
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="sp-tool-panel">
+      <div class="sp-tool-header">📋 Strichliste</div>
+      <div class="sp-tool-body" id="strichlisteWrap"></div>
+    </div>
+
+    <div class="sp-tool-panel">
+      <div class="sp-tool-header">📊 Häufigkeit vs. Wahrscheinlichkeit</div>
+      <div class="sp-tool-body" id="vergleichWrap"></div>
+    </div>
+
+    <div class="sp-tool-panel">
+      <div class="sp-tool-body" id="gesamtWrap"></div>
+    </div>
+
+    <div class="reset-row">
+      <button class="btn btn-ghost" onclick="resetExperiment()">🔄 Zurücksetzen</button>
+    </div>
+  </div>
+
+</div>
+
+<script src="../js/sp-stats.js"></script>
+<script>
+let modus = 1; // 1 or 2 dice
+let daten = {};
+let werfend = false;
+
+const DOT_PATTERNS = {
+  1: [4],
+  2: [0, 8],
+  3: [0, 4, 8],
+  4: [0, 2, 6, 8],
+  5: [0, 2, 4, 6, 8],
+  6: [0, 2, 3, 5, 6, 8],
+};
+
+function buildDieHTML(id) {
+  let dots = '';
+  for (let i = 0; i < 9; i++) dots += `<div class="die-dot" id="dot${id}_${i}"></div>`;
+  return `<div class="die" id="die${id}">${dots}</div>`;
+}
+
+function setDieFace(id, value) {
+  const pattern = DOT_PATTERNS[value] || [];
+  for (let i = 0; i < 9; i++) {
+    const dot = document.getElementById(`dot${id}_${i}`);
+    if (dot) dot.classList.toggle('on', pattern.includes(i));
+  }
+}
+
+function setModus(n) {
+  modus = n;
+  document.getElementById('btn1').classList.toggle('active', n === 1);
+  document.getElementById('btn2').classList.toggle('active', n === 2);
+
+  const stage = document.getElementById('wuerfelStage');
+  if (n === 1) {
+    stage.innerHTML = buildDieHTML(1);
+    setDieFace(1, 1);
+    document.getElementById('frageText').textContent = 'Würfle und beobachte, welche Zahl am häufigsten erscheint.';
+    document.getElementById('callout').innerHTML =
+      '<strong>Wahrscheinlichkeit:</strong> Bei einem Würfel hat jede Zahl von 1 bis 6 die gleiche Chance: <strong>1 von 6 ≈ 16,7%</strong>.';
+    initDaten([1,2,3,4,5,6]);
+  } else {
+    stage.innerHTML = buildDieHTML(1) + buildDieHTML(2);
+    setDieFace(1, 1); setDieFace(2, 1);
+    document.getElementById('frageText').textContent = 'Würfle mit zwei Würfeln und beobachte die Summe. Welche Summe kommt am häufigsten — und warum?';
+    document.getElementById('callout').innerHTML =
+      '<strong>Spannend:</strong> Bei zwei Würfeln sind nicht alle Summen gleich wahrscheinlich! Die <strong>7</strong> kann auf <strong>6 verschiedene Arten</strong> entstehen (1+6, 2+5, 3+4, 4+3, 5+2, 6+1) — viel öfter als die 2 oder die 12, die nur auf 1 Weise entstehen.';
+    initDaten([2,3,4,5,6,7,8,9,10,11,12]);
+  }
+  render();
+}
+
+function initDaten(keys) {
+  daten = {};
+  keys.forEach(k => daten[k] = 0);
+}
+
+function getOrder() {
+  return modus === 1 ? [1,2,3,4,5,6] : [2,3,4,5,6,7,8,9,10,11,12];
+}
+
+function getTheorie() {
+  if (modus === 1) {
+    const t = {};
+    [1,2,3,4,5,6].forEach(v => t[v] = 1/6);
+    return t;
+  } else {
+    // Sum probabilities for 2 dice (36 combos)
+    const counts = {};
+    for (let a = 1; a <= 6; a++) for (let b = 1; b <= 6; b++) {
+      const s = a + b;
+      counts[s] = (counts[s] || 0) + 1;
+    }
+    const t = {};
+    Object.entries(counts).forEach(([s, c]) => t[s] = c / 36);
+    return t;
+  }
+}
+
+function getLabels() {
+  const order = getOrder();
+  const labels = {};
+  order.forEach(v => labels[v] = String(v));
+  return labels;
+}
+
+async function wuerfeln() {
+  if (werfend) return;
+  werfend = true;
+
+  const die1 = document.getElementById('die1');
+  die1.classList.remove('rolling'); void die1.offsetWidth; die1.classList.add('rolling');
+  let die2;
+  if (modus === 2) {
+    die2 = document.getElementById('die2');
+    die2.classList.remove('rolling'); void die2.offsetWidth; die2.classList.add('rolling');
+  }
+
+  await new Promise(r => setTimeout(r, 600));
+
+  const w1 = 1 + Math.floor(Math.random() * 6);
+  setDieFace(1, w1);
+  let ergebnis = w1;
+
+  if (modus === 2) {
+    const w2 = 1 + Math.floor(Math.random() * 6);
+    setDieFace(2, w2);
+    ergebnis = w1 + w2;
+    document.getElementById('ergebnisText').textContent = `${w1} + ${w2} = ${ergebnis}`;
+  } else {
+    document.getElementById('ergebnisText').textContent = `Gewürfelt: ${ergebnis}`;
+  }
+
+  daten[ergebnis]++;
+  render(ergebnis);
+  werfend = false;
+}
+
+async function wuerfelSerie(n) {
+  if (werfend) return;
+  await wuerfeln();
+  for (let i = 1; i < n; i++) {
+    const w1 = 1 + Math.floor(Math.random() * 6);
+    let ergebnis = w1;
+    if (modus === 2) {
+      const w2 = 1 + Math.floor(Math.random() * 6);
+      ergebnis = w1 + w2;
+    }
+    daten[ergebnis]++;
+  }
+  render();
+}
+
+function render(flashKey) {
+  const order  = getOrder();
+  const labels = getLabels();
+  const theorie = getTheorie();
+
+  const slWrap = document.getElementById('strichlisteWrap');
+  SpStats.renderStrichliste(slWrap, daten, order, labels);
+  if (flashKey) SpStats.flashRow(slWrap, flashKey);
+
+  SpStats.renderVergleich(document.getElementById('vergleichWrap'), daten, theorie, order, labels);
+  const gesamt = Object.values(daten).reduce((a,b)=>a+b, 0);
+  SpStats.renderGesamt(document.getElementById('gesamtWrap'), gesamt);
+}
+
+function resetExperiment() {
+  werfend = false;
+  initDaten(getOrder());
+  document.getElementById('ergebnisText').textContent = '';
+  setDieFace(1, 1);
+  if (modus === 2) setDieFace(2, 1);
+  render();
+}
+
+setModus(1);
+</script>
+</body>
+</html>

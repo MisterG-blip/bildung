@@ -1,0 +1,312 @@
+/* ════════════════════════════════════════
+   SPIELECKE — Lernwelt 2: Zufall & Wahrscheinlichkeit
+   Shared styles for hub + all stations
+   ════════════════════════════════════════ */
+
+/* ── Header (same pattern as Klasse 5/6) ── */
+.sp-header {
+  background: linear-gradient(135deg, #1a1f3a 0%, #2e1a4a 100%);
+  border-bottom: 3px solid rgba(255,211,61,0.3);
+  padding: 1rem 1.5rem;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: .75rem;
+  position: sticky; top: 0; z-index: 50;
+}
+.sp-logo { font-size: 1.3rem; color: var(--yellow); letter-spacing: .05em; }
+.sp-logo span { color: var(--text); font-size: .9rem; font-family: 'Nunito', sans-serif; font-weight: 600; }
+.sp-header-btns { display: flex; gap: .5rem; flex-wrap: wrap; }
+
+/* ── Hub layout ── */
+.sp-hero { text-align: center; padding: 2.5rem 1.5rem 1.5rem; }
+.sp-hero h1 { font-size: clamp(1.8rem,5vw,3rem); color: var(--yellow); margin-bottom: .5rem; }
+.sp-hero p  { font-size: .95rem; color: var(--muted); max-width: 520px; margin: 0 auto; line-height: 1.7; }
+
+.stationen-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.3rem;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+.station-card {
+  background: var(--card-bg);
+  border-radius: 20px;
+  border: 3px solid rgba(255,255,255,0.08);
+  padding: 1.8rem 1.5rem;
+  cursor: pointer;
+  transition: all .2s ease;
+  position: relative;
+  overflow: hidden;
+  text-decoration: none;
+  display: block;
+  color: inherit;
+}
+.station-card::before {
+  content: '';
+  position: absolute; inset: 0;
+  opacity: 0; transition: opacity .2s;
+  border-radius: 17px;
+}
+.station-card:hover { transform: translateY(-5px); box-shadow: 0 20px 50px rgba(0,0,0,0.4); }
+.station-card:hover::before { opacity: 1; }
+
+.station-card.muenze   { border-color: rgba(255,211,61,0.3); }
+.station-card.muenze:hover   { border-color: var(--yellow); box-shadow: 0 20px 50px rgba(0,0,0,0.4), 0 0 30px rgba(255,211,61,0.15); }
+.station-card.muenze::before { background: radial-gradient(ellipse at top left, rgba(255,211,61,0.1), transparent 60%); }
+
+.station-card.wuerfel  { border-color: rgba(239,68,68,0.3); }
+.station-card.wuerfel:hover  { border-color: var(--red); box-shadow: 0 20px 50px rgba(0,0,0,0.4), 0 0 30px rgba(239,68,68,0.15); }
+.station-card.wuerfel::before { background: radial-gradient(ellipse at top left, rgba(239,68,68,0.1), transparent 60%); }
+
+.station-card.glueck   { border-color: rgba(168,85,247,0.3); }
+.station-card.glueck:hover   { border-color: var(--purple); box-shadow: 0 20px 50px rgba(0,0,0,0.4), 0 0 30px rgba(168,85,247,0.15); }
+.station-card.glueck::before { background: radial-gradient(ellipse at top left, rgba(168,85,247,0.1), transparent 60%); }
+
+.station-card.beutel   { border-color: rgba(78,205,196,0.3); }
+.station-card.beutel:hover   { border-color: var(--mint); box-shadow: 0 20px 50px rgba(0,0,0,0.4), 0 0 30px rgba(78,205,196,0.15); }
+.station-card.beutel::before { background: radial-gradient(ellipse at top left, rgba(78,205,196,0.1), transparent 60%); }
+
+.st-icon  { font-size: 2.8rem; margin-bottom: .75rem; display: block; }
+.st-titel { font-family:'Fredoka One',cursive; font-size: 1.25rem; color: var(--text); margin-bottom: .4rem; }
+.st-desc  { font-size: .82rem; color: var(--muted); line-height: 1.6; }
+.st-arrow { position: absolute; bottom: 1.2rem; right: 1.2rem; font-size: 1.2rem; opacity: 0; transform: translateX(-6px); transition: all .2s; }
+.station-card:hover .st-arrow { opacity: 1; transform: translateX(0); }
+
+/* ── Ereignis-Sortierer banner (hub) ── */
+.ereignis-banner {
+  max-width: 1000px; margin: 0 auto 1rem; padding: 0 1.5rem;
+}
+.ereignis-card {
+  background: linear-gradient(135deg, #1c2a3a 0%, #1a1f3a 100%);
+  border-radius: 20px; border: 3px solid rgba(78,205,196,0.3);
+  padding: 1.3rem 1.8rem;
+  display: flex; align-items: center; gap: 1.3rem; flex-wrap: wrap;
+  cursor: pointer; transition: all .2s; text-decoration: none; color: inherit;
+}
+.ereignis-card:hover { border-color: var(--mint); transform: translateY(-3px); box-shadow: 0 16px 40px rgba(0,0,0,0.4), 0 0 30px rgba(78,205,196,0.2); }
+.ereignis-icon { font-size: 2.5rem; flex-shrink: 0; }
+.ereignis-text h2 { font-size: 1.15rem; color: var(--mint); margin-bottom: .25rem; }
+.ereignis-text p  { font-size: .8rem; color: var(--muted); line-height: 1.5; }
+
+/* ════════════════════════════════════════
+   STATION LAYOUT  (shared by all 4 games)
+   ════════════════════════════════════════ */
+.station-main {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+@media (max-width: 900px) { .station-main { grid-template-columns: 1fr; } }
+
+.station-stage {
+  background: var(--card-bg);
+  border-radius: 20px;
+  border: 3px solid rgba(255,255,255,0.08);
+  padding: 2rem 1.5rem;
+  display: flex; flex-direction: column; align-items: center; gap: 1.3rem;
+  min-height: 420px;
+  justify-content: center;
+}
+
+.station-titel-row {
+  display: flex; align-items: center; gap: .6rem;
+  font-family: 'Fredoka One', cursive; font-size: 1.4rem;
+  margin-bottom: .25rem;
+}
+
+.station-frage {
+  font-size: .9rem; color: var(--muted); text-align: center; max-width: 420px; line-height: 1.6;
+}
+
+/* ── Ereignis-Typ Tag (sicher / möglich / unmöglich) ── */
+.ereignis-typ-row { display: flex; gap: .5rem; flex-wrap: wrap; justify-content: center; }
+.ereignis-typ {
+  padding: .35rem .9rem; border-radius: 100px; font-size: .72rem; font-weight: 800;
+  cursor: default; border: 2px solid transparent;
+}
+.et-sicher    { background: rgba(34,197,94,0.15);  color: #4ade80; border-color: rgba(34,197,94,0.3); }
+.et-moeglich  { background: rgba(255,211,61,0.15); color: var(--yellow); border-color: rgba(255,211,61,0.3); }
+.et-unmoeglich{ background: rgba(239,68,68,0.15);  color: #f87171; border-color: rgba(239,68,68,0.3); }
+
+/* ── Aktions-Button group ── */
+.station-actions { display: flex; gap: .75rem; flex-wrap: wrap; justify-content: center; }
+.anzahl-select {
+  display: flex; gap: .4rem; align-items: center; flex-wrap: wrap; justify-content: center;
+  font-size: .78rem; color: var(--muted);
+}
+.anzahl-btn {
+  padding: .35rem .8rem; border-radius: 100px; font-size: .78rem; font-weight: 700;
+  cursor: pointer; border: 2px solid rgba(255,255,255,0.15);
+  background: var(--surface2); color: var(--muted); transition: all .15s;
+}
+.anzahl-btn:hover { color: var(--text); border-color: rgba(255,255,255,0.3); }
+.anzahl-btn.active { background: var(--mint); color: #1a1f3a; border-color: var(--mint); }
+
+/* ── Sidebar tool panel (reuse base patterns) ── */
+.sp-tool-panel {
+  background: var(--surface);
+  border-radius: 16px;
+  border: 3px solid rgba(255,255,255,0.08);
+  overflow: hidden;
+}
+.sp-tool-header {
+  padding: .85rem 1.2rem;
+  background: rgba(255,255,255,0.04);
+  border-bottom: 2px solid rgba(255,255,255,0.06);
+  display: flex; align-items: center; gap: .6rem;
+  font-family: 'Fredoka One', cursive; font-size: 1rem; color: var(--yellow);
+}
+.sp-tool-body { padding: 1rem 1.2rem; }
+
+/* ── Strichliste (reuse from Klasse, simplified) ── */
+.sp-strich-row {
+  display: flex; align-items: center; gap: .5rem;
+  padding: .4rem .6rem; border-radius: 8px;
+  background: rgba(255,255,255,0.03);
+  margin-bottom: .35rem;
+}
+.sp-strich-row.flash { animation: spFlash .4s ease; }
+@keyframes spFlash {
+  0%   { background: rgba(255,211,61,0.25); }
+  100% { background: rgba(255,255,255,0.03); }
+}
+.sp-strich-key   { font-size: .82rem; font-weight: 800; min-width: 60px; }
+.sp-strich-marks { font-family: monospace; font-size: .85rem; color: var(--mint); flex: 1; letter-spacing: .04em; }
+.sp-strich-count { font-size: .85rem; font-weight: 800; color: var(--yellow); min-width: 22px; text-align: right; }
+
+/* ── Relative Häufigkeit vs theoretische Wahrscheinlichkeit ── */
+.vergleich-row { margin-bottom: .9rem; }
+.vergleich-label { display: flex; justify-content: space-between; font-size: .76rem; margin-bottom: .3rem; }
+.vergleich-label .key { font-weight: 800; }
+.vergleich-bars { display: flex; flex-direction: column; gap: .25rem; }
+.vbar-track { height: 16px; background: rgba(255,255,255,0.06); border-radius: 100px; overflow: hidden; position: relative; }
+.vbar-fill  { height: 100%; border-radius: 100px; transition: width .5s ease; display: flex; align-items: center; }
+.vbar-fill.theorie { background: repeating-linear-gradient(45deg, rgba(255,255,255,0.15), rgba(255,255,255,0.15) 4px, transparent 4px, transparent 8px), var(--surface2); border: 1px dashed rgba(255,255,255,0.3); }
+.vbar-fill.real    { background: var(--mint); }
+.vbar-sub { font-size: .62rem; color: var(--muted); margin-top: .15rem; }
+
+/* ── Gesamtzähler ── */
+.gesamt-counter {
+  text-align: center; padding: .5rem 0;
+}
+.gesamt-counter .big {
+  font-family: 'Fredoka One', cursive; font-size: 2.2rem; color: var(--yellow); line-height: 1;
+}
+.gesamt-counter .sub { font-size: .72rem; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+
+/* ── Prozent-Idee callout ── */
+.prozent-callout {
+  background: rgba(255,211,61,0.08); border: 2px solid rgba(255,211,61,0.25);
+  border-radius: 12px; padding: .8rem 1rem; font-size: .8rem; line-height: 1.6;
+  margin-top: .5rem;
+}
+.prozent-callout strong { color: var(--yellow); }
+
+/* ════════════════════════════════════════
+   MÜNZWURF  specific
+   ════════════════════════════════════════ */
+.coin {
+  width: 140px; height: 140px;
+  position: relative;
+  cursor: pointer;
+  perspective: 800px;
+}
+.coin-inner {
+  width: 100%; height: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 1.2s cubic-bezier(0.34, 1.2, 0.4, 1);
+}
+.coin-inner.flipping { animation: coinFlip 1.2s cubic-bezier(0.34, 1.2, 0.4, 1); }
+@keyframes coinFlip {
+  0%   { transform: rotateY(0) translateY(0); }
+  40%  { transform: rotateY(900deg) translateY(-60px); }
+  100% { transform: rotateY(1800deg) translateY(0); }
+}
+.coin-face {
+  position: absolute; inset: 0; border-radius: 50%;
+  backface-visibility: hidden; -webkit-backface-visibility: hidden;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Fredoka One', cursive; font-size: 3rem;
+  border: 5px solid #8a6e28;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4), inset 0 0 20px rgba(0,0,0,0.2);
+}
+.coin-face.kopf  { background: radial-gradient(circle at 35% 30%, #ffe066, #e8c84a 60%, #c9a83c); color: #5a4810; }
+.coin-face.zahl  { background: radial-gradient(circle at 35% 30%, #f0f0f0, #c8c8c8 60%, #999); color: #444; transform: rotateY(180deg); }
+
+/* ════════════════════════════════════════
+   WÜRFEL  specific
+   ════════════════════════════════════════ */
+.wuerfel-stage { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+.die {
+  width: 90px; height: 90px;
+  background: #fff; border-radius: 16px;
+  border: 4px solid #1a1f3a;
+  display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr);
+  padding: 12px; gap: 2px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+  transition: transform .15s;
+}
+.die.rolling { animation: dieRoll .6s ease; }
+@keyframes dieRoll {
+  0%   { transform: rotate(0deg) scale(1); }
+  25%  { transform: rotate(90deg) scale(1.1); }
+  50%  { transform: rotate(180deg) scale(0.95); }
+  75%  { transform: rotate(270deg) scale(1.1); }
+  100% { transform: rotate(360deg) scale(1); }
+}
+.die-dot { width: 12px; height: 12px; border-radius: 50%; background: #1a1f3a; align-self: center; justify-self: center; opacity: 0; }
+.die-dot.on { opacity: 1; }
+
+/* ════════════════════════════════════════
+   GLÜCKSRAD  specific
+   ════════════════════════════════════════ */
+.glueck-wrap { display: flex; flex-direction: column; align-items: center; gap: 1rem; }
+.glueck-canvas-wrap { position: relative; width: 260px; height: 260px; }
+.glueck-marker {
+  position: absolute; top: -4px; left: 50%; transform: translateX(-50%);
+  width: 0; height: 0;
+  border-left: 14px solid transparent; border-right: 14px solid transparent;
+  border-top: 22px solid var(--yellow);
+  z-index: 5; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4));
+}
+canvas#glueckCanvas { border-radius: 50%; display: block; }
+
+/* ════════════════════════════════════════
+   KUGELBEUTEL  specific
+   ════════════════════════════════════════ */
+.beutel-wrap { display: flex; flex-direction: column; align-items: center; gap: 1rem; }
+.beutel-svg-wrap { width: 200px; cursor: pointer; transition: transform .15s; }
+.beutel-svg-wrap:hover { transform: scale(1.04); }
+.beutel-svg-wrap.shaking { animation: beutelShake .5s ease; }
+@keyframes beutelShake {
+  0%,100% { transform: rotate(0deg); }
+  20%  { transform: rotate(-8deg); }
+  40%  { transform: rotate(7deg); }
+  60%  { transform: rotate(-6deg); }
+  80%  { transform: rotate(4deg); }
+}
+.beutel-kugeln-config { display: flex; flex-direction: column; gap: .5rem; max-width: 320px; width: 100%; }
+.kugel-config-row { display: flex; align-items: center; gap: .6rem; font-size: .8rem; }
+.kugel-config-row .kugel-dot { width: 18px; height: 18px; border-radius: 50%; border: 2px solid #1a1f3a; flex-shrink: 0; }
+.kugel-config-row input[type=range] { flex: 1; }
+.kugel-config-row .kugel-count { width: 24px; text-align: right; font-weight: 800; }
+
+.gezogene-kugel {
+  width: 50px; height: 50px; border-radius: 50%;
+  border: 3px solid #1a1f3a; margin: 0 auto;
+  animation: kugelPop .4s cubic-bezier(0.34,1.56,0.64,1) both;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+@keyframes kugelPop {
+  from { transform: scale(0); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
+}
+
+/* ── Reset button ── */
+.reset-row { text-align: center; padding-top: .5rem; }

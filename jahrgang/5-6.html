@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Klasse 5 &amp; 6 — Mathwelt</title>
+<link rel="stylesheet" href="../styles/base.css">
+<style>
+body { background: radial-gradient(ellipse at 30% 10%, #2a1a30 0%, #1a1f3a 55%); }
+
+.jg-header {
+  background: linear-gradient(135deg, #1a1f3a 0%, #2e1a4a 100%);
+  border-bottom: 3px solid rgba(255,211,61,0.3);
+  padding: 1rem 1.5rem;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: .75rem;
+}
+.jg-logo { font-size: 1.3rem; color: var(--yellow); letter-spacing: .05em; }
+.jg-logo span { color: var(--text); font-size: .9rem; font-family: 'Nunito', sans-serif; font-weight: 600; }
+
+.jg-hero { text-align: center; padding: 2.5rem 1.5rem 1.5rem; }
+.jg-hero h1 { font-size: clamp(1.8rem,5vw,3rem); color: var(--yellow); margin-bottom: .5rem; }
+.jg-hero p  { font-size: .95rem; color: var(--muted); max-width: 540px; margin: 0 auto; line-height: 1.7; }
+
+.lernwelten-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 1.5rem 1.5rem 4rem;
+}
+
+.lw-card {
+  background: var(--card-bg);
+  border-radius: 22px;
+  border: 3px solid rgba(255,255,255,0.08);
+  padding: 2rem 1.6rem;
+  cursor: pointer;
+  transition: all .2s ease;
+  position: relative;
+  overflow: hidden;
+  text-decoration: none;
+  display: block;
+  color: inherit;
+}
+.lw-card::before {
+  content: '';
+  position: absolute; inset: 0;
+  opacity: 0; transition: opacity .2s;
+  border-radius: 19px;
+}
+.lw-card.daten   { border-color: rgba(255,211,61,0.3); }
+.lw-card.daten:hover   { border-color: var(--yellow); box-shadow: 0 20px 50px rgba(0,0,0,0.4), 0 0 30px rgba(255,211,61,0.15); }
+.lw-card.daten::before { background: radial-gradient(ellipse at top left, rgba(255,211,61,0.1), transparent 60%); }
+
+.lw-card.zufall  { border-color: rgba(168,85,247,0.3); }
+.lw-card.zufall:hover  { border-color: var(--purple); box-shadow: 0 20px 50px rgba(0,0,0,0.4), 0 0 30px rgba(168,85,247,0.15); }
+.lw-card.zufall::before { background: radial-gradient(ellipse at top left, rgba(168,85,247,0.1), transparent 60%); }
+
+.lw-card.analyse { border-color: rgba(78,205,196,0.3); opacity: 0.5; cursor: default; }
+
+.lw-card:hover { transform: translateY(-5px); }
+.lw-card:hover::before { opacity: 1; }
+
+.lw-icon  { font-size: 3rem; margin-bottom: .9rem; display: block; }
+.lw-titel { font-family:'Fredoka One',cursive; font-size: 1.5rem; color: var(--text); margin-bottom: .5rem; }
+.lw-fokus { font-size: .72rem; color: var(--mint); text-transform: uppercase; letter-spacing: .08em; margin-bottom: .6rem; font-weight: 700; }
+.lw-desc  { font-size: .85rem; color: var(--muted); line-height: 1.65; }
+.lw-arrow { position: absolute; bottom: 1.4rem; right: 1.4rem; font-size: 1.3rem; opacity: 0; transform: translateX(-6px); transition: all .2s; }
+.lw-card:hover .lw-arrow { opacity: 1; transform: translateX(0); }
+.lw-tag { position: absolute; top: 1.2rem; right: 1.2rem; }
+
+.kerngedanke {
+  max-width: 700px; margin: 0 auto 1rem; padding: 0 1.5rem;
+  text-align: center; font-size: .85rem; color: var(--muted);
+  font-style: italic; line-height: 1.7;
+}
+.kerngedanke strong { color: var(--yellow); font-style: normal; }
+</style>
+</head>
+<body>
+
+<header class="jg-header">
+  <div class="jg-logo">🎒 Mathwelt <span>/ Jahrgang 5 &amp; 6</span></div>
+  <button class="btn btn-ghost" onclick="location.href='../index.html'">← Portal</button>
+</header>
+
+<div class="jg-hero">
+  <h1>Jahrgang 5 &amp; 6</h1>
+  <p>„Was passiert hier?" — In diesem Jahrgang erlebst und sammelst du Mathematik direkt aus deiner Lebenswelt.</p>
+</div>
+
+<div class="lernwelten-grid">
+
+  <a class="lw-card daten" href="../klasse/5-6.html">
+    <div class="lw-tag"><span class="badge badge-yellow">Verfügbar</span></div>
+    <span class="lw-icon">📊</span>
+    <div class="lw-fokus">Daten erzeugen und darstellen</div>
+    <div class="lw-titel">Die digitale Klasse</div>
+    <p class="lw-desc">Lerne eine virtuelle Klasse kennen, sammle Daten über Strichlisten und werte sie in Tabellen und Diagrammen aus. Mittelwert, Median und Spannweite inklusive.</p>
+    <div class="lw-arrow">→</div>
+  </a>
+
+  <a class="lw-card zufall" href="../spielecke/index.html">
+    <div class="lw-tag"><span class="badge badge-purple">Verfügbar</span></div>
+    <span class="lw-icon">🎲</span>
+    <div class="lw-fokus">Zufall erleben</div>
+    <div class="lw-titel">Die Spielecke</div>
+    <p class="lw-desc">Münzwurf, Würfel, Glücksrad und Kugelbeutel: erlebe sichere, mögliche und unmögliche Ereignisse und beobachte relative Häufigkeiten in Echtzeit.</p>
+    <div class="lw-arrow">→</div>
+  </a>
+
+  <div class="lw-card analyse">
+    <div class="lw-tag"><span class="badge badge-mint">Bald</span></div>
+    <span class="lw-icon">🧠</span>
+    <div class="lw-fokus">Verstehen von Darstellungen</div>
+    <div class="lw-titel">Analyse- &amp; Modelllabor</div>
+    <p class="lw-desc">Diagramme lesen, Informationen entnehmen, einfache Vergleiche anstellen — mathematische Darstellungen kritisch verstehen.</p>
+  </div>
+
+</div>
+
+<div class="kerngedanke">
+  <strong>Kerngedanke:</strong> Daten sind nicht vorgegeben — sie werden erzeugt, untersucht und interpretiert.
+</div>
+
+</body>
+</html>

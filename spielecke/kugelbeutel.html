@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kugelbeutel — Die Spielecke</title>
+<link rel="stylesheet" href="../styles/base.css">
+<link rel="stylesheet" href="../styles/spielecke.css">
+<style>
+.zurueck-row { display: flex; gap: .5rem; align-items: center; font-size: .78rem; color: var(--muted); }
+.zurueck-toggle {
+  display: flex; align-items: center; gap: .4rem; cursor: pointer;
+  background: var(--surface2); padding: .4rem .8rem; border-radius: 100px;
+  border: 2px solid rgba(255,255,255,0.1);
+}
+.zurueck-toggle input { accent-color: var(--mint); }
+.beutel-inhalt-info { font-size: .75rem; color: var(--muted); text-align: center; }
+</style>
+</head>
+<body>
+
+<header class="sp-header">
+  <div class="sp-logo">👜 Kugelbeutel <span>Die Spielecke — Klasse 5 &amp; 6</span></div>
+  <div class="sp-header-btns">
+    <button class="btn btn-ghost" onclick="location.href='index.html'">← Spielecke</button>
+  </div>
+</header>
+
+<div class="station-main">
+
+  <!-- Stage -->
+  <div class="station-stage">
+    <div class="station-titel-row">👜 Blind ziehen</div>
+    <p class="station-frage">Stelle deine eigene Mischung an Kugeln zusammen und ziehe blind. Was kommt häufiger — viele oder wenige Kugeln einer Farbe?</p>
+
+    <div class="beutel-wrap">
+      <div class="beutel-svg-wrap" id="beutelSvg" onclick="ziehen()">
+        <svg viewBox="0 0 200 220" xmlns="http://www.w3.org/2000/svg">
+          <path d="M40,80 Q30,200 100,210 Q170,200 160,80 Z" fill="#8B5CF6" stroke="#1a1f3a" stroke-width="4"/>
+          <path d="M40,80 Q100,100 160,80 L150,60 Q100,75 50,60 Z" fill="#7c3aed" stroke="#1a1f3a" stroke-width="4"/>
+          <ellipse cx="100" cy="55" rx="55" ry="14" fill="#A855F7" stroke="#1a1f3a" stroke-width="4"/>
+          <path d="M70,45 Q100,15 130,45" fill="none" stroke="#5a3888" stroke-width="6" stroke-linecap="round"/>
+          <text x="100" y="150" font-size="40" text-anchor="middle">❓</text>
+        </svg>
+      </div>
+
+      <div id="gezogeneKugel"></div>
+      <div id="ergebnisText" style="font-family:'Fredoka One',cursive;font-size:1.2rem;min-height:1.6rem;color:var(--yellow)"></div>
+    </div>
+
+    <div class="station-actions">
+      <button class="btn btn-mint" onclick="ziehen()">👜 Kugel ziehen</button>
+      <button class="btn btn-mint" onclick="ziehSerie(10)">⚡ 10× ziehen</button>
+      <button class="btn btn-mint" onclick="ziehSerie(50)">⚡⚡ 50× ziehen</button>
+    </div>
+
+    <div class="zurueck-row">
+      <label class="zurueck-toggle">
+        <input type="checkbox" id="zurueckCheck" checked onchange="updateZurueck()">
+        Mit Zurücklegen (Wahrscheinlichkeit bleibt gleich)
+      </label>
+    </div>
+
+    <div class="beutel-kugeln-config" id="kugelConfig"></div>
+    <div class="beutel-inhalt-info" id="beutelInfo"></div>
+
+    <div class="prozent-callout">
+      <strong>Mit oder ohne Zurücklegen?</strong> Legst du die gezogene Kugel zurück, bleibt die Wahrscheinlichkeit
+      für jede Farbe immer gleich. Ziehst du <strong>ohne</strong> Zurücklegen, ändert sich die Wahrscheinlichkeit
+      nach jeder Ziehung — der Beutel wird ja leerer!
+    </div>
+  </div>
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="sp-tool-panel">
+      <div class="sp-tool-header">📋 Strichliste</div>
+      <div class="sp-tool-body" id="strichlisteWrap"></div>
+    </div>
+
+    <div class="sp-tool-panel">
+      <div class="sp-tool-header">📊 Häufigkeit vs. Wahrscheinlichkeit</div>
+      <div class="sp-tool-body" id="vergleichWrap"></div>
+    </div>
+
+    <div class="sp-tool-panel">
+      <div class="sp-tool-body" id="gesamtWrap"></div>
+    </div>
+
+    <div class="reset-row">
+      <button class="btn btn-ghost" onclick="resetExperiment()">🔄 Zurücksetzen</button>
+    </div>
+  </div>
+
+</div>
+
+<script src="../js/sp-stats.js"></script>
+<script>
+// Initial bag setup: name, color, count
+let farben = [
+  { name: 'Rot',  farbe: '#EF4444', anzahl: 5 },
+  { name: 'Blau', farbe: '#3B82F6', anzahl: 3 },
+  { name: 'Gelb', farbe: '#FFD93D', anzahl: 2 },
+];
+
+let mitZuruecklegen = true;
+let beutelInhalt = []; // flat array of color names, used when "ohne Zurücklegen"
+let daten = {};
+let ziehend = false;
+
+function initBeutel() {
+  beutelInhalt = [];
+  farben.forEach(f => { for (let i = 0; i < f.anzahl; i++) beutelInhalt.push(f.name); });
+}
+
+function initDaten() {
+  daten = {};
+  farben.forEach(f => daten[f.name] = 0);
+}
+
+function renderKonfig() {
+  const wrap = document.getElementById('kugelConfig');
+  wrap.innerHTML = farben.map((f, i) => `
+    <div class="kugel-config-row">
+      <span class="kugel-dot" style="background:${f.farbe}"></span>
+      <span style="width:40px">${f.name}</span>
+      <input type="range" min="0" max="12" value="${f.anzahl}" oninput="updateFarbe(${i}, this.value)" ${!mitZuruecklegen && beutelInhalt.length < farben.reduce((a,x)=>a+x.anzahl,0) ? 'disabled' : ''}>
+      <span class="kugel-count" id="kugelCount${i}">${f.anzahl}</span>
+    </div>`).join('');
+  updateBeutelInfo();
+}
+
+function updateFarbe(i, val) {
+  farben[i].anzahl = parseInt(val);
+  document.getElementById('kugelCount' + i).textContent = val;
+  initBeutel();
+  initDaten();
+  updateBeutelInfo();
+  render();
+}
+
+function updateBeutelInfo() {
+  const gesamt = farben.reduce((a, f) => a + f.anzahl, 0);
+  const info = document.getElementById('beutelInfo');
+  if (gesamt === 0) {
+    info.textContent = 'Der Beutel ist leer! Stelle Kugeln über die Regler ein.';
+  } else {
+    const aktuell = mitZuruecklegen ? gesamt : beutelInhalt.length;
+    info.textContent = `${aktuell} von ${gesamt} Kugeln im Beutel`;
+  }
+}
+
+function updateZurueck() {
+  mitZuruecklegen = document.getElementById('zurueckCheck').checked;
+  initBeutel();
+  initDaten();
+  updateBeutelInfo();
+  render();
+}
+
+function getTheorie() {
+  const t = {};
+  const pool = mitZuruecklegen ? farben.map(f => ({name: f.name, anzahl: f.anzahl})) : null;
+  const gesamt = mitZuruecklegen
+    ? farben.reduce((a, f) => a + f.anzahl, 0)
+    : beutelInhalt.length;
+
+  if (gesamt === 0) { farben.forEach(f => t[f.name] = 0); return t; }
+
+  if (mitZuruecklegen) {
+    farben.forEach(f => t[f.name] = f.anzahl / gesamt);
+  } else {
+    // current proportions in remaining bag
+    farben.forEach(f => {
+      const remaining = beutelInhalt.filter(x => x === f.name).length;
+      t[f.name] = gesamt > 0 ? remaining / gesamt : 0;
+    });
+  }
+  return t;
+}
+
+function getOrder()  { return farben.map(f => f.name); }
+function getLabels() {
+  const l = {};
+  farben.forEach(f => l[f.name] = f.name);
+  return l;
+}
+
+async function ziehen() {
+  if (ziehend) return;
+
+  const gesamt = mitZuruecklegen
+    ? farben.reduce((a, f) => a + f.anzahl, 0)
+    : beutelInhalt.length;
+
+  if (gesamt === 0) {
+    document.getElementById('ergebnisText').textContent = 'Beutel ist leer!';
+    return;
+  }
+
+  ziehend = true;
+  const svg = document.getElementById('beutelSvg');
+  svg.classList.remove('shaking'); void svg.offsetWidth; svg.classList.add('shaking');
+
+  await new Promise(r => setTimeout(r, 400));
+
+  let gezogen;
+  if (mitZuruecklegen) {
+    const r = Math.random() * gesamt;
+    let acc = 0;
+    for (const f of farben) {
+      acc += f.anzahl;
+      if (r < acc) { gezogen = f; break; }
+    }
+  } else {
+    const idx = Math.floor(Math.random() * beutelInhalt.length);
+    const name = beutelInhalt[idx];
+    beutelInhalt.splice(idx, 1);
+    gezogen = farben.find(f => f.name === name);
+  }
+
+  daten[gezogen.name]++;
+  document.getElementById('ergebnisText').textContent = `${gezogen.name}!`;
+  document.getElementById('gezogeneKugel').innerHTML =
+    `<div class="gezogene-kugel" style="background:${gezogen.farbe}"></div>`;
+
+  updateBeutelInfo();
+  render(gezogen.name);
+  ziehend = false;
+}
+
+async function ziehSerie(n) {
+  if (ziehend) return;
+  await ziehen();
+  for (let i = 1; i < n; i++) {
+    const gesamt = mitZuruecklegen
+      ? farben.reduce((a, f) => a + f.anzahl, 0)
+      : beutelInhalt.length;
+    if (gesamt === 0) break;
+
+    if (mitZuruecklegen) {
+      const r = Math.random() * gesamt;
+      let acc = 0;
+      for (const f of farben) {
+        acc += f.anzahl;
+        if (r < acc) { daten[f.name]++; break; }
+      }
+    } else {
+      const idx = Math.floor(Math.random() * beutelInhalt.length);
+      const name = beutelInhalt[idx];
+      beutelInhalt.splice(idx, 1);
+      daten[name]++;
+    }
+  }
+  updateBeutelInfo();
+  render();
+}
+
+function render(flashKey) {
+  const order   = getOrder();
+  const labels  = getLabels();
+  const theorie = getTheorie();
+
+  const slWrap = document.getElementById('strichlisteWrap');
+  SpStats.renderStrichliste(slWrap, daten, order, labels);
+  if (flashKey) SpStats.flashRow(slWrap, flashKey);
+
+  SpStats.renderVergleich(document.getElementById('vergleichWrap'), daten, theorie, order, labels);
+  const gesamt = Object.values(daten).reduce((a,b)=>a+b, 0);
+  SpStats.renderGesamt(document.getElementById('gesamtWrap'), gesamt);
+}
+
+function resetExperiment() {
+  ziehend = false;
+  initBeutel();
+  initDaten();
+  document.getElementById('ergebnisText').textContent = '';
+  document.getElementById('gezogeneKugel').innerHTML = '';
+  renderKonfig();
+  updateBeutelInfo();
+  render();
+}
+
+/* Init */
+initBeutel();
+initDaten();
+renderKonfig();
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Münzwurf — Die Spielecke</title>
+<link rel="stylesheet" href="../styles/base.css">
+<link rel="stylesheet" href="../styles/spielecke.css">
+</head>
+<body>
+
+<header class="sp-header">
+  <div class="sp-logo">🪙 Münzwurf <span>Die Spielecke — Klasse 5 &amp; 6</span></div>
+  <div class="sp-header-btns">
+    <button class="btn btn-ghost" onclick="location.href='index.html'">← Spielecke</button>
+  </div>
+</header>
+
+<div class="station-main">
+
+  <!-- Stage -->
+  <div class="station-stage">
+    <div class="station-titel-row">🪙 Kopf oder Zahl?</div>
+    <p class="station-frage">Wirf die Münze und beobachte: Wie oft landet sie auf Kopf, wie oft auf Zahl?</p>
+
+    <div class="ereignis-typ-row">
+      <span class="ereignis-typ et-moeglich">Mögliches Ereignis: Kopf</span>
+      <span class="ereignis-typ et-moeglich">Mögliches Ereignis: Zahl</span>
+    </div>
+
+    <div class="coin" id="coinEl" onclick="wirfMuenze()">
+      <div class="coin-inner" id="coinInner">
+        <div class="coin-face kopf">👑</div>
+        <div class="coin-face zahl">2</div>
+      </div>
+    </div>
+
+    <div id="ergebnisText" style="font-family:'Fredoka One',cursive;font-size:1.1rem;min-height:1.6rem;color:var(--yellow)"></div>
+
+    <div class="station-actions">
+      <button class="btn btn-yellow" onclick="wirfMuenze()" id="wurfBtn">🪙 Münze werfen</button>
+      <button class="btn btn-mint"   onclick="wirfSerie(10)">⚡ 10× werfen</button>
+      <button class="btn btn-mint"   onclick="wirfSerie(50)">⚡⚡ 50× werfen</button>
+    </div>
+
+    <div class="prozent-callout">
+      <strong>Erste Prozentidee:</strong> Bei einer fairen Münze ist die Wahrscheinlichkeit für Kopf
+      <strong>1 von 2</strong> — das schreibt man als <strong>50%</strong>. Wirf oft genug, und du wirst sehen:
+      die relative Häufigkeit nähert sich diesem Wert immer mehr an!
+    </div>
+  </div>
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="sp-tool-panel">
+      <div class="sp-tool-header">📋 Strichliste</div>
+      <div class="sp-tool-body" id="strichlisteWrap"></div>
+    </div>
+
+    <div class="sp-tool-panel">
+      <div class="sp-tool-header">📊 Häufigkeit vs. Wahrscheinlichkeit</div>
+      <div class="sp-tool-body" id="vergleichWrap"></div>
+    </div>
+
+    <div class="sp-tool-panel">
+      <div class="sp-tool-body" id="gesamtWrap"></div>
+    </div>
+
+    <div class="reset-row">
+      <button class="btn btn-ghost" onclick="resetExperiment()">🔄 Zurücksetzen</button>
+    </div>
+  </div>
+
+</div>
+
+<script src="../js/sp-stats.js"></script>
+<script>
+const ORDER  = ['kopf', 'zahl'];
+const LABELS = { kopf: '👑 Kopf', zahl: '2️⃣ Zahl' };
+const THEORIE = { kopf: 0.5, zahl: 0.5 };
+const COLORS = ['var(--yellow)', 'var(--mint)'];
+
+let daten = { kopf: 0, zahl: 0 };
+let werfend = false;
+
+function wirfMuenze(silent) {
+  if (werfend && !silent) return;
+  return new Promise(resolve => {
+    werfend = true;
+    const inner = document.getElementById('coinInner');
+    const ergebnis = Math.random() < 0.5 ? 'kopf' : 'zahl';
+
+    inner.classList.remove('flipping');
+    void inner.offsetWidth;
+    inner.classList.add('flipping');
+
+    // Set final rotation based on result (even = kopf shows, odd = zahl shows)
+    const extraSpins = ergebnis === 'kopf' ? 1800 : 1980; // 1980 = 1800+180 → shows zahl face
+    inner.style.transform = `rotateY(${extraSpins}deg)`;
+
+    setTimeout(() => {
+      daten[ergebnis]++;
+      document.getElementById('ergebnisText').textContent =
+        ergebnis === 'kopf' ? '👑 Kopf!' : '2️⃣ Zahl!';
+      render(ergebnis);
+      werfend = false;
+      resolve();
+    }, 1200);
+  });
+}
+
+async function wirfSerie(n) {
+  if (werfend) return;
+  for (let i = 0; i < n; i++) {
+    await new Promise(r => setTimeout(r, i === 0 ? 0 : 60));
+    // For series, skip animation wait for speed after first
+    if (i > 0) {
+      const ergebnis = Math.random() < 0.5 ? 'kopf' : 'zahl';
+      daten[ergebnis]++;
+    } else {
+      await wirfMuenze(true);
+    }
+  }
+  render();
+}
+
+function render(flashKey) {
+  const slWrap = document.getElementById('strichlisteWrap');
+  SpStats.renderStrichliste(slWrap, daten, ORDER, LABELS, COLORS);
+  if (flashKey) SpStats.flashRow(slWrap, flashKey);
+
+  SpStats.renderVergleich(document.getElementById('vergleichWrap'), daten, THEORIE, ORDER, LABELS);
+  SpStats.renderGesamt(document.getElementById('gesamtWrap'), daten.kopf + daten.zahl);
+}
+
+function resetExperiment() {
+  daten = { kopf: 0, zahl: 0 };
+  werfend = false;
+  document.getElementById('ergebnisText').textContent = '';
+  const inner = document.getElementById('coinInner');
+  inner.classList.remove('flipping');
+  inner.style.transform = 'rotateY(0deg)';
+  render();
+}
+
+render();
+</script>
+</body>
+</html>

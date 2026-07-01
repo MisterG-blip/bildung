@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sicher, möglich oder unmöglich? — Die Spielecke</title>
+<link rel="stylesheet" href="../styles/base.css">
+<link rel="stylesheet" href="../styles/spielecke.css">
+<style>
+.sortier-main {
+  max-width: 900px; margin: 0 auto; padding: 1.5rem;
+  display: flex; flex-direction: column; gap: 1.5rem; align-items: center;
+}
+
+.karten-stapel { position: relative; width: 280px; height: 160px; }
+.ereignis-karte {
+  position: absolute; inset: 0;
+  background: var(--card-bg);
+  border-radius: 18px; border: 3px solid rgba(255,255,255,0.12);
+  display: flex; align-items: center; justify-content: center;
+  padding: 1.5rem; text-align: center;
+  font-size: 1.05rem; font-weight: 700;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.35);
+  cursor: grab;
+  transition: transform .3s ease, opacity .3s ease;
+  user-select: none;
+}
+.ereignis-karte:active { cursor: grabbing; }
+.ereignis-karte.swipe-left  { transform: translateX(-400px) rotate(-25deg); opacity: 0; }
+.ereignis-karte.swipe-right { transform: translateX(400px) rotate(25deg); opacity: 0; }
+.ereignis-karte.swipe-up    { transform: translateY(-400px) scale(0.8); opacity: 0; }
+
+.kategorien-row { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; max-width: 700px; }
+.kategorie-btn {
+  display: flex; flex-direction: column; align-items: center; gap: .3rem;
+  padding: 1rem 1.5rem; border-radius: 16px; cursor: pointer;
+  border: 3px solid; transition: all .15s; min-width: 140px;
+}
+.kategorie-btn:hover { transform: translateY(-3px); }
+.kategorie-btn.unmoeglich { border-color: rgba(239,68,68,0.4);  background: rgba(239,68,68,0.08); }
+.kategorie-btn.moeglich   { border-color: rgba(255,211,61,0.4); background: rgba(255,211,61,0.08); }
+.kategorie-btn.sicher     { border-color: rgba(34,197,94,0.4);  background: rgba(34,197,94,0.08); }
+.kategorie-icon { font-size: 1.8rem; }
+.kategorie-label { font-size: .85rem; font-weight: 800; }
+.kategorie-count { font-size: .7rem; color: var(--muted); }
+
+.fortschritt-row { display: flex; align-items: center; gap: .75rem; font-size: .85rem; color: var(--muted); }
+
+.feedback-text { font-family: 'Fredoka One', cursive; font-size: 1.1rem; min-height: 1.6rem; text-align: center; }
+.feedback-text.richtig { color: var(--mint); }
+.feedback-text.falsch  { color: var(--red); }
+
+.fertig-screen { text-align: center; padding: 2rem; }
+.fertig-screen .emoji { font-size: 3.5rem; margin-bottom: .75rem; }
+</style>
+</head>
+<body>
+
+<header class="sp-header">
+  <div class="sp-logo">🧩 Sicher, möglich, unmöglich? <span>Die Spielecke — Klasse 5 &amp; 6</span></div>
+  <div class="sp-header-btns">
+    <button class="btn btn-ghost" onclick="location.href='index.html'">← Spielecke</button>
+  </div>
+</header>
+
+<div class="sortier-main">
+  <p style="text-align:center;color:var(--muted);font-size:.9rem;max-width:520px">
+    Lies dir jedes Ereignis durch und ordne es ein: Ist es <strong style="color:#f87171">unmöglich</strong>,
+    nur <strong style="color:var(--yellow)">möglich</strong> (kann passieren, muss aber nicht),
+    oder <strong style="color:#4ade80">sicher</strong> (passiert garantiert)?
+  </p>
+
+  <div class="fortschritt-row">
+    <span id="fortschrittText">Karte 1 von 14</span>
+  </div>
+
+  <div id="kartenBereich">
+    <div class="karten-stapel" id="kartenStapel"></div>
+  </div>
+
+  <div class="kategorien-row" id="kategorienRow">
+    <div class="kategorie-btn unmoeglich" onclick="einordnen('unmoeglich')">
+      <span class="kategorie-icon">🚫</span>
+      <span class="kategorie-label">Unmöglich</span>
+      <span class="kategorie-count" id="countUnmoeglich">0 richtig</span>
+    </div>
+    <div class="kategorie-btn moeglich" onclick="einordnen('moeglich')">
+      <span class="kategorie-icon">🤔</span>
+      <span class="kategorie-label">Möglich</span>
+      <span class="kategorie-count" id="countMoeglich">0 richtig</span>
+    </div>
+    <div class="kategorie-btn sicher" onclick="einordnen('sicher')">
+      <span class="kategorie-icon">✅</span>
+      <span class="kategorie-label">Sicher</span>
+      <span class="kategorie-count" id="countSicher">0 richtig</span>
+    </div>
+  </div>
+
+  <div class="feedback-text" id="feedbackText"></div>
+</div>
+
+<script>
+const EREIGNISSE = [
+  { text: 'Die Sonne geht morgen früh auf.', kat: 'sicher' },
+  { text: 'Du würfelst mit einem normalen Würfel eine 7.', kat: 'unmoeglich' },
+  { text: 'Es regnet morgen in Hamburg.', kat: 'moeglich' },
+  { text: 'Du ziehst aus einem Stapel mit nur roten Karten eine rote Karte.', kat: 'sicher' },
+  { text: 'Eine geworfene Münze zeigt Kopf.', kat: 'moeglich' },
+  { text: 'Du würfelst eine Zahl zwischen 1 und 6.', kat: 'sicher' },
+  { text: 'Im Januar schneit es in der Sahara.', kat: 'moeglich' },
+  { text: 'Ein neugeborenes Baby ist sofort 10 Jahre alt.', kat: 'unmoeglich' },
+  { text: 'Du triffst beim Sechserlotto genau 6 Richtige.', kat: 'moeglich' },
+  { text: 'Du ziehst aus einem Beutel mit nur blauen Kugeln eine grüne Kugel.', kat: 'unmoeglich' },
+  { text: 'Heute ist ein Wochentag.', kat: 'sicher' },
+  { text: 'Du wirfst einen Stein hoch und er bleibt für immer in der Luft hängen.', kat: 'unmoeglich' },
+  { text: 'Beim Würfeln kommt eine gerade Zahl.', kat: 'moeglich' },
+  { text: 'Ein Jahr hat mehr als 300 Tage.', kat: 'sicher' },
+];
+
+let reihenfolge = [];
+let index = 0;
+let richtig = { unmoeglich: 0, moeglich: 0, sicher: 0 };
+let falsch  = { unmoeglich: 0, moeglich: 0, sicher: 0 };
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function start() {
+  reihenfolge = shuffle(EREIGNISSE);
+  index = 0;
+  richtig = { unmoeglich: 0, moeglich: 0, sicher: 0 };
+  falsch  = { unmoeglich: 0, moeglich: 0, sicher: 0 };
+  renderKarte();
+  updateCounts();
+}
+
+function renderKarte() {
+  const stapel = document.getElementById('kartenStapel');
+  document.getElementById('feedbackText').textContent = '';
+  document.getElementById('feedbackText').className = 'feedback-text';
+
+  if (index >= reihenfolge.length) {
+    showFertig();
+    return;
+  }
+
+  document.getElementById('fortschrittText').textContent = `Karte ${index + 1} von ${reihenfolge.length}`;
+  const ereignis = reihenfolge[index];
+  stapel.innerHTML = `<div class="ereignis-karte" id="aktiveKarte">${ereignis.text}</div>`;
+}
+
+function einordnen(kat) {
+  if (index >= reihenfolge.length) return;
+  const ereignis = reihenfolge[index];
+  const karte = document.getElementById('aktiveKarte');
+  const feedback = document.getElementById('feedbackText');
+
+  const istRichtig = ereignis.kat === kat;
+  if (istRichtig) {
+    richtig[kat]++;
+    feedback.textContent = '✅ Richtig!';
+    feedback.className = 'feedback-text richtig';
+  } else {
+    falsch[kat]++;
+    const richtigeKat = { unmoeglich: 'unmöglich', moeglich: 'möglich', sicher: 'sicher' }[ereignis.kat];
+    feedback.textContent = `Eigentlich: ${richtigeKat}`;
+    feedback.className = 'feedback-text falsch';
+  }
+
+  // Animate card away
+  const dir = kat === 'unmoeglich' ? 'swipe-left' : kat === 'sicher' ? 'swipe-right' : 'swipe-up';
+  if (karte) karte.classList.add(dir);
+
+  updateCounts();
+
+  setTimeout(() => {
+    index++;
+    renderKarte();
+  }, 450);
+}
+
+function updateCounts() {
+  document.getElementById('countUnmoeglich').textContent = `${richtig.unmoeglich} richtig`;
+  document.getElementById('countMoeglich').textContent   = `${richtig.moeglich} richtig`;
+  document.getElementById('countSicher').textContent     = `${richtig.sicher} richtig`;
+}
+
+function showFertig() {
+  const gesamtRichtig = richtig.unmoeglich + richtig.moeglich + richtig.sicher;
+  const gesamt = reihenfolge.length;
+  document.getElementById('kartenStapel').innerHTML = `
+    <div class="fertig-screen">
+      <div class="emoji">${gesamtRichtig === gesamt ? '🏆' : '🎉'}</div>
+      <div style="font-family:'Fredoka One',cursive;font-size:1.4rem;color:var(--yellow);margin-bottom:.5rem">
+        Geschafft!
+      </div>
+      <div style="color:var(--muted);margin-bottom:1.2rem">
+        Du hast ${gesamtRichtig} von ${gesamt} Ereignissen richtig eingeordnet.
+      </div>
+      <button class="btn btn-mint" onclick="start()">🔄 Nochmal spielen</button>
+    </div>`;
+  document.getElementById('fortschrittText').textContent = 'Fertig!';
+}
+
+start();
+</script>
+</body>
+</html>

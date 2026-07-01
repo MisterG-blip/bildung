@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Glücksrad — Die Spielecke</title>
+<link rel="stylesheet" href="../styles/base.css">
+<link rel="stylesheet" href="../styles/spielecke.css">
+<style>
+.segment-config { display: flex; flex-direction: column; gap: .5rem; max-width: 340px; width: 100%; margin-top: .5rem; }
+.seg-row { display: flex; align-items: center; gap: .6rem; font-size: .8rem; }
+.seg-row .seg-dot { width: 18px; height: 18px; border-radius: 50%; border: 2px solid #1a1f3a; flex-shrink: 0; }
+.seg-row input[type=range] { flex: 1; }
+.seg-row .seg-pct { width: 42px; text-align: right; font-weight: 800; font-size: .78rem; }
+</style>
+</head>
+<body>
+
+<header class="sp-header">
+  <div class="sp-logo">🎡 Glücksrad <span>Die Spielecke — Klasse 5 &amp; 6</span></div>
+  <div class="sp-header-btns">
+    <button class="btn btn-ghost" onclick="location.href='index.html'">← Spielecke</button>
+  </div>
+</header>
+
+<div class="station-main">
+
+  <!-- Stage -->
+  <div class="station-stage">
+    <div class="station-titel-row">🎡 Baue dein Glücksrad</div>
+    <p class="station-frage">Verändere die Größe der Felder mit den Reglern. Je größer ein Feld, desto wahrscheinlicher landest du darauf!</p>
+
+    <div class="glueck-wrap">
+      <div class="glueck-canvas-wrap">
+        <div class="glueck-marker"></div>
+        <canvas id="glueckCanvas" width="260" height="260"></canvas>
+      </div>
+    </div>
+
+    <div id="ergebnisText" style="font-family:'Fredoka One',cursive;font-size:1.2rem;min-height:1.6rem;color:var(--yellow)"></div>
+
+    <div class="station-actions">
+      <button class="btn btn-purple" onclick="drehen()">🎡 Drehen</button>
+      <button class="btn btn-mint"   onclick="drehSerie(10)">⚡ 10× drehen</button>
+      <button class="btn btn-mint"   onclick="drehSerie(50)">⚡⚡ 50× drehen</button>
+    </div>
+
+    <div class="segment-config" id="segConfig"></div>
+
+    <div class="prozent-callout">
+      <strong>Idee dahinter:</strong> Die Wahrscheinlichkeit eines Feldes hängt direkt von seiner
+      <strong>Flächengröße</strong> ab. Ein Feld, das die Hälfte des Rades einnimmt, hat eine
+      Wahrscheinlichkeit von <strong>50%</strong> — egal, wie viele andere Felder es daneben gibt.
+    </div>
+  </div>
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="sp-tool-panel">
+      <div class="sp-tool-header">📋 Strichliste</div>
+      <div class="sp-tool-body" id="strichlisteWrap"></div>
+    </div>
+
+    <div class="sp-tool-panel">
+      <div class="sp-tool-header">📊 Häufigkeit vs. Wahrscheinlichkeit</div>
+      <div class="sp-tool-body" id="vergleichWrap"></div>
+    </div>
+
+    <div class="sp-tool-panel">
+      <div class="sp-tool-body" id="gesamtWrap"></div>
+    </div>
+
+    <div class="reset-row">
+      <button class="btn btn-ghost" onclick="resetExperiment()">🔄 Zurücksetzen</button>
+    </div>
+  </div>
+
+</div>
+
+<script src="../js/sp-stats.js"></script>
+<script>
+const TWO_PI = Math.PI * 2;
+
+// Default 4 segments with names + colors
+let segmente = [
+  { name: 'Rot',    farbe: '#EF4444', anteil: 25 },
+  { name: 'Gelb',   farbe: '#FFD93D', anteil: 25 },
+  { name: 'Grün',   farbe: '#22C55E', anteil: 25 },
+  { name: 'Blau',   farbe: '#3B82F6', anteil: 25 },
+];
+
+let daten = {};
+let canvas, ctx;
+let radAngle = 0;
+let spinning = false;
+
+function initDaten() {
+  daten = {};
+  segmente.forEach(s => daten[s.name] = 0);
+}
+
+function normalisiere() {
+  const sum = segmente.reduce((a, s) => a + s.anteil, 0);
+  if (sum === 0) return;
+  segmente.forEach(s => s.anteil = s.anteil / sum * 100);
+}
+
+function renderConfig() {
+  const wrap = document.getElementById('segConfig');
+  wrap.innerHTML = segmente.map((s, i) => `
+    <div class="seg-row">
+      <span class="seg-dot" style="background:${s.farbe}"></span>
+      <span style="width:50px">${s.name}</span>
+      <input type="range" min="2" max="80" value="${Math.round(s.anteil)}" oninput="updateSeg(${i}, this.value)">
+      <span class="seg-pct" id="segPct${i}">${Math.round(s.anteil)}%</span>
+    </div>`).join('');
+}
+
+function updateSeg(i, val) {
+  segmente[i].anteil = parseFloat(val);
+  // Renormalize so total = 100
+  const others = segmente.filter((_, idx) => idx !== i);
+  const otherSum = others.reduce((a, s) => a + s.anteil, 0);
+  const remaining = 100 - segmente[i].anteil;
+  if (otherSum > 0) {
+    others.forEach(s => s.anteil = s.anteil / otherSum * remaining);
+  }
+  segmente.forEach((s, idx) => {
+    const el = document.getElementById('segPct' + idx);
+    if (el) el.textContent = Math.round(s.anteil) + '%';
+    const slider = document.querySelectorAll('.seg-row input')[idx];
+    if (slider && idx !== i) slider.value = Math.round(s.anteil);
+  });
+  drawWheel();
+  render();
+}
+
+function drawWheel() {
+  const W = canvas.width, CX = W/2, CY = W/2, R = W/2 - 6;
+  ctx.clearRect(0, 0, W, W);
+
+  let startA = -Math.PI/2 + radAngle; // start at top
+  segmente.forEach(s => {
+    const sweep = (s.anteil / 100) * TWO_PI;
+    const endA = startA + sweep;
+
+    ctx.beginPath();
+    ctx.moveTo(CX, CY);
+    ctx.arc(CX, CY, R, startA, endA);
+    ctx.closePath();
+    ctx.fillStyle = s.farbe;
+    ctx.fill();
+    ctx.strokeStyle = '#1a1f3a';
+    ctx.lineWidth = 3;
+    ctx.stroke();
+
+    // Label
+    const midA = startA + sweep / 2;
+    const lr = R * 0.65;
+    ctx.save();
+    ctx.translate(CX + Math.cos(midA) * lr, CY + Math.sin(midA) * lr);
+    ctx.rotate(midA + Math.PI/2);
+    ctx.fillStyle = '#1a1f3a';
+    ctx.font = 'bold 13px Nunito, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(s.name, 0, 0);
+    ctx.restore();
+
+    startA = endA;
+  });
+
+  // Hub
+  ctx.beginPath(); ctx.arc(CX, CY, 14, 0, TWO_PI);
+  ctx.fillStyle = '#1a1f3a'; ctx.fill();
+  ctx.strokeStyle = '#FFD93D'; ctx.lineWidth = 3; ctx.stroke();
+}
+
+function pickWinningSegment() {
+  // Which segment is under the marker (top, angle -PI/2) given current radAngle
+  const markerA = -Math.PI/2;
+  let rel = ((markerA - (-Math.PI/2 + radAngle)) % TWO_PI + TWO_PI) % TWO_PI;
+  // rel is how far around from segment start; walk through segments
+  let acc = 0;
+  for (const s of segmente) {
+    const sweep = (s.anteil / 100) * TWO_PI;
+    if (rel < acc + sweep) return s;
+    acc += sweep;
+  }
+  return segmente[segmente.length - 1];
+}
+
+async function drehen() {
+  if (spinning) return;
+  spinning = true;
+
+  const extraSpins = (4 + Math.random() * 3) * TWO_PI;
+  const randomOffset = Math.random() * TWO_PI;
+  const targetAngle = radAngle + extraSpins + randomOffset;
+
+  const duration = 2200;
+  const startAngle = radAngle;
+  const startTime = performance.now();
+
+  await new Promise(resolve => {
+    function frame(now) {
+      const t = Math.min((now - startTime) / duration, 1);
+      const eased = 1 - Math.pow(1 - t, 3); // ease-out cubic
+      radAngle = startAngle + (targetAngle - startAngle) * eased;
+      drawWheel();
+      if (t < 1) requestAnimationFrame(frame);
+      else resolve();
+    }
+    requestAnimationFrame(frame);
+  });
+
+  const winner = pickWinningSegment();
+  daten[winner.name]++;
+  document.getElementById('ergebnisText').textContent = `🎯 ${winner.name}!`;
+  render(winner.name);
+  spinning = false;
+}
+
+async function drehSerie(n) {
+  if (spinning) return;
+  await drehen();
+  for (let i = 1; i < n; i++) {
+    // Fast simulated spins (no animation) using current segment proportions
+    const r = Math.random() * 100;
+    let acc = 0;
+    for (const s of segmente) {
+      acc += s.anteil;
+      if (r < acc) { daten[s.name]++; break; }
+    }
+  }
+  render();
+}
+
+function getTheorie() {
+  const t = {};
+  segmente.forEach(s => t[s.name] = s.anteil / 100);
+  return t;
+}
+function getOrder()  { return segmente.map(s => s.name); }
+function getLabels() {
+  const l = {};
+  segmente.forEach(s => l[s.name] = s.name);
+  return l;
+}
+
+function render(flashKey) {
+  const order  = getOrder();
+  const labels = getLabels();
+  const theorie = getTheorie();
+
+  const slWrap = document.getElementById('strichlisteWrap');
+  SpStats.renderStrichliste(slWrap, daten, order, labels);
+  if (flashKey) SpStats.flashRow(slWrap, flashKey);
+
+  SpStats.renderVergleich(document.getElementById('vergleichWrap'), daten, theorie, order, labels);
+  const gesamt = Object.values(daten).reduce((a,b)=>a+b, 0);
+  SpStats.renderGesamt(document.getElementById('gesamtWrap'), gesamt);
+}
+
+function resetExperiment() {
+  spinning = false;
+  initDaten();
+  document.getElementById('ergebnisText').textContent = '';
+  render();
+}
+
+/* Init */
+canvas = document.getElementById('glueckCanvas');
+ctx = canvas.getContext('2d');
+initDaten();
+renderConfig();
+drawWheel();
+render();
+</script>
+</body>
+</html>
