@@ -18,35 +18,87 @@ const AvatarGen = (() => {
     ['#8B5CF6','#6d28d9'],
   ];
 
-  // Hair style generators (returns SVG path data)
+  /* ── Haar-System ──────────────────────────────────────────
+     Jede Frisur besteht aus zwei Ebenen:
+       - back:  liegt HINTER dem Kopf (Zopf, Dutt, Afro-Volumen,
+                lange Strähnen). Wird VOR dem Gesichtskreis gezeichnet,
+                sichtbar nur dort, wo es über die Kopf-Silhouette hinausragt.
+       - front: Pony + Seitenteile + Oberkopf — die einzige Haarpartie,
+                die man von vorne wirklich sieht. Wird NACH dem
+                Gesichtskreis gezeichnet, bleibt aber immer oberhalb
+                der Augenbrauen, damit das Gesicht frei bleibt.
+     ─────────────────────────────────────────────────────── */
+
+  // Baut die front-Silhouette: Oberkopf, der an den Schläfen als
+  // "Seitenteil" etwas tiefer zu den Ohren herunterreicht, aber in der
+  // Mitte klar oberhalb der Augenbrauen (Augenbrauen liegen bei ca. -0.22r bis -0.32r) endet.
+  function capPath(cx, cy, r, { top = 1.05, fringe = 0.42, temple = 0.95, sideDip = 0.02 } = {}) {
+    return `M ${cx-r*temple},${cy-r*sideDip}
+      C ${cx-r*(temple+0.1)},${cy-r*(top*0.55)} ${cx-r*0.72},${cy-r*top} ${cx-r*0.28},${cy-r*(top+0.02)}
+      C ${cx-r*0.1},${cy-r*(top+0.04)} ${cx+r*0.1},${cy-r*(top+0.04)} ${cx+r*0.28},${cy-r*(top+0.02)}
+      C ${cx+r*0.72},${cy-r*top} ${cx+r*(temple+0.1)},${cy-r*(top*0.55)} ${cx+r*temple},${cy-r*sideDip}
+      C ${cx+r*(temple-0.15)},${cy-r*(sideDip+0.05)} ${cx+r*0.62},${cy-r*(sideDip+0.05)} ${cx+r*0.52},${cy-r*(fringe*0.4)}
+      C ${cx+r*0.42},${cy-r*fringe} ${cx+r*0.22},${cy-r*(fringe+0.08)} ${cx},${cy-r*(fringe+0.08)}
+      C ${cx-r*0.22},${cy-r*(fringe+0.08)} ${cx-r*0.42},${cy-r*fringe} ${cx-r*0.52},${cy-r*(fringe*0.4)}
+      C ${cx-r*0.62},${cy-r*(sideDip+0.05)} ${cx-r*(temple-0.15)},${cy-r*(sideDip+0.05)} ${cx-r*temple},${cy-r*sideDip}
+      Z`;
+  }
+
   const HAIR_STYLES = [
-    // Short spiky
-    (cx, cy, r, col) => `
-      <ellipse cx="${cx}" cy="${cy - r*0.1}" rx="${r*1.05}" ry="${r*0.75}" fill="${col}" stroke="#1a1f3a" stroke-width="2.5"/>
-      <polygon points="${cx-r*0.6},${cy-r*0.6} ${cx-r*0.8},${cy-r*1.1} ${cx-r*0.4},${cy-r*0.7}" fill="${col}"/>
-      <polygon points="${cx-r*0.1},${cy-r*0.75} ${cx-r*0.2},${cy-r*1.2} ${cx+r*0.15},${cy-r*0.8}" fill="${col}"/>
-      <polygon points="${cx+r*0.4},${cy-r*0.65} ${cx+r*0.5},${cy-r*1.1} ${cx+r*0.7},${cy-r*0.7}" fill="${col}"/>`,
-    // Long straight
-    (cx, cy, r, col) => `
-      <ellipse cx="${cx}" cy="${cy - r*0.1}" rx="${r*1.05}" ry="${r*0.75}" fill="${col}" stroke="#1a1f3a" stroke-width="2.5"/>
-      <rect x="${cx-r*1.0}" y="${cy-r*0.1}" width="${r*0.28}" height="${r*1.1}" rx="6" fill="${col}" stroke="#1a1f3a" stroke-width="2"/>
-      <rect x="${cx+r*0.72}" y="${cy-r*0.1}" width="${r*0.28}" height="${r*1.1}" rx="6" fill="${col}" stroke="#1a1f3a" stroke-width="2"/>`,
-    // Curly/afro
-    (cx, cy, r, col) => `
-      <circle cx="${cx}" cy="${cy-r*0.3}" r="${r*0.95}" fill="${col}" stroke="#1a1f3a" stroke-width="2.5"/>
-      <circle cx="${cx-r*0.7}" cy="${cy-r*0.1}" r="${r*0.45}" fill="${col}" stroke="#1a1f3a" stroke-width="2"/>
-      <circle cx="${cx+r*0.7}" cy="${cy-r*0.1}" r="${r*0.45}" fill="${col}" stroke="#1a1f3a" stroke-width="2"/>`,
-    // Ponytail
-    (cx, cy, r, col) => `
-      <ellipse cx="${cx}" cy="${cy - r*0.1}" rx="${r*1.05}" ry="${r*0.75}" fill="${col}" stroke="#1a1f3a" stroke-width="2.5"/>
-      <ellipse cx="${cx+r*1.1}" cy="${cy+r*0.3}" rx="${r*0.22}" ry="${r*0.55}" fill="${col}" stroke="#1a1f3a" stroke-width="2" transform="rotate(-20,${cx+r*1.1},${cy+r*0.3})"/>`,
-    // Buzzcut / very short
-    (cx, cy, r, col) => `
-      <ellipse cx="${cx}" cy="${cy - r*0.3}" rx="${r*1.0}" ry="${r*0.5}" fill="${col}" stroke="#1a1f3a" stroke-width="2.5"/>`,
-    // Bun
-    (cx, cy, r, col) => `
-      <ellipse cx="${cx}" cy="${cy - r*0.1}" rx="${r*1.05}" ry="${r*0.75}" fill="${col}" stroke="#1a1f3a" stroke-width="2.5"/>
-      <circle cx="${cx}" cy="${cy-r*0.85}" r="${r*0.32}" fill="${col}" stroke="#1a1f3a" stroke-width="2"/>`,
+    // Kurz & spikey
+    {
+      back: null,
+      front: (cx, cy, r, col) => `
+        <path d="${capPath(cx, cy, r, { top: 1.02, fringe: 0.4, temple: 0.9, sideDip: 0.05 })}" fill="${col}" stroke="#1a1f3a" stroke-width="2.5"/>
+        <polygon points="${cx-r*0.5},${cy-r*0.85} ${cx-r*0.62},${cy-r*1.22} ${cx-r*0.26},${cy-r*0.95}" fill="${col}" stroke="#1a1f3a" stroke-width="1.5"/>
+        <polygon points="${cx-r*0.08},${cy-r*0.95} ${cx-r*0.14},${cy-r*1.32} ${cx+r*0.16},${cy-r*1.0}" fill="${col}" stroke="#1a1f3a" stroke-width="1.5"/>
+        <polygon points="${cx+r*0.28},${cy-r*0.88} ${cx+r*0.4},${cy-r*1.24} ${cx+r*0.54},${cy-r*0.92}" fill="${col}" stroke="#1a1f3a" stroke-width="1.5"/>`
+    },
+    // Lange glatte Haare
+    {
+      back: (cx, cy, r, col) => `
+        <rect x="${cx-r*1.05}" y="${cy+r*0.05}" width="${r*0.32}" height="${r*1.3}" rx="10" fill="${col}" stroke="#1a1f3a" stroke-width="2.5"/>
+        <rect x="${cx+r*0.73}" y="${cy+r*0.05}" width="${r*0.32}" height="${r*1.3}" rx="10" fill="${col}" stroke="#1a1f3a" stroke-width="2.5"/>`,
+      front: (cx, cy, r, col) => `
+        <path d="${capPath(cx, cy, r, { top: 1.05, fringe: 0.44, temple: 0.97, sideDip: -0.05 })}" fill="${col}" stroke="#1a1f3a" stroke-width="2.5"/>`
+    },
+    // Locken/Afro
+    {
+      back: (cx, cy, r, col) => `
+        <circle cx="${cx}" cy="${cy-r*0.35}" r="${r*1.0}" fill="${col}" stroke="#1a1f3a" stroke-width="2.5"/>
+        <circle cx="${cx-r*0.85}" cy="${cy-r*0.05}" r="${r*0.5}" fill="${col}" stroke="#1a1f3a" stroke-width="2.5"/>
+        <circle cx="${cx+r*0.85}" cy="${cy-r*0.05}" r="${r*0.5}" fill="${col}" stroke="#1a1f3a" stroke-width="2.5"/>`,
+      front: (cx, cy, r, col) => `
+        <path d="${capPath(cx, cy, r, { top: 1.1, fringe: 0.42, temple: 0.92, sideDip: 0.1 })}" fill="${col}" stroke="#1a1f3a" stroke-width="2.5"/>
+        <circle cx="${cx-r*0.5}" cy="${cy-r*0.5}" r="${r*0.18}" fill="${col}" stroke="#1a1f3a" stroke-width="1.5"/>
+        <circle cx="${cx-r*0.2}" cy="${cy-r*0.6}" r="${r*0.18}" fill="${col}" stroke="#1a1f3a" stroke-width="1.5"/>
+        <circle cx="${cx+r*0.1}" cy="${cy-r*0.6}" r="${r*0.18}" fill="${col}" stroke="#1a1f3a" stroke-width="1.5"/>
+        <circle cx="${cx+r*0.4}" cy="${cy-r*0.52}" r="${r*0.18}" fill="${col}" stroke="#1a1f3a" stroke-width="1.5"/>`
+    },
+    // Zopf
+    {
+      back: (cx, cy, r, col) => `
+        <path d="M ${cx-r*0.9},${cy-r*0.15}
+          C ${cx-r*0.95},${cy-r*0.75} ${cx-r*0.4},${cy-r*1.1} ${cx},${cy-r*1.1}
+          C ${cx+r*0.4},${cy-r*1.1} ${cx+r*0.95},${cy-r*0.75} ${cx+r*0.9},${cy-r*0.15}
+          L ${cx+r*0.8},${cy+r*0.15} L ${cx-r*0.8},${cy+r*0.15} Z" fill="${col}" stroke="#1a1f3a" stroke-width="2.5"/>
+        <ellipse cx="${cx+r*1.02}" cy="${cy+r*0.35}" rx="${r*0.2}" ry="${r*0.5}" fill="${col}" stroke="#1a1f3a" stroke-width="2" transform="rotate(-15,${cx+r*1.02},${cy+r*0.35})"/>`,
+      front: (cx, cy, r, col) => `
+        <path d="${capPath(cx, cy, r, { top: 1.0, fringe: 0.42, temple: 0.88, sideDip: 0.02 })}" fill="${col}" stroke="#1a1f3a" stroke-width="2.5"/>`
+    },
+    // Kurzhaarschnitt / Buzzcut
+    {
+      back: null,
+      front: (cx, cy, r, col) => `
+        <path d="${capPath(cx, cy, r, { top: 1.0, fringe: 0.58, temple: 0.85, sideDip: 0.25 })}" fill="${col}" stroke="#1a1f3a" stroke-width="2.5"/>`
+    },
+    // Dutt
+    {
+      back: (cx, cy, r, col) => `
+        <circle cx="${cx}" cy="${cy-r*1.05}" r="${r*0.3}" fill="${col}" stroke="#1a1f3a" stroke-width="2.5"/>`,
+      front: (cx, cy, r, col) => `
+        <path d="${capPath(cx, cy, r, { top: 1.0, fringe: 0.46, temple: 0.9, sideDip: 0.15 })}" fill="${col}" stroke="#1a1f3a" stroke-width="2.5"/>`
+    },
   ];
 
   // Accessories (glasses, hat, etc.) — some kids have them
@@ -57,11 +109,6 @@ const AvatarGen = (() => {
       <circle cx="${cx-r*0.28}" cy="${cy+r*0.05}" r="${r*0.22}" fill="none" stroke="#1a1f3a" stroke-width="3"/>
       <circle cx="${cx+r*0.28}" cy="${cy+r*0.05}" r="${r*0.22}" fill="none" stroke="#1a1f3a" stroke-width="3"/>
       <line x1="${cx-r*0.06}" y1="${cy+r*0.05}" x2="${cx+r*0.06}" y2="${cy+r*0.05}" stroke="#1a1f3a" stroke-width="2.5"/>`,
-    // Cap
-    (cx, cy, r) => `
-      <ellipse cx="${cx}" cy="${cy-r*0.6}" rx="${r*0.9}" ry="${r*0.25}" fill="#FF6B35" stroke="#1a1f3a" stroke-width="2.5"/>
-      <rect x="${cx-r*0.75}" y="${cy-r*0.85}" width="${r*1.5}" height="${r*0.4}" rx="8" fill="#FF6B35" stroke="#1a1f3a" stroke-width="2.5"/>
-      <rect x="${cx-r*0.85}" y="${cy-r*0.68}" width="${r*0.25}" height="${r*0.12}" rx="4" fill="#cc4a1a"/>`,
     // Star hairclip
     (cx, cy, r) => `
       <text x="${cx+r*0.55}" y="${cy-r*0.55}" font-size="${r*0.4}" fill="#FFD93D" stroke="#1a1f3a" stroke-width="1">⭐</text>`,
@@ -117,7 +164,7 @@ const AvatarGen = (() => {
     const hairC  = srArr(HAIR_COLORS);
     const eyeC   = srArr(EYE_COLORS);
     const shirtC = srArr(SHIRT_COLORS);
-    const hairFn = HAIR_STYLES[srInt(0, HAIR_STYLES.length - 1)];
+    const hairStyle = HAIR_STYLES[srInt(0, HAIR_STYLES.length - 1)];
     const mouthFn = MOUTHS[srInt(0, MOUTHS.length - 1)];
     const eyeFn  = EYES[srInt(0, EYES.length - 1)];
     const accFn  = ACCESSORIES[srInt(0, ACCESSORIES.length - 1)];
@@ -164,9 +211,10 @@ const AvatarGen = (() => {
 
     return `<svg viewBox="0 0 120 140" xmlns="http://www.w3.org/2000/svg">
       ${body}
+      ${hairStyle.back ? hairStyle.back(cx, cy, r, hairC) : ''}
       ${ears}
-      ${hairFn(cx, cy, r, hairC)}
       <circle cx="${cx}" cy="${cy}" r="${r}" fill="${skin}" stroke="#1a1f3a" stroke-width="3"/>
+      ${hairStyle.front(cx, cy, r, hairC)}
       ${blush}
       ${freckles}
       ${brows}

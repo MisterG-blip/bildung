@@ -3,7 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mathwelt — Interaktives Lernportal</title>
+<title>MaLa - das Mathematik Labor — Interaktives Lernportal</title>
+<meta name="author" content="Mister G Apps">
+<meta name="copyright" content="© 2026 Mister G Apps. Alle Rechte vorbehalten.">
+<meta name="creator" content="Mister G Apps">
+<meta name="publisher" content="Mister G Apps">
 <link rel="stylesheet" href="styles/base.css">
 <style>
 body { background: radial-gradient(ellipse at 30% 20%, #2a1a4a 0%, #1a1f3a 60%); }
@@ -11,10 +15,12 @@ body { background: radial-gradient(ellipse at 30% 20%, #2a1a4a 0%, #1a1f3a 60%);
 .portal-header {
   padding: 2rem 2.5rem 1.5rem;
   display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: .75rem;
   border-bottom: 2px solid rgba(255,211,61,0.15);
 }
 .portal-logo { font-size: 2rem; color: var(--yellow); }
 .portal-logo span { color: var(--text); font-size: 1rem; font-family:'Nunito',sans-serif; font-weight:600; display:block; }
+.creator-badge { color: var(--muted); font-size: .72rem; font-weight: 600; margin-top: .3rem; }
 
 .portal-hero { text-align: center; padding: 3rem 2rem 2rem; }
 .portal-hero h1 { font-size: clamp(2rem,6vw,4rem); color: var(--yellow); line-height: 1.1; margin-bottom: .75rem; }
@@ -78,14 +84,16 @@ body { background: radial-gradient(ellipse at 30% 20%, #2a1a4a 0%, #1a1f3a 60%);
 
 <header class="portal-header">
   <div class="portal-logo">
-    🏫 Mathwelt
-    <span>Interaktives Lernportal für Mathematik</span>
+    🏫 MaLa - das Mathematik Labor
+    <span>Interaktive Modelle und Experimente für den Mathematikunterricht </span>
+    <div class="creator-badge">by Mister G Apps</div>
   </div>
+  <button class="btn btn-ghost" onclick="location.href='../index.html'">← Mister G Portal</button>
 </header>
 
 <div class="portal-hero">
-  <h1>Mathe<br>macht Spaß!</h1>
-  <p>Interaktive Lernwelten für die Schule — echte Daten, echte Klassen, echtes Verstehen.</p>
+  <h1>Mathematik<br>erleben.</h1>
+  <p>Interaktive Experimente und Modelle für den Unterricht nach Hamburger Bildungsplan</p>
 </div>
 
 <!-- Jahrgänge -->
@@ -136,6 +144,15 @@ body { background: radial-gradient(ellipse at 30% 20%, #2a1a4a 0%, #1a1f3a 60%);
     <div style="margin-left:auto;color:#A855F7;font-size:1.4rem">→</div>
   </a>
 </div>
+
+<nav class="footer-nav">
+  <div class="nav-links">
+    <a href="https://ichwillzocken.com/support" class="nav-link">Support</a>
+    <a href="https://ichwillzocken.com/dev" class="nav-link">Developer</a>
+    <a href="https://ichwillzocken.com/docs/Impressum" class="nav-link">Impressum</a>
+  </div>
+  <footer>© 2026 MISTER G</footer>
+</nav>
 
 </body>
 </html>

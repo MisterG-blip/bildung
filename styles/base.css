@@ -1,7 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fredoka+One&display=swap');
 
 /* ════════════════════════════════════════
-   DESIGN TOKENS — Mathwelt
+   DESIGN TOKENS — MaLA - Das Mathematik Labor
    ════════════════════════════════════════ */
 :root {
   --bg:        #1a1f3a;
@@ -108,4 +108,22 @@ h1, h2, h3 { font-family: 'Fredoka One', cursive; }
 @keyframes popIn  {
   from { opacity: 0; transform: scale(0.85) translateY(20px); }
   to   { opacity: 1; transform: scale(1)    translateY(0); }
+}
+
+/* ── Footer-Navigation (auf allen Seiten) ── */
+.footer-nav {
+  margin-top: 3rem; padding: 1.5rem 1.5rem 2rem;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  display: flex; flex-direction: column; align-items: center; gap: .6rem;
+}
+.footer-nav .nav-links {
+  display: flex; flex-wrap: wrap; justify-content: center; gap: 1.5rem;
+}
+.footer-nav .nav-link {
+  color: var(--muted); font-size: .85rem; font-weight: 600;
+  text-decoration: none; transition: color .2s;
+}
+.footer-nav .nav-link:hover { color: var(--text); text-decoration: underline; }
+.footer-nav footer {
+  color: var(--muted); font-size: .75rem; opacity: .7;
 }

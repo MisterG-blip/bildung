@@ -353,9 +353,11 @@ const KenngroessenLab = (() => {
                        onpointerdown="KenngroessenLab.mittel.startDrag(event,${i})"></div>
                   <span class="kg-bar-val" id="barval-${i}">${formatVal(v)}</span>
                 </div>
-                <div class="kg-bar-label">${label} ${i+1}</div>
               </div>`).join('')}
           </div>
+        </div>
+        <div class="kg-ausgleich-labels">
+          ${werte.map((v, i) => `<div class="kg-bar-label">Kind ${i+1}</div>`).join('')}
         </div>
 
         <div style="text-align:center;margin:.5rem 0">

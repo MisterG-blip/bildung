@@ -7,8 +7,14 @@
 <link rel="stylesheet" href="../styles/base.css">
 <style>
 /* ════════════════════════════════════════
-   KLASSE 5/6 STYLES
+   KLASSE 5/6 — Tablet & Kind optimiert
+   Basis-Schriftgröße: 18px (statt 14-16px)
+   Touch-Targets: min. 48px
+   Anweisungen: doppelte Schriftgröße
    ════════════════════════════════════════ */
+
+/* ── Base: larger for children on tablets ── */
+body { font-size: 18px; }
 
 /* ── Header ── */
 .kl-header {
@@ -19,9 +25,37 @@
   flex-wrap: wrap; gap: .75rem;
   position: sticky; top: 0; z-index: 50;
 }
-.kl-logo { font-size: 1.3rem; color: var(--yellow); letter-spacing: .05em; }
-.kl-logo span { color: var(--text); font-size: .9rem; font-family: 'Nunito', sans-serif; font-weight: 600; }
+.kl-logo { font-size: 1.4rem; color: var(--yellow); }
+.kl-logo span { color: var(--text); font-size: 1rem; font-family: 'Nunito',sans-serif; font-weight: 600; }
 .kl-header-btns { display: flex; gap: .5rem; flex-wrap: wrap; }
+
+/* ── Echter Bruch (CSS fraction) ── */
+.bruch-wrap {
+  display: inline-flex; flex-direction: column; align-items: center;
+  vertical-align: middle; margin: 0 .3rem; font-size: .9rem; line-height: 1.1;
+}
+.bruch-zaehler { font-weight: 800; color: var(--text); }
+.bruch-strich  { display: block; width: 100%; height: 2px; background: var(--text); margin: 2px 0; min-width: 22px; }
+.bruch-nenner  { font-weight: 800; color: var(--text); }
+.rel-dez { display: block; font-size: .8rem; color: var(--muted); }
+.rel-pct { display: block; font-size: .85rem; font-weight: 700; color: var(--text); }
+
+/* ── Werkstatt layout: Strichliste-Sidebar links neben dem Koordinatensystem ── */
+.werkst-sl-titel { font-family: 'Fredoka One',cursive; font-size: 1rem; color: var(--yellow); margin-bottom: .6rem; }
+.werkst-sl-row { display: flex; align-items: center; gap: .5rem; margin-bottom: .4rem; font-size: .9rem; }
+.werkst-sl-key { font-weight: 800; min-width: 50px; }
+.werkst-sl-striche { font-family: monospace; color: var(--mint); flex: 1; font-size: .9rem; }
+.werkst-sl-val { font-weight: 800; color: var(--yellow); min-width: 24px; text-align: right; }
+.werkst-sl-rel { font-size: .8rem; color: var(--muted); min-width: 46px; text-align: right; }
+
+/* Alle übrigen Regeln für Kids-Grid, Merkmal-Auswahl, Strichliste, Häufigkeitstabelle,
+   Kenngrößen-Labor, Diagramm-Werkstatt, Modal und Empty-State stehen gebündelt weiter
+   unten (ab "Kids grid") — hier stand früher ein doppelter, überholter Entwurf mit
+   denselben Klassennamen, der nur totes CSS war. */
+
+/* ── Diagrammart-Toggle (Säulen-/Balkendiagramm) ── */
+.diagrammart-toggle { display: flex; gap: .6rem; align-items: center; justify-content: center; flex-wrap: wrap; margin-bottom: .75rem; }
+.diagrammart-label { font-size: .95rem; color: var(--muted); }
 
 /* ── Main layout ── */
 .kl-main {
@@ -36,9 +70,7 @@
 
 /* ── Auswertung: full-width section below kl-main, not squeezed into sidebar ── */
 .auswertung-section {
-  max-width: 1300px;
-  margin: 0 auto;
-  padding: 0 1.5rem 3rem;
+  max-width: 1300px; margin: 0 auto; padding: 0 1.5rem 3rem;
 }
 .auswertung-card {
   background: var(--surface);
@@ -320,9 +352,9 @@ svg#koordSystem { width: 100%; height: 440px; display: block; }
 .kg-ausgleich-stage {
   position: relative;
   display: flex; align-items: flex-end; justify-content: center; gap: 1rem;
-  height: 280px; padding: 1rem 1.5rem 0;
-  background: rgba(255,255,255,0.03); border-radius: 14px;
-  margin-bottom: 1rem; overflow: visible;
+  height: 240px; padding: 1rem 1.5rem 0;
+  background: rgba(255,255,255,0.03); border-radius: 14px 14px 0 0;
+  overflow: visible;
 }
 .kg-ausgleich-linie {
   position: absolute; left: 1rem; right: 1rem;
@@ -330,7 +362,7 @@ svg#koordSystem { width: 100%; height: 440px; display: block; }
   z-index: 1;
 }
 .kg-ausgleich-bars { display: flex; align-items: flex-end; gap: 1rem; z-index: 2; height: 100%; }
-.kg-ausgleich-col { display: flex; flex-direction: column; align-items: center; gap: .4rem; height: 100%; justify-content: flex-end; }
+.kg-ausgleich-col { display: flex; align-items: flex-end; height: 100%; }
 .kg-ausgleich-bar {
   width: 38px; background: linear-gradient(180deg, #FF6B35, #FFD93D);
   border-radius: 8px 8px 0 0; border: 3px solid #1a1f3a; border-bottom: none;
@@ -351,7 +383,17 @@ svg#koordSystem { width: 100%; height: 440px; display: block; }
   position: absolute; top: -38px; left: 50%; transform: translateX(-50%);
   font-size: .75rem; font-weight: 800; color: var(--text);
 }
-.kg-bar-label { font-size: .68rem; color: var(--muted); }
+/* Eigene Zeile UNTER dem Balken-Track — dieselben Spaltenmaße (38px + 1rem-Abstand),
+   damit jede Beschriftung exakt unter ihrem Balken sitzt, aber die Balken selbst
+   nicht mehr in ihrer Höhe beeinflusst (dadurch stimmt der Nullpunkt wieder mit
+   der Referenzlinie überein). */
+.kg-ausgleich-labels {
+  display: flex; justify-content: center; gap: 1rem;
+  padding: .5rem 1.5rem .75rem;
+  background: rgba(255,255,255,0.03); border-radius: 0 0 14px 14px;
+  margin-bottom: 1rem;
+}
+.kg-bar-label { width: 38px; text-align: center; font-size: .68rem; color: var(--muted); }
 
 /* Linienbeschriftung */
 .kg-linie-label {
@@ -453,7 +495,7 @@ svg#koordSystem { width: 100%; height: 440px; display: block; }
 
 <!-- Header -->
 <header class="kl-header">
-  <div class="kl-logo">🏫 Mathwelt <span>/ Klasse 5 &amp; 6</span></div>
+  <div class="kl-logo">🏫 MaLA - Das Mathematik Labor <span>/ Klasse 5 &amp; 6</span></div>
   <div class="kl-header-btns">
     <button class="btn btn-ghost" onclick="location.href='../jahrgang/5-6.html'">← Jahrgang 5/6</button>
     <button class="btn btn-yellow" onclick="neueKlasse()">🔄 Neue Klasse</button>
@@ -540,6 +582,7 @@ svg#koordSystem { width: 100%; height: 440px; display: block; }
 </div>
 
 <!-- Scripts -->
+<script src="../js/utils.js"></script>
 <script src="../js/avatars.js"></script>
 <script src="../js/kinder.js"></script>
 <script src="../js/charts.js"></script>
@@ -567,6 +610,7 @@ let aktivMerkmal = null;
 let strichDaten  = {};    // { key: count }
 let erfasste     = new Set(); // kind IDs already tallied
 let aktuellerTab = 'tabelle';
+let diagrammRelativ = false;
 
 const KLASSEN_BUCHSTABEN = ['a', 'b', 'c', 'd', 'e', 'f'];
 
@@ -661,6 +705,12 @@ function strichEintragen(id, wert) {
   // Update the modal button area to show it's done
   renderStrichButton(id);
 
+  // Richtige Antwort → Bestätigung kurz zeigen, dann Fenster automatisch schließen
+  setTimeout(() => {
+    const modal = document.getElementById('kindModal');
+    if (modal) modal.classList.add('hidden');
+  }, 900);
+
   // All tallied → show auswertung
   if (erfasste.size === klasse.length) showAuswertung();
 }
@@ -752,33 +802,46 @@ function setTab(tab) {
   renderTab();
 }
 
+// Shared markup for the "Diagrammart" absolute/relativ toggle used by
+// both the Säulen- and Balkendiagramm tabs — was duplicated verbatim before.
+function diagrammToggleHTML() {
+  return `
+    <div class="diagrammart-toggle">
+      <span class="diagrammart-label">Diagrammart:</span>
+      <button class="btn ${!diagrammRelativ?'btn-yellow':'btn-ghost'}" onclick="diagrammRelativ=false;renderTab()">Absolute Häufigkeit</button>
+      <button class="btn ${diagrammRelativ?'btn-mint':'btn-ghost'}" onclick="diagrammRelativ=true;renderTab()">Relative Häufigkeit (%)</button>
+    </div>
+    <div class="chart-canvas-wrap"><canvas class="chart-canvas" id="chartCanvas"></canvas></div>`;
+}
+
 function renderTab() {
   const container = document.getElementById('auswertContent');
   const merkmal   = MERKMALE.find(m => m.id === aktivMerkmal);
   if (!merkmal) return;
+  const achsenTitel = merkmal.label.replace(/^\S+\s/, '');
 
   if (aktuellerTab === 'tabelle') {
     Charts.renderTabelle(container, strichDaten, merkmal.label);
 
   } else if (aktuellerTab === 'saeule') {
-    container.innerHTML = '<div class="chart-canvas-wrap"><canvas class="chart-canvas" id="chartCanvas"></canvas></div>';
+    container.innerHTML = diagrammToggleHTML();
     requestAnimationFrame(() => {
       const cv = document.getElementById('chartCanvas');
-      Charts.renderSaeulen(cv, strichDaten, merkmal.label, { achsenTitel: merkmal.label.replace(/^\S+\s/, '') });
+      Charts.renderSaeulen(cv, strichDaten, merkmal.label, { achsenTitel, relativ: diagrammRelativ });
     });
 
   } else if (aktuellerTab === 'balken') {
-    container.innerHTML = '<div class="chart-canvas-wrap"><canvas class="chart-canvas" id="chartCanvas"></canvas></div>';
+    container.innerHTML = diagrammToggleHTML();
     requestAnimationFrame(() => {
       const cv = document.getElementById('chartCanvas');
-      Charts.renderBalken(cv, strichDaten, merkmal.label);
+      Charts.renderBalken(cv, strichDaten, merkmal.label, { relativ: diagrammRelativ });
     });
 
   } else if (aktuellerTab === 'werkstatt') {
     Werkstatt.render(container, strichDaten, merkmal);
 
   } else if (aktuellerTab === 'kenngroessen') {
-    KenngroessenLab.render(container, strichDaten, merkmal.label.replace(/^\S+\s/, ''));
+    KenngroessenLab.render(container, strichDaten, achsenTitel);
   }
 }
 

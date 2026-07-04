@@ -310,3 +310,8 @@ canvas#glueckCanvas { border-radius: 50%; display: block; }
 
 /* ── Reset button ── */
 .reset-row { text-align: center; padding-top: .5rem; }
+
+/* ── Ergebnis-Text (Münzwurf, Würfel, Glücksrad, Kugelbeutel) ──
+   Was previously a near-identical inline style on 4 separate pages. */
+.ergebnis-text { font-family: 'Fredoka One', cursive; min-height: 1.6rem; color: var(--yellow); font-size: 1.2rem; }
+.ergebnis-text.gross { font-size: 1.3rem; min-height: 1.8rem; }
