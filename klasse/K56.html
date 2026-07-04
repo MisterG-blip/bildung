@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mathwelt — Klasse 5/6</title>
+<title>s — Klasse 5/6</title>
 <link rel="stylesheet" href="../styles/base.css">
 <style>
 /* ════════════════════════════════════════
@@ -30,23 +30,35 @@ body { font-size: 18px; }
 .kl-header-btns { display: flex; gap: .5rem; flex-wrap: wrap; }
 
 /* ── Echter Bruch (CSS fraction) ── */
+.rel-zeile {
+  display: inline-flex; align-items: center; gap: .3rem; white-space: nowrap;
+}
 .bruch-wrap {
   display: inline-flex; flex-direction: column; align-items: center;
-  vertical-align: middle; margin: 0 .3rem; font-size: .9rem; line-height: 1.1;
+  vertical-align: middle; font-size: .72rem; line-height: 1.05;
 }
 .bruch-zaehler { font-weight: 800; color: var(--text); }
-.bruch-strich  { display: block; width: 100%; height: 2px; background: var(--text); margin: 2px 0; min-width: 22px; }
+.bruch-strich  { display: block; width: 100%; height: 2px; background: var(--text); margin: 1px 0; min-width: 16px; }
 .bruch-nenner  { font-weight: 800; color: var(--text); }
-.rel-dez { display: block; font-size: .8rem; color: var(--muted); }
-.rel-pct { display: block; font-size: .85rem; font-weight: 700; color: var(--text); }
+.rel-gleich { color: var(--muted); font-size: .78rem; }
+.rel-dez { font-size: .78rem; color: var(--muted); }
+.rel-pct { font-size: .82rem; font-weight: 700; color: var(--text); }
 
 /* ── Werkstatt layout: Strichliste-Sidebar links neben dem Koordinatensystem ── */
 .werkst-sl-titel { font-family: 'Fredoka One',cursive; font-size: 1rem; color: var(--yellow); margin-bottom: .6rem; }
-.werkst-sl-row { display: flex; align-items: center; gap: .5rem; margin-bottom: .4rem; font-size: .9rem; }
-.werkst-sl-key { font-weight: 800; min-width: 50px; }
-.werkst-sl-striche { font-family: monospace; color: var(--mint); flex: 1; font-size: .9rem; }
-.werkst-sl-val { font-weight: 800; color: var(--yellow); min-width: 24px; text-align: right; }
-.werkst-sl-rel { font-size: .8rem; color: var(--muted); min-width: 46px; text-align: right; }
+.werkst-sl-table { width: 100%; border-collapse: collapse; font-size: .82rem; margin-bottom: 1rem; }
+.werkst-sl-table th {
+  text-align: left; padding: .4rem .5rem;
+  color: var(--muted); font-weight: 700; font-size: .68rem;
+  text-transform: uppercase; letter-spacing: .04em;
+  border-bottom: 2px solid rgba(255,255,255,0.08);
+}
+.werkst-sl-table th:nth-child(3), .werkst-sl-table th:nth-child(4) { text-align: center; }
+.werkst-sl-table td { padding: .4rem .5rem; border-bottom: 1px solid rgba(255,255,255,0.05); }
+.werkst-sl-table tr:hover td { background: rgba(255,255,255,0.03); }
+.werkst-sl-key { font-weight: 800; }
+.werkst-sl-striche { font-family: monospace; color: var(--mint); }
+.werkst-sl-num { text-align: center; font-weight: 800; color: var(--yellow); }
 
 /* Alle übrigen Regeln für Kids-Grid, Merkmal-Auswahl, Strichliste, Häufigkeitstabelle,
    Kenngrößen-Labor, Diagramm-Werkstatt, Modal und Empty-State stehen gebündelt weiter
@@ -222,11 +234,12 @@ body { font-size: 18px; }
   text-transform: uppercase; letter-spacing: .05em;
   border-bottom: 2px solid rgba(255,255,255,0.08);
 }
+.haeufig-tabelle th:nth-child(3), .haeufig-tabelle th:nth-child(4) { text-align: center; }
 .haeufig-tabelle td { padding: .45rem .6rem; border-bottom: 1px solid rgba(255,255,255,0.05); }
 .haeufig-tabelle tr:hover td { background: rgba(255,255,255,0.03); }
 .gesamt-row td { border-top: 2px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.03); }
 .tabelle-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
-.zahl-cell { text-align: right; font-weight: 700; font-family: monospace; }
+.zahl-cell { text-align: center; font-weight: 700; font-family: monospace; }
 
 /* Strichliste in tabelle */
 .strichliste { font-family: monospace; letter-spacing: .06em; color: var(--mint); }
@@ -495,9 +508,9 @@ svg#koordSystem { width: 100%; height: 440px; display: block; }
 
 <!-- Header -->
 <header class="kl-header">
-  <div class="kl-logo">🏫 MaLA - Das Mathematik Labor <span>/ Klasse 5 &amp; 6</span></div>
+  <div class="kl-logo">🏫 MaLa - Das Mathematik Labor <span>/ Klasse 5 &amp; 6</span></div>
   <div class="kl-header-btns">
-    <button class="btn btn-ghost" onclick="location.href='../jahrgang/5-6.html'">← Jahrgang 5/6</button>
+    <button class="btn btn-ghost" onclick="location.href='../jahrgang/Jg56.html'">← Jahrgang 5/6</button>
     <button class="btn btn-yellow" onclick="neueKlasse()">🔄 Neue Klasse</button>
   </div>
 </header>
@@ -939,5 +952,15 @@ function closeModal(e) {
 /* ── Start ── */
 neueKlasse();
 </script>
+
+<nav class="footer-nav">
+  <div class="nav-links">
+    <a href="https://ichwillzocken.com/support" class="nav-link">Support</a>
+    <a href="https://ichwillzocken.com/dev" class="nav-link">Developer</a>
+    <a href="https://ichwillzocken.com/docs/Impressum" class="nav-link">Impressum</a>
+  </div>
+  <footer>© 2026 MISTER G</footer>
+</nav>
+
 </body>
 </html>

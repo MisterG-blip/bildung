@@ -34,9 +34,13 @@ const Charts = (() => {
         <td>${renderStriche(val)}</td>
         <td class="zahl-cell">${val}</td>
         <td class="zahl-cell">
-          <span class="bruch-wrap"><span class="bruch-zaehler">${val}</span><span class="bruch-strich"></span><span class="bruch-nenner">${gesamt}</span></span>
-          <span class="rel-dez">${dez}</span>
-          <span class="rel-pct">${pct}%</span>
+          <span class="rel-zeile">
+            <span class="bruch-wrap"><span class="bruch-zaehler">${val}</span><span class="bruch-strich"></span><span class="bruch-nenner">${gesamt}</span></span>
+            <span class="rel-gleich">=</span>
+            <span class="rel-dez">${dez.replace('.', ',')}</span>
+            <span class="rel-gleich">=</span>
+            <span class="rel-pct">${pct.replace('.', ',')}%</span>
+          </span>
         </td>
       </tr>`;
     });

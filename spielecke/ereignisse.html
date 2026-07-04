@@ -12,9 +12,9 @@
   display: flex; flex-direction: column; gap: 1.5rem; align-items: center;
 }
 
-.karten-stapel { position: relative; width: 280px; height: 160px; }
+.karten-stapel { position: relative; width: 100%; max-width: 320px; min-height: 160px; margin: 0 auto; }
 .ereignis-karte {
-  position: absolute; inset: 0;
+  position: relative; width: 100%; min-height: 160px;
   background: var(--card-bg);
   border-radius: 18px; border: 3px solid rgba(255,255,255,0.12);
   display: flex; align-items: center; justify-content: center;
@@ -148,6 +148,7 @@ let reihenfolge = [];
 let index = 0;
 let richtig = { unmoeglich: 0, moeglich: 0, sicher: 0 };
 let falsch  = { unmoeglich: 0, moeglich: 0, sicher: 0 };
+const ANZAHL_PRO_RUNDE = 10;
 
 function shuffle(arr) {
   const a = [...arr];
@@ -159,7 +160,7 @@ function shuffle(arr) {
 }
 
 function start() {
-  reihenfolge = shuffle(EREIGNISSE);
+  reihenfolge = shuffle(EREIGNISSE).slice(0, ANZAHL_PRO_RUNDE);
   index = 0;
   richtig = { unmoeglich: 0, moeglich: 0, sicher: 0 };
   falsch  = { unmoeglich: 0, moeglich: 0, sicher: 0 };

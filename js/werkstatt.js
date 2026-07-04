@@ -46,13 +46,33 @@ const Werkstatt = (() => {
           <div class="werkstatt-left">
             <div class="werkstatt-strichliste">
               <div class="werkst-sl-titel">📋 Strichliste</div>
-              ${entries.map(([key,val],i)=>`
-                <div class="werkst-sl-row">
-                  <span class="werkst-sl-key" style="color:${COLORS[i%COLORS.length]}">${key}</span>
-                  <span class="werkst-sl-striche">${renderStriche(val)}</span>
-                  <span class="werkst-sl-val">${val}</span>
-                  ${relativ?`<span class="werkst-sl-rel">${(val/gesamt*100).toFixed(1)}%</span>`:''}
-                </div>`).join('')}
+              <table class="werkst-sl-table">
+                <thead>
+                  <tr>
+                    <th>Merkmal</th>
+                    <th>Strichliste</th>
+                    <th>Absolute<br>Häufigkeit</th>
+                    <th>Relative<br>Häufigkeit</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${entries.map(([key,val],i)=>`
+                  <tr>
+                    <td class="werkst-sl-key" style="color:${COLORS[i%COLORS.length]}">${key}</td>
+                    <td class="werkst-sl-striche">${renderStriche(val)}</td>
+                    <td class="werkst-sl-num">${val}</td>
+                    <td class="werkst-sl-num">
+                      <span class="rel-zeile">
+                        <span class="bruch-wrap"><span class="bruch-zaehler">${val}</span><span class="bruch-strich"></span><span class="bruch-nenner">${gesamt}</span></span>
+                        <span class="rel-gleich">=</span>
+                        <span class="rel-dez">${(val/gesamt).toFixed(2).replace('.', ',')}</span>
+                        <span class="rel-gleich">=</span>
+                        <span class="rel-pct">${(val/gesamt*100).toFixed(1).replace('.', ',')}%</span>
+                      </span>
+                    </td>
+                  </tr>`).join('')}
+                </tbody>
+              </table>
             </div>
             <div class="werkbank" id="werkbank">
               <div class="werkst-sl-titel">🧱 Werkbank</div>

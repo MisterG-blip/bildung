@@ -225,16 +225,15 @@ const KenngroessenLab = (() => {
      ════════════════════════════════════════ */
   const SpannweiteAufgabe = (() => {
     let karten   = [];
-    let minId    = null, maxId = null;
+    let minVal   = null, maxVal = null;
     let gewaehlt = { min: null, max: null };
 
     function init(container, values, label) {
       // Build cards shuffled (not sorted!)
       const shuffled = shuffle(values.map((v, i) => ({ val: v, id: i })));
       karten   = shuffled;
-      const sorted = [...karten].sort((a,b) => a.val - b.val);
-      minId    = sorted[0].id;
-      maxId    = sorted[sorted.length-1].id;
+      minVal   = Math.min(...karten.map(k => k.val));
+      maxVal   = Math.max(...karten.map(k => k.val));
       gewaehlt = { min: null, max: null };
       render(container, label);
     }
@@ -264,7 +263,7 @@ const KenngroessenLab = (() => {
       const fb    = document.getElementById('spannFeedback');
 
       if (gewaehlt.min === null) {
-        if (id === minId) {
+        if (karte.val === minVal) {
           gewaehlt.min = karte.val;
           markiere(id, 'min');
           fb.textContent = '✅ Richtig! Das ist der kleinste Wert. Jetzt den größten finden.';
@@ -276,7 +275,7 @@ const KenngroessenLab = (() => {
           fb.className = 'kg-feedback falsch';
         }
       } else if (gewaehlt.max === null) {
-        if (id === maxId) {
+        if (karte.val === maxVal) {
           gewaehlt.max = karte.val;
           markiere(id, 'max');
           fb.textContent = '🏆 Beide gefunden! Jetzt kommt die Rechnung:';
