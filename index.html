@@ -53,6 +53,8 @@ body { background: radial-gradient(ellipse at 30% 20%, #2a1a4a 0%, #1a1f3a 60%);
 .jahrgang-card.locked { opacity: 0.45; cursor: default; }
 .jahrgang-card.active:hover { transform: translateY(-5px); border-color: var(--yellow); box-shadow: 0 20px 50px rgba(0,0,0,0.4), 0 0 30px rgba(255,211,61,0.15); }
 .jahrgang-card.active:hover::before { opacity: 1; }
+.jahrgang-card[href*="Jg78"].active:hover { border-color: var(--orange); box-shadow: 0 20px 50px rgba(0,0,0,0.4), 0 0 30px rgba(255,107,53,0.18); }
+.jahrgang-card[href*="Jg78"].active::before { background: radial-gradient(ellipse at top left, rgba(255,107,53,0.1), transparent 60%); }
 
 .jg-icon  { font-size: 2.8rem; margin-bottom: .75rem; display: block; }
 .jg-titel { font-family:'Fredoka One',cursive; font-size: 1.3rem; color: var(--text); margin-bottom: .4rem; }
@@ -109,12 +111,13 @@ body { background: radial-gradient(ellipse at 30% 20%, #2a1a4a 0%, #1a1f3a 60%);
       <div class="jg-arrow">→</div>
     </a>
 
-    <div class="jahrgang-card locked">
+    <a class="jahrgang-card active" href="jahrgang/Jg78.html">
       <span class="jg-icon">📐</span>
-      <div class="jg-tag"><span class="badge badge-orange">Bald</span></div>
+      <div class="jg-tag"><span class="badge badge-orange">Verfügbar</span></div>
       <div class="jg-titel">Klasse 7 &amp; 8</div>
       <p class="jg-desc">Wahrscheinlichkeit, Zufallsexperimente, Baumdiagramme, relative Häufigkeit.</p>
-    </div>
+      <div class="jg-arrow">→</div>
+    </a>
 
     <div class="jahrgang-card locked">
       <span class="jg-icon">📈</span>

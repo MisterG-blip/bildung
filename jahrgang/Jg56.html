@@ -58,7 +58,9 @@ body { background: radial-gradient(ellipse at 30% 10%, #2a1a30 0%, #1a1f3a 55%);
 .lw-card.zufall:hover  { border-color: var(--purple); box-shadow: 0 20px 50px rgba(0,0,0,0.4), 0 0 30px rgba(168,85,247,0.15); }
 .lw-card.zufall::before { background: radial-gradient(ellipse at top left, rgba(168,85,247,0.1), transparent 60%); }
 
-.lw-card.analyse { border-color: rgba(78,205,196,0.3); opacity: 0.5; cursor: default; }
+.lw-card.analyse { border-color: rgba(78,205,196,0.3); }
+.lw-card.analyse:hover   { border-color: var(--mint); box-shadow: 0 20px 50px rgba(0,0,0,0.4), 0 0 30px rgba(78,205,196,0.15); }
+.lw-card.analyse::before { background: radial-gradient(ellipse at top left, rgba(78,205,196,0.1), transparent 60%); }
 
 .lw-card:hover { transform: translateY(-5px); }
 .lw-card:hover::before { opacity: 1; }
@@ -111,13 +113,14 @@ body { background: radial-gradient(ellipse at 30% 10%, #2a1a30 0%, #1a1f3a 55%);
     <div class="lw-arrow">→</div>
   </a>
 
-  <div class="lw-card analyse">
-    <div class="lw-tag"><span class="badge badge-mint">Bald</span></div>
+  <a class="lw-card analyse" href="../analyse/index.html">
+    <div class="lw-tag"><span class="badge badge-mint">Verfügbar</span></div>
     <span class="lw-icon">🧠</span>
     <div class="lw-fokus">Verstehen von Darstellungen</div>
     <div class="lw-titel">Analyse- &amp; Modelllabor</div>
     <p class="lw-desc">Diagramme und Modelle lesen, vergleichen und interpretieren. Du erkennst, welche Informationen wirklich darin stecken.</p>
-  </div>
+    <div class="lw-arrow">→</div>
+  </a>
 
 </div>
 

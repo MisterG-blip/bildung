@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Diagramm-Labor — MaLa - Das Mathematik Labor</title>
+<link rel="stylesheet" href="../styles/base.css">
+<style>
+body { background: radial-gradient(ellipse at 30% 10%, #1a3a35 0%, #1a1f3a 55%); }
+
+.an-header {
+  background: linear-gradient(135deg, #1a1f3a 0%, #1a3a3a 100%);
+  border-bottom: 3px solid rgba(78,205,196,0.35);
+  padding: 1rem 1.5rem;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: .75rem;
+  position: sticky; top: 0; z-index: 50;
+}
+.an-logo { font-size: 1.3rem; color: var(--mint); letter-spacing: .05em; }
+.an-logo span { color: var(--text); font-size: .9rem; font-family: 'Nunito', sans-serif; font-weight: 600; }
+
+.an-hero { text-align: center; padding: 2rem 1.5rem 1rem; }
+.an-hero h1 { font-size: clamp(1.6rem,4.5vw,2.4rem); color: var(--mint); margin-bottom: .4rem; }
+.an-hero p  { font-size: .9rem; color: var(--muted); max-width: 560px; margin: 0 auto; line-height: 1.6; }
+
+.an-main { max-width: 820px; margin: 0 auto; padding: 1rem 1.5rem 4rem; }
+
+.an-fortschritt {
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: .8rem; color: var(--muted); margin-bottom: 1rem; font-weight: 700;
+}
+.an-punkte { color: var(--yellow); }
+
+.an-karte {
+  background: var(--card-bg); border-radius: 20px;
+  border: 3px solid rgba(255,255,255,0.08);
+  padding: 1.5rem; margin-bottom: 1.2rem;
+}
+.an-thema-titel {
+  font-family: 'Fredoka One', cursive; font-size: 1.2rem; color: var(--text);
+  text-align: center; margin-bottom: .8rem;
+}
+.an-canvas-wrap { width: 100%; height: 320px; margin-bottom: .5rem; }
+.an-canvas-wrap canvas { width: 100%; height: 100%; display: block; }
+
+.an-frage-karte {
+  background: var(--card-bg); border-radius: 20px;
+  border: 3px solid rgba(78,205,196,0.25);
+  padding: 1.6rem; text-align: center;
+}
+.an-frage-nr { font-size: .75rem; color: var(--mint); font-weight: 800; text-transform: uppercase; letter-spacing: .06em; margin-bottom: .5rem; }
+.an-frage-text { font-size: 1.05rem; font-weight: 700; color: var(--text); margin-bottom: 1.2rem; line-height: 1.5; }
+.an-aussage {
+  font-size: 1rem; font-style: italic; color: var(--text);
+  background: rgba(255,255,255,0.04); border-radius: 12px;
+  padding: .9rem 1.2rem; margin-bottom: 1.2rem;
+}
+
+.an-optionen { display: flex; flex-wrap: wrap; gap: .7rem; justify-content: center; margin-bottom: 1rem; }
+.an-opt-btn {
+  padding: .75rem 1.3rem; border-radius: 14px; cursor: pointer;
+  border: 3px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.03);
+  color: var(--text); font-size: .95rem; font-weight: 700; font-family: 'Nunito', sans-serif;
+  transition: all .15s;
+}
+.an-opt-btn:hover:not(:disabled) { transform: translateY(-2px); border-color: var(--mint); }
+.an-opt-btn:disabled { cursor: default; }
+.an-opt-btn.richtig { border-color: var(--green); background: rgba(34,197,94,0.18); }
+.an-opt-btn.falsch  { border-color: var(--red); background: rgba(239,68,68,0.18); }
+
+.an-eingabe-row { display: flex; gap: .6rem; justify-content: center; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; }
+.an-eingabe-row input {
+  width: 110px; padding: .7rem 1rem; border-radius: 12px;
+  border: 3px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.05);
+  color: var(--text); font-size: 1.1rem; font-weight: 800; text-align: center;
+  font-family: 'Nunito', sans-serif;
+}
+.an-eingabe-row input:focus { outline: none; border-color: var(--mint); }
+
+.an-feedback { min-height: 1.6rem; font-weight: 700; font-size: .95rem; margin-bottom: .8rem; }
+.an-feedback.richtig { color: var(--mint); }
+.an-feedback.falsch  { color: var(--red); }
+
+.an-weiter-row { display: flex; justify-content: center; }
+
+.an-ende { text-align: center; padding: 2rem 1rem; }
+.an-ende-emoji { font-size: 3.5rem; margin-bottom: .5rem; }
+.an-ende-titel { font-family: 'Fredoka One', cursive; font-size: 1.4rem; color: var(--yellow); margin-bottom: .5rem; }
+.an-ende-score { font-size: 1.1rem; color: var(--text); margin-bottom: 1.5rem; }
+.an-ende-score strong { color: var(--mint); font-size: 1.4rem; }
+</style>
+</head>
+<body>
+
+<header class="an-header">
+  <div class="an-logo">📊 Diagramm-Labor <span>/ Analyse- &amp; Modelllabor</span></div>
+  <button class="btn btn-ghost" onclick="location.href='../jahrgang/Jg56.html'">← Jahrgang 5/6</button>
+</header>
+
+<div class="an-hero">
+  <h1>Diagramme lesen &amp; verstehen</h1>
+  <p>Zu jedem Diagramm gibt es 3 Fragen: Maximum, Minimum, Spannweite, Durchschnitt oder ein Vergleich zwischen zwei Balken. Schau genau hin!</p>
+</div>
+
+<div class="an-main" id="mainArea"></div>
+
+<nav class="footer-nav">
+  <div class="nav-links">
+    <a href="https://ichwillzocken.com/support" class="nav-link">Support</a>
+    <a href="https://ichwillzocken.com/dev" class="nav-link">Developer</a>
+    <a href="https://ichwillzocken.com/docs/Impressum" class="nav-link">Impressum</a>
+  </div>
+  <footer>© 2026 MISTER G</footer>
+</nav>
+
+<script src="../js/utils.js"></script>
+<script src="../js/charts.js"></script>
+<script>
+const { COLORS } = MathUtils;
+
+/* ── Themen-Pool für Zufallsdaten ── */
+const THEMEN = [
+  { titel: 'Lieblingsfarben der Klasse',      einheit: 'Kinder',   kategorien: ['Rot','Blau','Grün','Gelb','Lila','Türkis'] },
+  { titel: 'Haustiere im Straßenzug',         einheit: 'Haushalte',kategorien: ['Hund','Katze','Hamster','Fisch','Vogel','Keins'] },
+  { titel: 'Lieblingssportarten',             einheit: 'Kinder',   kategorien: ['Fußball','Schwimmen','Tennis','Reiten','Turnen','Tanzen'] },
+  { titel: 'Verkaufte Eissorten im Sommer',   einheit: 'Kugeln',   kategorien: ['Vanille','Schokolade','Erdbeere','Zitrone','Stracciatella'] },
+  { titel: 'Getränke in der Pause',           einheit: 'Kinder',   kategorien: ['Wasser','Saft','Kakao','Tee','Limonade'] },
+  { titel: 'Wetter im letzten Monat',         einheit: 'Tage',     kategorien: ['Sonnig','Bewölkt','Regen','Schnee','Nebel'], maxSumme: 31 },
+  { titel: 'Schulweg der Kinder',             einheit: 'Kinder',   kategorien: ['zu Fuß','Fahrrad','Bus','Auto','Bahn'] },
+  { titel: 'Musikgeschmack der Klasse',       einheit: 'Kinder',   kategorien: ['Pop','Hip-Hop','Rock','Klassik','Electro'] },
+  { titel: 'Lieblingsfach',                   einheit: 'Kinder',   kategorien: ['Mathe','Sport','Kunst','Musik','Deutsch','Englisch'] },
+  { titel: 'Besuchte Länder im Urlaub',       einheit: 'Familien', kategorien: ['Italien','Spanien','Türkei','Deutschland','Frankreich'] },
+];
+
+const ANZAHL_RUNDEN = 5;
+const FRAGEN_PRO_RUNDE = 3;
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+function randInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+
+/* Verteilt `summe` als `anzahl` positive Ganzzahlen (jede >= 1), Summe exakt = `summe` */
+function verteileSumme(anzahl, summe) {
+  const werte = new Array(anzahl).fill(1);
+  let rest = summe - anzahl;
+  while (rest > 0) {
+    werte[randInt(0, anzahl - 1)]++;
+    rest--;
+  }
+  return shuffle(werte);
+}
+
+/* ── Rundendaten erzeugen ── */
+function erzeugeRunde() {
+  const thema = THEMEN[randInt(0, THEMEN.length - 1)];
+  const anzahlKategorien = randInt(4, Math.min(6, thema.kategorien.length));
+  const kategorien = shuffle(thema.kategorien).slice(0, anzahlKategorien);
+  const daten = {};
+  if (thema.maxSumme) {
+    // z.B. Wetter: nie mehr "Tage" verteilen, als ein Monat hat
+    const gesamt = randInt(Math.max(anzahlKategorien, thema.maxSumme - 5), thema.maxSumme);
+    const werte = verteileSumme(anzahlKategorien, gesamt);
+    kategorien.forEach((k, i) => { daten[k] = werte[i]; });
+  } else {
+    kategorien.forEach(k => { daten[k] = randInt(2, 18); });
+  }
+  const chartTyp = Math.random() < 0.5 ? 'saeulen' : 'balken';
+
+  const fragenPool = [erzeugeMaxFrage, erzeugeMinFrage, erzeugeSpannweiteFrage, erzeugeDurchschnittFrage, erzeugeVergleichFrage];
+  const fragen = shuffle(fragenPool).slice(0, FRAGEN_PRO_RUNDE).map(fn => fn(daten));
+
+  return { thema, daten, chartTyp, fragen };
+}
+
+/* ── Fragen-Generatoren ── */
+function erzeugeMaxFrage(daten) {
+  const entries = Object.entries(daten);
+  const maxVal = Math.max(...entries.map(([,v]) => v));
+  return {
+    frage: 'Welche Kategorie hat den höchsten Wert?',
+    typ: 'kategorie',
+    optionen: shuffle(entries.map(([k]) => k)),
+    check: (antwort) => daten[antwort] === maxVal,
+    loesungstext: () => {
+      const richtige = entries.filter(([,v]) => v === maxVal).map(([k]) => k);
+      return `Richtig: ${richtige.join(' oder ')} (Wert ${maxVal})`;
+    }
+  };
+}
+
+function erzeugeMinFrage(daten) {
+  const entries = Object.entries(daten);
+  const minVal = Math.min(...entries.map(([,v]) => v));
+  return {
+    frage: 'Welche Kategorie hat den kleinsten Wert?',
+    typ: 'kategorie',
+    optionen: shuffle(entries.map(([k]) => k)),
+    check: (antwort) => daten[antwort] === minVal,
+    loesungstext: () => {
+      const richtige = entries.filter(([,v]) => v === minVal).map(([k]) => k);
+      return `Richtig: ${richtige.join(' oder ')} (Wert ${minVal})`;
+    }
+  };
+}
+
+function erzeugeSpannweiteFrage(daten) {
+  const vals = Object.values(daten);
+  const max = Math.max(...vals), min = Math.min(...vals);
+  const span = max - min;
+  return {
+    frage: 'Wie groß ist die Spannweite (größter Wert minus kleinster Wert)?',
+    typ: 'zahl-exakt',
+    check: (antwort) => Number(antwort) === span,
+    loesungstext: () => `Spannweite = ${max} − ${min} = ${span}`
+  };
+}
+
+function erzeugeDurchschnittFrage(daten) {
+  const vals = Object.values(daten);
+  const summe = vals.reduce((a,b) => a+b, 0);
+  const mittel = summe / vals.length;
+  const toleranz = Math.max(1, mittel * 0.13);
+  const alsMC = Math.random() < 0.5;
+
+  if (alsMC) {
+    const richtig = Math.round(mittel);
+    const distraktoren = new Set();
+    while (distraktoren.size < 3) {
+      const offset = randInt(2, 4) * (Math.random() < 0.5 ? -1 : 1);
+      const kandidat = Math.max(0, richtig + offset);
+      if (kandidat !== richtig) distraktoren.add(kandidat);
+    }
+    return {
+      frage: 'Was ist ungefähr der Durchschnitt (Mittelwert) aller Werte?',
+      typ: 'mc-zahl',
+      optionen: shuffle([richtig, ...distraktoren]),
+      check: (antwort) => Number(antwort) === richtig,
+      loesungstext: () => `Durchschnitt = ${summe} ÷ ${vals.length} = ${mittel.toFixed(2)} ≈ ${richtig}`
+    };
+  }
+  return {
+    frage: 'Schätze den Durchschnitt (Mittelwert) aller Werte (kleine Abweichung ist ok).',
+    typ: 'zahl-toleranz',
+    check: (antwort) => Math.abs(Number(antwort) - mittel) <= toleranz,
+    loesungstext: () => `Durchschnitt = ${summe} ÷ ${vals.length} = ${mittel.toFixed(2)} (± ${toleranz.toFixed(1)} war ok)`
+  };
+}
+
+function erzeugeVergleichFrage(daten) {
+  const entries = shuffle(Object.entries(daten)).slice(0, 2);
+  const [[keyA, valA], [keyB, valB]] = entries;
+  const diff = Math.abs(valA - valB);
+  const ratio = valB === 0 ? null : valA / valB;
+  const nice = (r,t,eps) => Math.abs(r-t) <= eps;
+
+  const kandidaten = [];
+
+  if (valA !== valB) {
+    const [hi, lo] = valA > valB ? [keyA, keyB] : [keyB, keyA];
+    kandidaten.push({ text: `„${hi}" kommt häufiger vor als „${lo}".`, wahr: true });
+    kandidaten.push({ text: `„${lo}" kommt häufiger vor als „${hi}".`, wahr: false });
+  } else {
+    kandidaten.push({ text: `„${keyA}" kommt genauso oft vor wie „${keyB}".`, wahr: true });
+    kandidaten.push({ text: `„${keyA}" kommt häufiger vor als „${keyB}".`, wahr: false });
+  }
+
+  if (ratio !== null) {
+    let faktor = null;
+    if (nice(ratio, 2, 0.2) || nice(ratio, 0.5, 0.12)) faktor = 'doppelt';
+    else if (nice(ratio, 3, 0.25) || nice(ratio, 1/3, 0.08)) faktor = 'dreimal';
+    if (faktor) {
+      const [gross, klein] = ratio >= 1 ? [keyA, keyB] : [keyB, keyA];
+      kandidaten.push({ text: `„${gross}" kommt etwa ${faktor} so oft vor wie „${klein}".`, wahr: true });
+      const falscherFaktor = faktor === 'doppelt' ? 'dreimal' : 'doppelt';
+      kandidaten.push({ text: `„${gross}" kommt etwa ${falscherFaktor} so oft vor wie „${klein}".`, wahr: false });
+    }
+  }
+
+  if (diff > 0) {
+    const [hi, lo] = valA > valB ? [keyA, keyB] : [keyB, keyA];
+    kandidaten.push({ text: `„${hi}" hat genau ${diff} mehr als „${lo}".`, wahr: true });
+    let falscheZahl = diff + (Math.random() < 0.5 ? 1 : -1) * randInt(1, 2);
+    if (falscheZahl <= 0) falscheZahl = diff + 2;
+    kandidaten.push({ text: `„${hi}" hat genau ${falscheZahl} mehr als „${lo}".`, wahr: false });
+  }
+
+  const wahrePool   = kandidaten.filter(k => k.wahr);
+  const falschePool = kandidaten.filter(k => !k.wahr);
+  const nimmWahr = Math.random() < 0.5;
+  const gewaehlt = nimmWahr
+    ? wahrePool[randInt(0, wahrePool.length - 1)]
+    : falschePool[randInt(0, falschePool.length - 1)];
+
+  return {
+    frage: 'Stimmt diese Aussage?',
+    typ: 'wahr-falsch',
+    aussage: gewaehlt.text,
+    check: (antwort) => antwort === gewaehlt.wahr,
+    loesungstext: () => gewaehlt.wahr ? 'Die Aussage stimmt! ✓' : `Stimmt nicht. Z.B. richtig: ${wahrePool[0].text}`
+  };
+}
+
+/* ── Spielzustand & Rendering ── */
+let rundenIndex = 0, frageIndex = 0, punkte = 0;
+let aktuelleRunde = null;
+let beantwortet = false;
+
+function starteSpiel() {
+  rundenIndex = 0; punkte = 0;
+  aktuelleRunde = erzeugeRunde();
+  frageIndex = 0;
+  renderAlles();
+}
+
+function renderAlles() {
+  const el = document.getElementById('mainArea');
+  const { thema, daten, chartTyp } = aktuelleRunde;
+  const frage = aktuelleRunde.fragen[frageIndex];
+
+  el.innerHTML = `
+    <div class="an-fortschritt">
+      <span>Diagramm ${rundenIndex + 1} von ${ANZAHL_RUNDEN} · Frage ${frageIndex + 1} von ${FRAGEN_PRO_RUNDE}</span>
+      <span class="an-punkte">★ ${punkte} / ${ANZAHL_RUNDEN * FRAGEN_PRO_RUNDE}</span>
+    </div>
+    <div class="an-karte">
+      <div class="an-thema-titel">${thema.titel}</div>
+      <div class="an-canvas-wrap"><canvas id="chartCanvas"></canvas></div>
+    </div>
+    <div class="an-frage-karte" id="frageKarte">
+      <div class="an-frage-nr">Frage ${frageIndex + 1}</div>
+      <div class="an-frage-text">${frage.frage}</div>
+      ${frage.typ === 'wahr-falsch' ? `<div class="an-aussage">${frage.aussage}</div>` : ''}
+      <div id="antwortBereich"></div>
+      <div class="an-feedback" id="feedback"></div>
+      <div class="an-weiter-row" id="weiterRow"></div>
+    </div>
+  `;
+
+  const canvas = document.getElementById('chartCanvas');
+  if (chartTyp === 'saeulen') Charts.renderSaeulen(canvas, daten, thema.titel, { achsenTitel: thema.einheit });
+  else Charts.renderBalken(canvas, daten, thema.titel, {});
+
+  renderAntwortBereich(frage);
+}
+
+function renderAntwortBereich(frage) {
+  beantwortet = false;
+  const bereich = document.getElementById('antwortBereich');
+
+  if (frage.typ === 'kategorie' || frage.typ === 'mc-zahl') {
+    bereich.innerHTML = `<div class="an-optionen">${
+      frage.optionen.map(opt => `<button class="an-opt-btn" data-opt="${opt}" onclick="antwortenOption(this)">${opt}</button>`).join('')
+    }</div>`;
+  } else if (frage.typ === 'wahr-falsch') {
+    bereich.innerHTML = `<div class="an-optionen">
+      <button class="an-opt-btn" data-opt="true"  onclick="antwortenWahrFalsch(this, true)">✅ Wahr</button>
+      <button class="an-opt-btn" data-opt="false" onclick="antwortenWahrFalsch(this, false)">❌ Falsch</button>
+    </div>`;
+  } else if (frage.typ === 'zahl-exakt' || frage.typ === 'zahl-toleranz') {
+    bereich.innerHTML = `<div class="an-eingabe-row">
+      <input type="number" id="zahlInput" placeholder="?">
+      <button class="btn btn-mint" onclick="antwortenZahl()">Prüfen</button>
+    </div>`;
+    document.getElementById('zahlInput').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') antwortenZahl();
+    });
+  }
+}
+
+function antwortenOption(btn) {
+  if (beantwortet) return;
+  beantwortet = true;
+  const frage = aktuelleRunde.fragen[frageIndex];
+  const wert = btn.dataset.opt;
+  const istRichtig = frage.typ === 'mc-zahl' ? frage.check(Number(wert)) : frage.check(wert);
+  auswerten(istRichtig, frage);
+  document.querySelectorAll('.an-opt-btn').forEach(b => {
+    b.disabled = true;
+    const bWert = frage.typ === 'mc-zahl' ? Number(b.dataset.opt) : b.dataset.opt;
+    const bRichtig = frage.typ === 'mc-zahl' ? frage.check(bWert) : frage.check(bWert);
+    if (bRichtig) b.classList.add('richtig');
+    else if (b === btn) b.classList.add('falsch');
+  });
+}
+
+function antwortenWahrFalsch(btn, wert) {
+  if (beantwortet) return;
+  beantwortet = true;
+  const frage = aktuelleRunde.fragen[frageIndex];
+  const istRichtig = frage.check(wert);
+  auswerten(istRichtig, frage);
+  document.querySelectorAll('.an-opt-btn').forEach(b => {
+    b.disabled = true;
+    const bWert = b.dataset.opt === 'true';
+    if (frage.check(bWert)) b.classList.add('richtig');
+    else if (b === btn) b.classList.add('falsch');
+  });
+}
+
+function antwortenZahl() {
+  if (beantwortet) return;
+  const input = document.getElementById('zahlInput');
+  if (input.value === '') return;
+  beantwortet = true;
+  const frage = aktuelleRunde.fragen[frageIndex];
+  const istRichtig = frage.check(input.value);
+  input.disabled = true;
+  auswerten(istRichtig, frage);
+}
+
+function auswerten(istRichtig, frage) {
+  if (istRichtig) punkte++;
+  const fb = document.getElementById('feedback');
+  fb.textContent = (istRichtig ? '✅ Richtig! ' : '❌ Leider nicht. ') + frage.loesungstext();
+  fb.className = 'an-feedback ' + (istRichtig ? 'richtig' : 'falsch');
+
+  document.getElementById('weiterRow').innerHTML =
+    `<button class="btn btn-yellow" onclick="weiter()">Weiter →</button>`;
+}
+
+function weiter() {
+  frageIndex++;
+  if (frageIndex >= FRAGEN_PRO_RUNDE) {
+    rundenIndex++;
+    if (rundenIndex >= ANZAHL_RUNDEN) { zeigeEnde(); return; }
+    aktuelleRunde = erzeugeRunde();
+    frageIndex = 0;
+  }
+  renderAlles();
+}
+
+function zeigeEnde() {
+  const gesamt = ANZAHL_RUNDEN * FRAGEN_PRO_RUNDE;
+  const quote = punkte / gesamt;
+  const emoji = quote >= 0.8 ? '🏆' : quote >= 0.5 ? '🎉' : '💪';
+  const spruch = quote >= 0.8 ? 'Stark gelesen!' : quote >= 0.5 ? 'Gut gemacht!' : 'Weiter üben lohnt sich!';
+
+  document.getElementById('mainArea').innerHTML = `
+    <div class="an-karte an-ende">
+      <div class="an-ende-emoji">${emoji}</div>
+      <div class="an-ende-titel">${spruch}</div>
+      <div class="an-ende-score">Du hast <strong>${punkte} von ${gesamt}</strong> Fragen richtig beantwortet.</div>
+      <button class="btn btn-mint" onclick="starteSpiel()">🔄 Nochmal spielen</button>
+    </div>
+  `;
+}
+
+starteSpiel();
+</script>
+</body>
+</html>
