@@ -148,24 +148,66 @@ body { background: radial-gradient(ellipse at 30% 10%, #3a2410 0%, #1a1f3a 55%);
 .m1-card-corner.tl { top: 8px; left: 10px; }
 .m1-card-corner.br { bottom: 8px; right: 10px; transform: rotate(180deg); }
 
-.m1-lootbox-wrap { position: relative; width: 140px; height: 140px; display: flex; align-items: center; justify-content: center; }
-.m1-lootbox {
-  font-size: 5rem; line-height: 1; filter: drop-shadow(0 6px 14px rgba(0,0,0,0.5));
-  transition: filter .3s ease;
+.m1-loot-stage { position: relative; width: 170px; height: 170px; perspective: 340px; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 14px; }
+.m1-loot-glow {
+  position: absolute; inset: -34px; border-radius: 50%;
+  background: radial-gradient(circle, var(--glow, rgba(255,255,255,0.5)) 0%, transparent 68%);
+  opacity: 0; transition: opacity .3s ease; filter: blur(1px);
 }
-.m1-lootbox-glow {
-  position: absolute; inset: -10px; border-radius: 50%;
-  background: radial-gradient(circle, var(--glow, rgba(255,255,255,0.25)) 0%, transparent 70%);
-  opacity: 0; transition: opacity .4s ease;
+.m1-loot-glow.aktiv { opacity: 1; animation: lootPulse 1.3s ease-in-out infinite; }
+@keyframes lootPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.18); } }
+
+.m1-loot-particles { position: absolute; inset: 0; pointer-events: none; z-index: 4; }
+.m1-loot-particle {
+  position: absolute; left: 50%; bottom: 40px; width: 9px; height: 9px; border-radius: 50%;
+  background: var(--pc, #fff); box-shadow: 0 0 8px var(--pc, #fff);
+  opacity: 0;
 }
-.m1-lootbox-glow.aktiv { opacity: 1; }
-.m1-lootbox-wrap.shake .m1-lootbox { animation: lootShake .5s ease; }
+.m1-loot-particle.fly { animation: lootFly .8s ease-out forwards; }
+@keyframes lootFly {
+  0%   { opacity: 1; transform: translate(-50%, 0) scale(1); }
+  100% { opacity: 0; transform: translate(calc(-50% + var(--dx)), var(--dy)) scale(.3); }
+}
+
+.m1-loot-box { position: relative; width: 112px; height: 92px; transform-style: preserve-3d; }
+.m1-loot-body {
+  position: absolute; bottom: 0; left: 0; width: 100%; height: 64px;
+  background: linear-gradient(180deg,#c98a3e 0%, #8a5a22 100%);
+  border: 3px solid #4a2e0f; border-radius: 6px 6px 12px 12px;
+  box-shadow: inset 0 -10px 16px rgba(0,0,0,0.3), 0 8px 16px rgba(0,0,0,0.4);
+  z-index: 1;
+}
+.m1-loot-body::after {
+  content: ''; position: absolute; left: 0; right: 0; top: 46%; height: 11px;
+  background: linear-gradient(180deg,#ffe066,#c9a227); border-top: 1px solid rgba(0,0,0,0.2);
+}
+.m1-loot-lid {
+  position: absolute; top: 0; left: 0; width: 100%; height: 40px;
+  background: linear-gradient(180deg,#dba15a 0%, #a9702f 100%);
+  border: 3px solid #4a2e0f; border-radius: 8px 8px 3px 3px;
+  transform-origin: bottom center; transform: rotateX(0deg);
+  transition: transform .5s cubic-bezier(.34,1.56,.64,1);
+  z-index: 3;
+}
+.m1-loot-box.offen .m1-loot-lid { transform: rotateX(-125deg) translateY(-2px); }
+.m1-loot-box.shake { animation: lootShake .45s ease; }
 @keyframes lootShake {
-  0%,100% { transform: rotate(0deg) scale(1); }
-  20% { transform: rotate(-10deg) scale(1.05); }
-  40% { transform: rotate(9deg) scale(1.05); }
-  60% { transform: rotate(-7deg) scale(1.08); }
-  80% { transform: rotate(5deg) scale(1.05); }
+  0%,100% { transform: rotate(0deg); }
+  20% { transform: rotate(-6deg); }
+  40% { transform: rotate(5deg); }
+  60% { transform: rotate(-4deg); }
+  80% { transform: rotate(3deg); }
+}
+
+.m1-loot-item {
+  position: absolute; left: 50%; bottom: 58px; font-size: 2.3rem; z-index: 2;
+  transform: translateX(-50%) translateY(0) scale(0); opacity: 0;
+}
+.m1-loot-item.pop { animation: lootPop .65s cubic-bezier(.34,1.56,.64,1) forwards; }
+@keyframes lootPop {
+  0%   { transform: translateX(-50%) translateY(0) scale(0); opacity: 0; }
+  55%  { transform: translateX(-50%) translateY(-58px) scale(1.35); opacity: 1; }
+  100% { transform: translateX(-50%) translateY(-42px) scale(1); opacity: 1; }
 }
 
 .m1-slot-frame {
@@ -199,7 +241,7 @@ body { background: radial-gradient(ellipse at 30% 10%, #3a2410 0%, #1a1f3a 55%);
 
 <div class="m1-hero">
   <h1>Was kann überhaupt passieren?</h1>
-  <p>Stufe 1: 5 einfache Zufallsexperimente. Stufe 2: Wir kombinieren jedes Experiment mit sich selbst — und der Ergebnisraum wächst schneller, als man denkt.</p>
+  <p>Stufe 1: 5 einfache Zufallsexperimente. Stufe 2: jedes Experiment mit sich selbst kombiniert. Stufe 3: verschiedene Experimente miteinander kombiniert — der Ergebnisraum wächst schneller, als man denkt.</p>
 </div>
 
 <div class="m1-main" id="mainArea"></div>
@@ -234,7 +276,7 @@ function setDieFaceEl(id, value) {
 /* ── Basis-Experimente (Stufe 1) ── */
 const BASIS_EXPERIMENTE = [
   {
-    id: 'muenze', typ: 'muenze', titel: 'Münzwurf', ziehenLabel: '🪙 Münze werfen',
+    id: 'muenze', typ: 'muenze', titel: 'Münzwurf', kurz: 'Münze', ziehenLabel: '🪙 Münze werfen',
     beschreibung: 'Der Klassiker zum Einstieg — auch wenn heute kaum noch jemand wirklich eine Münze wirft, bleibt es das einfachste Beispiel für ein Zufallsexperiment.',
     ergebnisse: [
       { label: 'Kopf', symbol: '👑', gewicht: 1 },
@@ -242,12 +284,12 @@ const BASIS_EXPERIMENTE = [
     ],
   },
   {
-    id: 'wuerfel', typ: 'wuerfel', titel: 'Sechsseitiger Würfel', ziehenLabel: '🎲 Würfeln',
+    id: 'wuerfel', typ: 'wuerfel', titel: 'Sechsseitiger Würfel', kurz: 'Würfel', ziehenLabel: '🎲 Würfeln',
     beschreibung: 'Ein normaler Spielwürfel mit 6 Seiten.',
     ergebnisse: [1,2,3,4,5,6].map(n => ({ label: String(n), symbol: '⚀⚁⚂⚃⚄⚅'[n-1], gewicht: 1 })),
   },
   {
-    id: 'karte', typ: 'karte', titel: 'Kartenfarbe ziehen', ziehenLabel: '🃏 Karte ziehen',
+    id: 'karte', typ: 'karte', titel: 'Kartenfarbe ziehen', kurz: 'Karte', ziehenLabel: '🃏 Karte ziehen',
     beschreibung: 'Du ziehst eine Spielkarte aus einem gut gemischten Stapel und schaust nur auf die Farbe — Zahl oder Bild ignorierst du erstmal.',
     ergebnisse: [
       { label: 'Pik',   symbol: '♠', gewicht: 1, farbe: '#1a1f3a' },
@@ -257,15 +299,15 @@ const BASIS_EXPERIMENTE = [
     ],
   },
   {
-    id: 'lootbox', typ: 'lootbox', titel: 'Lootbox öffnen', ziehenLabel: '📦 Lootbox öffnen',
+    id: 'lootbox', typ: 'lootbox', titel: 'Lootbox öffnen', kurz: 'Lootbox', ziehenLabel: '📦 Lootbox öffnen',
     beschreibung: 'In vielen Videospielen kannst du "Lootboxen" öffnen — kleine Zufallspakete mit virtuellen Gegenständen in unterschiedlichen Seltenheitsstufen. Was drin ist, siehst du erst nach dem Öffnen.',
     ergebnisse: [
-      { label: 'Gewöhnlich',   symbol: '⚪', gewicht: 50, farbe: 'rgba(200,200,210,0.55)' },
-      { label: 'Ungewöhnlich', symbol: '🟢', gewicht: 25, farbe: 'rgba(34,197,94,0.55)' },
-      { label: 'Selten',       symbol: '🔵', gewicht: 15, farbe: 'rgba(59,130,246,0.55)' },
-      { label: 'Episch',       symbol: '🟣', gewicht: 6,  farbe: 'rgba(168,85,247,0.6)' },
-      { label: 'Legendär',     symbol: '🟠', gewicht: 3,  farbe: 'rgba(249,115,22,0.65)' },
-      { label: 'Mythisch',     symbol: '🔴', gewicht: 1,  farbe: 'rgba(255,107,157,0.75)' },
+      { label: 'Gewöhnlich',   symbol: '⚪', gewicht: 50, farbe: 'rgba(220,222,230,0.9)', kern: '#dcdee6' },
+      { label: 'Ungewöhnlich', symbol: '🟢', gewicht: 25, farbe: 'rgba(34,197,94,0.9)',   kern: '#22c55e' },
+      { label: 'Selten',       symbol: '🔵', gewicht: 15, farbe: 'rgba(59,130,246,0.9)',   kern: '#3b82f6' },
+      { label: 'Episch',       symbol: '🟣', gewicht: 6,  farbe: 'rgba(168,85,247,0.95)',  kern: '#a855f7' },
+      { label: 'Legendär',     symbol: '🟠', gewicht: 3,  farbe: 'rgba(249,115,22,1)',     kern: '#f97316' },
+      { label: 'Mythisch',     symbol: '🔴', gewicht: 1,  farbe: 'rgba(255,107,157,1)',    kern: '#ff6b9d' },
     ],
     kritisch: {
       titel: '🔍 Kritischer Blick: Lootboxen',
@@ -285,7 +327,7 @@ const BASIS_EXPERIMENTE = [
     }
   },
   {
-    id: 'slot', typ: 'slot', titel: 'Slotmaschine (1 Walze)', ziehenLabel: '🎰 Drehen',
+    id: 'slot', typ: 'slot', titel: 'Slotmaschine (1 Walze)', kurz: 'Slotmaschine', ziehenLabel: '🎰 Drehen',
     beschreibung: 'Eine Walze mit 6 Symbolen dreht sich. Bei mehreren Walzen gleichzeitig wird es schnell kombinatorisch spannend — dazu mehr in Modul 2!',
     ergebnisse: [
       { label: 'Kirsche', symbol: '🍒', gewicht: 35 },
@@ -314,29 +356,53 @@ const BASIS_EXPERIMENTE = [
 ];
 
 /* ── Stufe 2: jedes Experiment mit sich selbst kombiniert ── */
-function kombiniereErgebnisse(basisErgebnisse) {
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+function kombiniereErgebnisse(basisErgebnisseA, basisErgebnisseB) {
   const kombis = [];
-  basisErgebnisse.forEach(a => {
-    basisErgebnisse.forEach(b => {
+  basisErgebnisseA.forEach(a => {
+    basisErgebnisseB.forEach(b => {
       kombis.push({ label: `${a.label} + ${b.label}`, a, b, gewicht: a.gewicht * b.gewicht });
     });
   });
   return kombis;
 }
-function macheKombiniert(basis) {
+function macheKombiniert(basisA, basisB) {
+  const gleich = basisA.id === basisB.id;
   return {
-    id: basis.id + '_x2', typ: 'kombiniert', basisTyp: basis.typ,
-    titel: `2× ${basis.titel}`,
-    ziehenLabel: `${basis.ziehenLabel} (2×)`,
-    beschreibung: `Jetzt kombinieren wir: Du führst "${basis.titel}" zweimal hintereinander aus. Das Ergebnis ist die Kombination aus beiden Durchgängen.`,
-    basisErgebnisse: basis.ergebnisse,
-    ergebnisse: kombiniereErgebnisse(basis.ergebnisse),
+    id: basisA.id + '_x_' + basisB.id, typ: 'kombiniert',
+    basisTypA: basisA.typ, basisTypB: basisB.typ,
+    titel: gleich ? `2× ${basisA.titel}` : `${basisA.titel} + ${basisB.titel}`,
+    ziehenLabel: gleich ? `${basisA.ziehenLabel} (2×)` : `${basisA.ziehenLabel} + ${basisB.ziehenLabel}`,
+    beschreibung: gleich
+      ? `Jetzt kombinieren wir: Du führst "${basisA.titel}" zweimal hintereinander aus. Das Ergebnis ist die Kombination aus beiden Durchgängen.`
+      : `Jetzt kombinieren wir zwei verschiedene Experimente: "${basisA.titel}" und "${basisB.titel}". Das Ergebnis ist die Kombination aus beiden.`,
+    basisErgebnisseA: basisA.ergebnisse,
+    basisErgebnisseB: basisB.ergebnisse,
+    ergebnisse: kombiniereErgebnisse(basisA.ergebnisse, basisB.ergebnisse),
   };
 }
 
+/* Alle ungeordneten Paare unterschiedlicher Experimente, davon 5 zufällige für Stufe 3 */
+function alleUngeordnetenPaare(arr) {
+  const paare = [];
+  for (let i = 0; i < arr.length; i++)
+    for (let j = i + 1; j < arr.length; j++)
+      paare.push([arr[i], arr[j]]);
+  return paare;
+}
+const STUFE3_PAARE = shuffle(alleUngeordnetenPaare(BASIS_EXPERIMENTE)).slice(0, 5);
+
 const ALLE_RUNDEN = [
   ...BASIS_EXPERIMENTE.map(e => ({ ...e, stufe: 1 })),
-  ...BASIS_EXPERIMENTE.map(e => ({ ...macheKombiniert(e), stufe: 2 })),
+  ...BASIS_EXPERIMENTE.map(e => ({ ...macheKombiniert(e, e), stufe: 2 })),
+  ...STUFE3_PAARE.map(([a, b]) => ({ ...macheKombiniert(a, b), stufe: 3 })),
 ];
 
 const MIN_ZIEHUNGEN_VOR_SCHAETZUNG = 3;
@@ -387,9 +453,14 @@ function buehneTeilHTML(typ, suffix) {
   }
   if (typ === 'lootbox') {
     return `
-      <div class="m1-lootbox-wrap" id="m1LootWrap${suffix}">
-        <div class="m1-lootbox-glow" id="m1LootGlow${suffix}"></div>
-        <div class="m1-lootbox" id="m1LootIcon${suffix}">📦</div>
+      <div class="m1-loot-stage" id="m1LootStage${suffix}">
+        <div class="m1-loot-glow" id="m1LootGlow${suffix}"></div>
+        <div class="m1-loot-particles" id="m1LootParticles${suffix}"></div>
+        <div class="m1-loot-box" id="m1LootBox${suffix}">
+          <div class="m1-loot-lid" id="m1LootLid${suffix}"></div>
+          <div class="m1-loot-body"></div>
+          <div class="m1-loot-item" id="m1LootItem${suffix}"></div>
+        </div>
       </div>`;
   }
   if (typ === 'slot') {
@@ -402,13 +473,21 @@ function buehneTeilHTML(typ, suffix) {
   return '';
 }
 
+function kurzForTyp(typ) {
+  const basis = BASIS_EXPERIMENTE.find(e => e.typ === typ);
+  return basis ? basis.kurz : '';
+}
+
 function buehneHTML(exp) {
   if (exp.typ !== 'kombiniert') return buehneTeilHTML(exp.typ, '');
+  const gleich = exp.basisTypA === exp.basisTypB;
+  const labelA = gleich ? '1. Durchgang' : `1. Durchgang (${kurzForTyp(exp.basisTypA)})`;
+  const labelB = gleich ? '2. Durchgang' : `2. Durchgang (${kurzForTyp(exp.basisTypB)})`;
   return `
     <div class="m1-kombi-row">
-      <div>${buehneTeilHTML(exp.basisTyp, 'A')}<div class="m1-kombi-label">1. Durchgang</div></div>
+      <div>${buehneTeilHTML(exp.basisTypA, 'A')}<div class="m1-kombi-label">${labelA}</div></div>
       <span class="m1-kombi-plus">+</span>
-      <div>${buehneTeilHTML(exp.basisTyp, 'B')}<div class="m1-kombi-label">2. Durchgang</div></div>
+      <div>${buehneTeilHTML(exp.basisTypB, 'B')}<div class="m1-kombi-label">${labelB}</div></div>
     </div>`;
 }
 
@@ -432,7 +511,15 @@ function ruhezustandTeil(typ, suffix, teilErgebnis) {
     if (card) card.innerHTML = cardInnerHTML(teilErgebnis);
   } else if (typ === 'lootbox') {
     const glow = document.getElementById('m1LootGlow' + suffix);
+    const box = document.getElementById('m1LootBox' + suffix);
+    const item = document.getElementById('m1LootItem' + suffix);
     if (glow) { glow.style.setProperty('--glow', teilErgebnis.farbe); glow.classList.add('aktiv'); }
+    if (box) box.classList.add('offen');
+    if (item) {
+      item.textContent = teilErgebnis.symbol;
+      item.style.transform = 'translateX(-50%) translateY(-42px) scale(1)';
+      item.style.opacity = '1';
+    }
   } else if (typ === 'slot') {
     const sym = document.getElementById('m1SlotSymbol' + suffix);
     if (sym) sym.textContent = teilErgebnis.symbol;
@@ -443,8 +530,27 @@ function buehneAufRuhezustandSetzen(exp, letzterZug) {
   if (exp.typ !== 'kombiniert') {
     ruhezustandTeil(exp.typ, '', letzterZug);
   } else {
-    ruhezustandTeil(exp.basisTyp, 'A', letzterZug ? letzterZug.a : null);
-    ruhezustandTeil(exp.basisTyp, 'B', letzterZug ? letzterZug.b : null);
+    ruhezustandTeil(exp.basisTypA, 'A', letzterZug ? letzterZug.a : null);
+    ruhezustandTeil(exp.basisTypB, 'B', letzterZug ? letzterZug.b : null);
+  }
+}
+
+/* Erzeugt kleine, in zufällige Richtungen fliegende Funken-Partikel */
+function spawnLootPartikel(container, farbe) {
+  const anzahl = 12;
+  for (let i = 0; i < anzahl; i++) {
+    const p = document.createElement('div');
+    p.className = 'm1-loot-particle';
+    const winkel = (Math.PI * 2 * i) / anzahl + (Math.random() * 0.4 - 0.2);
+    const distanz = 45 + Math.random() * 35;
+    const dx = Math.cos(winkel) * distanz;
+    const dy = -Math.abs(Math.sin(winkel) * distanz) - 20;
+    p.style.setProperty('--dx', dx + 'px');
+    p.style.setProperty('--dy', dy + 'px');
+    p.style.setProperty('--pc', farbe);
+    container.appendChild(p);
+    requestAnimationFrame(() => p.classList.add('fly'));
+    setTimeout(() => p.remove(), 850);
   }
 }
 
@@ -478,15 +584,29 @@ function spieleAnimationTeil(typ, suffix, zielErgebnis, fertig) {
     }, 320);
 
   } else if (typ === 'lootbox') {
-    const wrap = document.getElementById('m1LootWrap' + suffix);
+    const box = document.getElementById('m1LootBox' + suffix);
     const glow = document.getElementById('m1LootGlow' + suffix);
-    wrap.classList.remove('shake'); void wrap.offsetWidth; wrap.classList.add('shake');
+    const item = document.getElementById('m1LootItem' + suffix);
+    const particlesEl = document.getElementById('m1LootParticles' + suffix);
+
+    box.classList.remove('offen', 'shake'); void box.offsetWidth; box.classList.add('shake');
+    item.classList.remove('pop'); item.style.opacity = '0'; item.style.transform = 'translateX(-50%) translateY(0) scale(0)';
+    particlesEl.innerHTML = '';
+
     setTimeout(() => {
-      wrap.classList.remove('shake');
+      box.classList.remove('shake');
+      box.classList.add('offen');
       glow.style.setProperty('--glow', zielErgebnis.farbe);
       glow.classList.add('aktiv');
-      fertig();
-    }, 500);
+      spawnLootPartikel(particlesEl, zielErgebnis.kern);
+    }, 450);
+
+    setTimeout(() => {
+      item.textContent = zielErgebnis.symbol;
+      item.classList.add('pop');
+    }, 650);
+
+    setTimeout(fertig, 1250);
 
   } else if (typ === 'slot') {
     const basis = BASIS_EXPERIMENTE.find(e => e.typ === 'slot');
@@ -512,8 +632,8 @@ function spieleAnimation(exp, fertig) {
   }
   let fertigCount = 0;
   const onTeilFertig = () => { fertigCount++; if (fertigCount === 2) fertig(ergebnis); };
-  spieleAnimationTeil(exp.basisTyp, 'A', ergebnis.a, onTeilFertig);
-  spieleAnimationTeil(exp.basisTyp, 'B', ergebnis.b, onTeilFertig);
+  spieleAnimationTeil(exp.basisTypA, 'A', ergebnis.a, onTeilFertig);
+  spieleAnimationTeil(exp.basisTypB, 'B', ergebnis.b, onTeilFertig);
 }
 
 function ziehenKlick() {
@@ -598,7 +718,7 @@ function render(letzteSchaetzungRichtig) {
     `;
   }
 
-  const stufenLabel = exp.stufe === 1 ? 'Stufe 1' : 'Stufe 2';
+  const stufenLabel = `Stufe ${exp.stufe}`;
   const nummerInStufe = (expIndex % BASIS_EXPERIMENTE.length) + 1;
 
   el.innerHTML = `
@@ -641,13 +761,17 @@ function render(letzteSchaetzungRichtig) {
 }
 
 function renderErgebnisraumGrid(exp, gesehenLabels) {
-  const basis = exp.basisErgebnisse;
-  let html = '<div class="m1-er-grid-achsen">Zeilen = <strong>1. Durchgang</strong> · Spalten = <strong>2. Durchgang</strong></div>';
+  const zeilen = exp.basisErgebnisseA;
+  const spalten = exp.basisErgebnisseB;
+  const gleich = exp.basisTypA === exp.basisTypB;
+  const labelZeilen = gleich ? '1. Durchgang' : `1. Durchgang (${kurzForTyp(exp.basisTypA)})`;
+  const labelSpalten = gleich ? '2. Durchgang' : `2. Durchgang (${kurzForTyp(exp.basisTypB)})`;
+  let html = `<div class="m1-er-grid-achsen">Zeilen = <strong>${labelZeilen}</strong> · Spalten = <strong>${labelSpalten}</strong></div>`;
   html += '<div class="m1-er-grid-wrap"><table class="m1-er-grid"><tr><th></th>' +
-    basis.map(b => `<th>${b.symbol}</th>`).join('') + '</tr>';
-  basis.forEach(rowA => {
+    spalten.map(b => `<th>${b.symbol}</th>`).join('') + '</tr>';
+  zeilen.forEach(rowA => {
     html += `<tr><th>${rowA.symbol}</th>`;
-    basis.forEach(colB => {
+    spalten.forEach(colB => {
       const label = `${rowA.label} + ${colB.label}`;
       const neu = !gesehenLabels.has(label);
       html += `<td class="${neu ? 'neu' : ''}" title="${label}"><div class="m1-grid-zelle"><span>${rowA.symbol}</span><span>${colB.symbol}</span></div></td>`;
@@ -672,16 +796,26 @@ function renderKritisch(k) {
 }
 
 function zeigeStufenwechsel() {
+  const neueStufe = ALLE_RUNDEN[expIndex].stufe;
+  const inhalt = neueStufe === 2 ? {
+    titel: 'Stufe 1 geschafft! Weiter mit Stufe 2',
+    text: `Jetzt kombinieren wir jedes Experiment <strong>mit sich selbst</strong>: Du ziehst z.&nbsp;B. zweimal hintereinander eine Münze,
+           und das Ergebnis ist die <em>Kombination</em> aus beiden Würfen (z.&nbsp;B. "Kopf + Zahl").
+           Schätze wieder: Wie viele verschiedene Kombinationen gibt es dann wohl?`,
+    button: "Los geht's mit Stufe 2 →"
+  } : {
+    titel: 'Stufe 2 geschafft! Weiter mit Stufe 3',
+    text: `Jetzt kombinieren wir <strong>verschiedene</strong> Experimente miteinander — z.&nbsp;B. eine Münze <em>und</em> einen Würfel
+           in einem Durchgang. Das Ergebnis ist wieder die Kombination aus beiden (z.&nbsp;B. "Kopf + 4").
+           5 von 10 möglichen Paarungen sind für dich ausgelost — schätze auch hier wieder die Größe des Ergebnisraums.`,
+    button: "Los geht's mit Stufe 3 →"
+  };
   document.getElementById('mainArea').innerHTML = `
     <div class="m1-karte m1-transition">
       <div class="m1-transition-emoji">🔗</div>
-      <div class="m1-transition-titel">Stufe 1 geschafft! Weiter mit Stufe 2</div>
-      <p class="m1-transition-text">
-        Jetzt kombinieren wir jedes Experiment <strong>mit sich selbst</strong>: Du ziehst z.&nbsp;B. zweimal hintereinander eine Münze,
-        und das Ergebnis ist die <em>Kombination</em> aus beiden Würfen (z.&nbsp;B. "Kopf + Zahl").
-        Schätze wieder: Wie viele verschiedene Kombinationen gibt es dann wohl?
-      </p>
-      <button class="btn btn-orange" onclick="starteExperiment()">Los geht's mit Stufe 2 →</button>
+      <div class="m1-transition-titel">${inhalt.titel}</div>
+      <p class="m1-transition-text">${inhalt.text}</p>
+      <button class="btn btn-orange" onclick="starteExperiment()">${inhalt.button}</button>
     </div>
   `;
 }
