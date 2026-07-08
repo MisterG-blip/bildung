@@ -148,7 +148,7 @@ body { background: radial-gradient(ellipse at 30% 10%, #3a2410 0%, #1a1f3a 55%);
 .m1-card-corner.tl { top: 8px; left: 10px; }
 .m1-card-corner.br { bottom: 8px; right: 10px; transform: rotate(180deg); }
 
-.m1-loot-stage { position: relative; width: 170px; height: 170px; perspective: 340px; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 14px; }
+.m1-loot-stage { position: relative; width: 190px; height: 190px; perspective: 340px; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 14px; }
 .m1-loot-glow {
   position: absolute; inset: -34px; border-radius: 50%;
   background: radial-gradient(circle, var(--glow, rgba(255,255,255,0.5)) 0%, transparent 68%);
@@ -169,27 +169,63 @@ body { background: radial-gradient(ellipse at 30% 10%, #3a2410 0%, #1a1f3a 55%);
   100% { opacity: 0; transform: translate(calc(-50% + var(--dx)), var(--dy)) scale(.3); }
 }
 
-.m1-loot-box { position: relative; width: 112px; height: 92px; transform-style: preserve-3d; }
-.m1-loot-body {
-  position: absolute; bottom: 0; left: 0; width: 100%; height: 64px;
+/* ── 3D-Kiste: Vorderseite (gerade) + Seiten-/Deckflächen (schräg verzerrt) ── */
+.m1-loot-box { position: relative; width: 118px; height: 100px; margin: 0 14px 0 0; perspective: 380px; }
+.m1-loot-body-wrap { position: absolute; bottom: 0; left: 14px; width: 90px; height: 62px; }
+.m1-loot-body-front {
+  position: absolute; inset: 0;
   background: linear-gradient(180deg,#c98a3e 0%, #8a5a22 100%);
-  border: 3px solid #4a2e0f; border-radius: 6px 6px 12px 12px;
-  box-shadow: inset 0 -10px 16px rgba(0,0,0,0.3), 0 8px 16px rgba(0,0,0,0.4);
-  z-index: 1;
+  border: 3px solid #4a2e0f; border-radius: 4px 4px 10px 10px;
+  box-shadow: inset 0 -10px 14px rgba(0,0,0,0.3);
+  z-index: 2;
 }
-.m1-loot-body::after {
-  content: ''; position: absolute; left: 0; right: 0; top: 46%; height: 11px;
+.m1-loot-body-front::after {
+  content: ''; position: absolute; left: -3px; right: -3px; top: 44%; height: 10px;
   background: linear-gradient(180deg,#ffe066,#c9a227); border-top: 1px solid rgba(0,0,0,0.2);
 }
-.m1-loot-lid {
-  position: absolute; top: 0; left: 0; width: 100%; height: 40px;
-  background: linear-gradient(180deg,#dba15a 0%, #a9702f 100%);
-  border: 3px solid #4a2e0f; border-radius: 8px 8px 3px 3px;
+.m1-loot-body-top {
+  position: absolute; left: 0; top: -12px; width: 90px; height: 16px;
+  background: linear-gradient(100deg,#e8b06a,#c98a3e);
+  border: 3px solid #4a2e0f; border-bottom: none;
+  transform: perspective(120px) rotateX(48deg); transform-origin: bottom;
+  z-index: 1;
+}
+.m1-loot-body-side {
+  position: absolute; right: -15px; top: 4px; width: 16px; height: 56px;
+  background: linear-gradient(90deg,#7a4d1e,#5a3810);
+  border: 3px solid #4a2e0f; border-left: none;
+  transform: perspective(120px) rotateY(48deg); transform-origin: left;
+  z-index: 1; border-radius: 0 4px 8px 0;
+}
+
+.m1-loot-lid-wrap {
+  position: absolute; top: 0; left: 14px; width: 90px; height: 40px;
   transform-origin: bottom center; transform: rotateX(0deg);
-  transition: transform .5s cubic-bezier(.34,1.56,.64,1);
+  transition: transform .55s cubic-bezier(.34,1.56,.64,1);
   z-index: 3;
 }
-.m1-loot-box.offen .m1-loot-lid { transform: rotateX(-125deg) translateY(-2px); }
+.m1-loot-box.offen .m1-loot-lid-wrap { transform: rotateX(-122deg) translateY(-2px); }
+.m1-loot-lid-front {
+  position: absolute; left: 0; bottom: 0; width: 100%; height: 30px;
+  background: linear-gradient(180deg,#dba15a 0%, #a9702f 100%);
+  border: 3px solid #4a2e0f; border-radius: 6px 6px 3px 3px;
+  z-index: 2;
+}
+.m1-loot-lid-top {
+  position: absolute; left: 0; top: 0; width: 100%; height: 14px;
+  background: linear-gradient(100deg,#f0c080,#dba15a);
+  border: 3px solid #4a2e0f; border-bottom: none; border-radius: 6px 6px 0 0;
+  transform: perspective(100px) rotateX(50deg); transform-origin: bottom;
+  z-index: 1;
+}
+.m1-loot-lid-side {
+  position: absolute; right: -15px; top: 8px; width: 16px; height: 24px;
+  background: linear-gradient(90deg,#a9702f,#7a4d1e);
+  border: 3px solid #4a2e0f; border-left: none; border-radius: 0 4px 4px 0;
+  transform: perspective(100px) rotateY(48deg); transform-origin: left;
+  z-index: 1;
+}
+
 .m1-loot-box.shake { animation: lootShake .45s ease; }
 @keyframes lootShake {
   0%,100% { transform: rotate(0deg); }
@@ -457,8 +493,16 @@ function buehneTeilHTML(typ, suffix) {
         <div class="m1-loot-glow" id="m1LootGlow${suffix}"></div>
         <div class="m1-loot-particles" id="m1LootParticles${suffix}"></div>
         <div class="m1-loot-box" id="m1LootBox${suffix}">
-          <div class="m1-loot-lid" id="m1LootLid${suffix}"></div>
-          <div class="m1-loot-body"></div>
+          <div class="m1-loot-body-wrap">
+            <div class="m1-loot-body-top"></div>
+            <div class="m1-loot-body-side"></div>
+            <div class="m1-loot-body-front"></div>
+          </div>
+          <div class="m1-loot-lid-wrap" id="m1LootLid${suffix}">
+            <div class="m1-loot-lid-top"></div>
+            <div class="m1-loot-lid-side"></div>
+            <div class="m1-loot-lid-front"></div>
+          </div>
           <div class="m1-loot-item" id="m1LootItem${suffix}"></div>
         </div>
       </div>`;
@@ -606,7 +650,7 @@ function spieleAnimationTeil(typ, suffix, zielErgebnis, fertig) {
       item.classList.add('pop');
     }, 650);
 
-    setTimeout(fertig, 1250);
+    setTimeout(fertig, 2100);
 
   } else if (typ === 'slot') {
     const basis = BASIS_EXPERIMENTE.find(e => e.typ === 'slot');
@@ -845,5 +889,6 @@ function starteSpiel() {
 
 starteSpiel();
 </script>
+<script src="../js/sidebar.js"></script>
 </body>
 </html>

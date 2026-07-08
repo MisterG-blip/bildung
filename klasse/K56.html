@@ -635,7 +635,7 @@ function zufaelligeKlassenbezeichnung() {
 
 /* ── Init ── */
 function neueKlasse() {
-  const n = 20 + Math.floor(Math.random() * 6); // 20-25
+  const n = 15 + Math.floor(Math.random() * 6); // 15-20
   klassenName  = zufaelligeKlassenbezeichnung();
   klasse       = KinderGen.generateKlasse(n, klassenName);
   strichDaten  = {};
@@ -962,5 +962,6 @@ neueKlasse();
   <footer>© 2026 MISTER G</footer>
 </nav>
 
+<script src="../js/sidebar.js"></script>
 </body>
 </html>
