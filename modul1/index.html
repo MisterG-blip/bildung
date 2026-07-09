@@ -525,8 +525,8 @@ function kurzForTyp(typ) {
 function buehneHTML(exp) {
   if (exp.typ !== 'kombiniert') return buehneTeilHTML(exp.typ, '');
   const gleich = exp.basisTypA === exp.basisTypB;
-  const labelA = gleich ? '1. Durchgang' : `1. Durchgang (${kurzForTyp(exp.basisTypA)})`;
-  const labelB = gleich ? '2. Durchgang' : `2. Durchgang (${kurzForTyp(exp.basisTypB)})`;
+  const labelA = gleich ? '1. Ergebnis' : `1. Ergebnis (${kurzForTyp(exp.basisTypA)})`;
+  const labelB = gleich ? '2. Ergebnis' : `2. Ergebnis (${kurzForTyp(exp.basisTypB)})`;
   return `
     <div class="m1-kombi-row">
       <div>${buehneTeilHTML(exp.basisTypA, 'A')}<div class="m1-kombi-label">${labelA}</div></div>
@@ -808,8 +808,8 @@ function renderErgebnisraumGrid(exp, gesehenLabels) {
   const zeilen = exp.basisErgebnisseA;
   const spalten = exp.basisErgebnisseB;
   const gleich = exp.basisTypA === exp.basisTypB;
-  const labelZeilen = gleich ? '1. Durchgang' : `1. Durchgang (${kurzForTyp(exp.basisTypA)})`;
-  const labelSpalten = gleich ? '2. Durchgang' : `2. Durchgang (${kurzForTyp(exp.basisTypB)})`;
+  const labelZeilen = gleich ? '1. Ergebnis' : `1. Ergebnis (${kurzForTyp(exp.basisTypA)})`;
+  const labelSpalten = gleich ? '2. Ergebnis' : `2. Ergebnis (${kurzForTyp(exp.basisTypB)})`;
   let html = `<div class="m1-er-grid-achsen">Zeilen = <strong>${labelZeilen}</strong> · Spalten = <strong>${labelSpalten}</strong></div>`;
   html += '<div class="m1-er-grid-wrap"><table class="m1-er-grid"><tr><th></th>' +
     spalten.map(b => `<th>${b.symbol}</th>`).join('') + '</tr>';
