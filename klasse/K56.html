@@ -155,6 +155,36 @@ body { font-size: 18px; background: radial-gradient(ellipse at 30% 10%, #2a1a30 
 }
 .kind-avatar-wrap svg { width: 100%; height: 100%; }
 
+/* ── Dezente Idle-Animationen der Kinder-Avatare ──
+   Sehr kleine Amplituden, individuell verzögert (siehe avatars.js),
+   damit die Klasse nicht "synchron" wirkt und der Fokus auf dem
+   Inhalt bleibt statt auf den Figuren. */
+@keyframes avBob   { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-1.5px); } }
+@keyframes avBlink { 0%, 90%, 100% { transform: scaleY(1); } 94% { transform: scaleY(0.12); } 97% { transform: scaleY(1); } }
+@keyframes avWave  { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(-14deg); } }
+/* Gähnen: normaler Mund blendet kurz zum offenen Mund über und wieder zurück,
+   statt die Lächel-Form zu verzerren (wirkte wie ein "Loch"). */
+@keyframes avMouthNormalFade { 0%, 88%, 100% { opacity: 1; } 92%, 96% { opacity: 0; } }
+@keyframes avMouthYawnFade   { 0%, 88%, 100% { opacity: 0; } 92%, 96% { opacity: 1; } }
+
+.av-figure       { animation: avBob 4.5s ease-in-out infinite; }
+.av-eyes         { animation: avBlink 5s ease-in-out infinite; }
+.av-arm-right    { animation: avWave 6s ease-in-out infinite; }
+.av-mouth-normal { animation: avMouthNormalFade 16s ease-in-out infinite; }
+.av-mouth-yawn   { animation: avMouthYawnFade 16s ease-in-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .av-figure, .av-eyes, .av-arm-right, .av-mouth-normal, .av-mouth-yawn { animation: none !important; }
+}
+
+/* Klitzekleine Reaktion beim Anklicken eines Kindes — im Klassenraster */
+@keyframes kindPop { 0% { transform: scale(1) rotate(0); } 45% { transform: scale(1.1) rotate(-4deg); } 100% { transform: scale(1) rotate(0); } }
+.kind-card.kind-reagiert .kind-avatar-wrap { animation: kindPop .45s ease; }
+
+/* Dieselbe Reaktion beim Öffnen des Profil-Popups — DAS ist im Fenster sichtbar */
+@keyframes kindModalPop { 0% { transform: scale(0.8) rotate(-6deg); opacity: 0; } 60% { transform: scale(1.08) rotate(2deg); opacity: 1; } 100% { transform: scale(1) rotate(0); opacity: 1; } }
+.kind-modal-avatar { animation: kindModalPop .4s ease-out; }
+
 .kind-name {
   font-size: .7rem; font-weight: 800;
   color: var(--text);
@@ -698,6 +728,11 @@ function merkmalWaehlen(id) {
    Just opens the profile. Tallying happens via an explicit button inside the modal,
    so the child has to actively decide and record the data point themselves. */
 function kindAnklicken(id) {
+  const card = document.getElementById('kcard-' + id);
+  if (card) {
+    card.classList.add('kind-reagiert');
+    setTimeout(() => card.classList.remove('kind-reagiert'), 450);
+  }
   zeigeKindProfil(id);
 }
 

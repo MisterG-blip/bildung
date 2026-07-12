@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Modul 2: Baumdiagramme — MaLa - Das Mathematik Labor</title>
+<link rel="stylesheet" href="../styles/base.css">
+<link rel="stylesheet" href="../styles/spielecke.css">
+<style>
+body { background: radial-gradient(ellipse at 30% 10%, #3a2410 0%, #1a1f3a 55%); }
+
+.m2-header {
+  background: linear-gradient(135deg, #1a1f3a 0%, #4a2e1a 100%);
+  border-bottom: 3px solid rgba(255,107,53,0.35);
+  padding: 1rem 1.5rem;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: .75rem;
+  position: sticky; top: 0; z-index: 50;
+}
+.m2-logo { font-size: 1.2rem; color: var(--orange); letter-spacing: .05em; }
+.m2-logo span { color: var(--muted); font-size: .82rem; font-family: 'Nunito', sans-serif; font-weight: 600; margin-left: .4rem; }
+
+.m2-hero { text-align: center; padding: 2rem 1.5rem 1rem; max-width: 700px; margin: 0 auto; }
+.m2-hero h1 { font-size: clamp(1.6rem,4.5vw,2.4rem); color: var(--orange); margin-bottom: .5rem; }
+.m2-hero p  { font-size: .9rem; color: var(--muted); line-height: 1.7; }
+
+.m2-main { max-width: 880px; margin: 0 auto; padding: 0 1.2rem 4rem; }
+
+/* ── Fortschritt: zweistufig, damit es eindeutig ist ── */
+.m2-fortschritt {
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: .6rem;
+  margin-bottom: 1.2rem; padding: .7rem 1rem;
+  background: var(--card-bg); border-radius: 14px; border: 2px solid rgba(255,255,255,0.08);
+  font-size: .82rem;
+}
+.m2-teil-badge {
+  background: rgba(255,107,53,0.15); color: var(--orange); font-weight: 800;
+  border-radius: 20px; padding: .25rem .7rem; margin-right: .6rem; font-size: .74rem;
+}
+.m2-runde-info { color: var(--muted); }
+
+.m2-karte {
+  background: var(--card-bg); border-radius: 22px; border: 3px solid rgba(255,107,53,0.25);
+  padding: 1.6rem 1.6rem 1.8rem;
+}
+.m2-titel { font-family:'Fredoka One',cursive; font-size: 1.25rem; color: var(--text); margin-bottom: .4rem; }
+.m2-beschreibung { font-size: .85rem; color: var(--muted); line-height: 1.65; margin-bottom: 1.3rem; }
+
+/* ── Zieh-Bühne ── */
+.m2-buehne-row { display: flex; gap: 1.4rem; justify-content: center; flex-wrap: wrap; margin-bottom: 1rem; }
+.m2-buehne-teil { text-align: center; }
+.m2-buehne-label { font-size: .68rem; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin-bottom: .4rem; }
+.m2-ziehen-row { text-align: center; margin-bottom: 1.6rem; }
+.m2-ziehen-btn { font-size: 1rem; padding: .7rem 1.8rem; }
+.m2-letzter-pfad { font-size: .8rem; color: var(--mint); font-weight: 700; margin-top: .5rem; min-height: 1.2em; }
+
+/* ── Baumdiagramm ── */
+.m2-baum-legende { text-align: center; font-size: .8rem; color: var(--muted); font-style: italic; margin-bottom: .3rem; }
+.m2-baum-scroll { overflow-x: auto; padding: 1rem .5rem 1.5rem; margin-bottom: .5rem; text-align: center; }
+@keyframes m2NodePulse { 0% { transform: scale(0.6); opacity: 0; } 60% { transform: scale(1.18); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
+.m2-node-neu { transform-box: fill-box; transform-origin: center; animation: m2NodePulse .5s ease; }
+.m2-baum-root-row { display: flex; align-items: center; gap: 1rem; }
+@keyframes m2Pop { 0% { transform: scale(0.7); } 55% { transform: scale(1.12); } 100% { transform: scale(1); } }
+
+/* ── Werkstatt (Teil 2): 16:9-Board mit seitlichem Materialkasten, damit es
+   1:1 auf einem Smartboard/Beamer passt, ohne dass gescrollt werden muss. ── */
+.m2-board {
+  width: 100%; aspect-ratio: 16 / 9; margin: 0 auto 1rem;
+  display: flex; background: rgba(0,0,0,0.15); border-radius: 16px;
+  border: 2px solid rgba(255,255,255,0.1); overflow: hidden;
+}
+.m2-board-tree {
+  flex: 1; display: flex; align-items: center; justify-content: center;
+  padding: 1rem; overflow: auto; min-width: 0;
+}
+.m2-board-material {
+  width: 230px; flex-shrink: 0; border-left: 2px dashed rgba(255,255,255,0.15);
+  padding: .9rem; overflow-y: auto; display: flex; flex-direction: column; gap: 1rem;
+  background: rgba(255,255,255,0.02);
+}
+.m2-material-titel { font-size: .78rem; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; margin-bottom: .5rem; }
+.m2-material-kacheln { display: flex; flex-wrap: wrap; gap: .5rem; }
+.m2-material-tile {
+  background: var(--surface2); border: 2px solid rgba(255,255,255,0.15); border-radius: 10px;
+  padding: .45rem .8rem; font-size: .85rem; font-weight: 700; cursor: grab; user-select: none;
+  transition: all .15s;
+}
+.m2-material-tile:active { cursor: grabbing; }
+.m2-material-tile:hover { border-color: var(--yellow); transform: translateY(-2px); }
+.m2-material-tile.ausgewaehlt { border-color: var(--mint); background: rgba(78,205,196,0.15); box-shadow: 0 0 0 2px rgba(78,205,196,0.35); }
+.m2-material-bruch { padding: .3rem .7rem; }
+
+.m2-pruef-row { display: flex; align-items: center; gap: .8rem; flex-wrap: wrap; margin-top: .3rem; }
+.m2-pruef-info { font-size: .82rem; color: var(--muted); font-weight: 700; }
+.m2-pruef-info.richtig { color: var(--mint); }
+
+.m2-bruch { display: inline-flex; flex-direction: column; align-items: center; line-height: 1; vertical-align: middle; margin: 0 .15em; }
+.m2-bruch .z { border-bottom: 1.4px solid currentColor; padding: 0 .3em .05em; }
+.m2-bruch .n { padding: .05em .3em 0; }
+
+@media (max-width: 700px) {
+  .m2-board { aspect-ratio: auto; flex-direction: column; }
+  .m2-board-material { width: auto; border-left: none; border-top: 2px dashed rgba(255,255,255,0.15); }
+}
+
+/* ── Sammel-Info während Teil 1 ── */
+.m2-info-row { text-align: center; font-size: .8rem; color: var(--muted); margin-bottom: .8rem; }
+.m2-weiter-row { text-align: center; margin-top: 1.4rem; }
+
+/* ── Übergang / Ende ── */
+.m2-transition, .m2-ende { text-align: center; padding: 2.5rem 1.5rem; }
+.m2-transition-emoji, .m2-ende-emoji { font-size: 3rem; margin-bottom: .8rem; }
+.m2-transition-titel, .m2-ende-titel { font-family:'Fredoka One',cursive; font-size: 1.4rem; color: var(--orange); margin-bottom: .8rem; }
+.m2-transition-text { font-size: .88rem; color: var(--muted); line-height: 1.7; max-width: 520px; margin: 0 auto 1.5rem; }
+.m2-ende-merksatz { font-size: .85rem; color: var(--muted); line-height: 1.7; max-width: 540px; margin: 1rem auto 1.6rem; font-style: italic; }
+</style>
+</head>
+<body>
+
+<header class="m2-header">
+  <div class="m2-logo">🌳 Modul 2: Baumdiagramme<span>/ Jahrgang 7 &amp; 8</span></div>
+  <button class="btn btn-ghost" onclick="location.href='../jahrgang/Jg78.html'">← Jahrgang 7 &amp; 8</button>
+</header>
+
+<div class="m2-hero">
+  <h1>Vom Zufall zur übersichtlichen Struktur</h1>
+  <p>Ein Baumdiagramm zeigt <strong>alle</strong> möglichen Pfade eines Zufallsexperiments auf einen Blick — und wie sich Wahrscheinlichkeiten entlang eines Pfades multiplizieren.</p>
+</div>
+
+<div class="m2-main" id="mainArea"></div>
+
+<script>
+/* ── Experimente ── */
+const MUENZE = { typ: 'muenze', titel: 'Münze', ergebnisse: [
+  { label: 'Kopf', symbol: '👑' }, { label: 'Zahl', symbol: '2️⃣' }
+]};
+const WUERFEL = { typ: 'wuerfel', titel: 'Würfel', ergebnisse: [1,2,3,4,5,6].map(n => ({ label: String(n), symbol: '⚀⚁⚂⚃⚄⚅'[n-1] })) };
+const KARTE = { typ: 'karte', titel: 'Kartenfarbe', ergebnisse: [
+  { label: 'Pik', symbol: '♠', farbe: '#c9c9e0' }, { label: 'Herz', symbol: '♥', farbe: '#ff6b6b' },
+  { label: 'Karo', symbol: '♦', farbe: '#ff6b6b' }, { label: 'Kreuz', symbol: '♣', farbe: '#c9c9e0' }
+]};
+
+/* ── Teil 1: Kennenlernen (automatisch mitwachsend) ── */
+const TEIL1_RUNDEN = [
+  { key: 'm1', titel: 'Münzwurf — einstufig', stufen: [MUENZE], minZuege: 3, ziehenLabel: '🪙 Münze werfen',
+    text: 'Wirf ein paarmal die Münze. Sobald du ein Ergebnis zum ersten Mal ziehst, wächst der passende Ast im Baumdiagramm.' },
+  { key: 'w1', titel: 'Würfel — einstufig', stufen: [WUERFEL], minZuege: 5, ziehenLabel: '🎲 Würfeln',
+    text: 'Diesmal gibt es 6 statt 2 mögliche Äste — der Baum wird schon deutlich breiter.' },
+  { key: 'm2', titel: 'Münzwurf — zweistufig', stufen: [MUENZE, MUENZE], minZuege: 5, ziehenLabel: '🪙 Zweimal werfen',
+    text: 'Jetzt wirfst du zweimal hintereinander. An jedem Ast der 1. Stufe wachsen eigene Äste für die 2. Stufe — und an jedem Pfadende steht die Pfadwahrscheinlichkeit (1. Stufe × 2. Stufe).' },
+  { key: 'w2', titel: 'Würfel — zweistufig', stufen: [WUERFEL, WUERFEL], minZuege: 6, kollabiert: true, ziehenLabel: '🎲 Zweimal würfeln',
+    text: '6 × 6 = 36 mögliche Pfade! Damit es übersichtlich bleibt, fassen wir die 2. Stufe erstmal zusammen — du kannst sie dir aber komplett aufklappen, wenn du willst.' },
+];
+
+/* ── Teil 2: Selbst bauen (Werkstatt) ── */
+const TEIL2_RUNDEN = [
+  { key: 'k1', titel: 'Kartenfarbe ziehen — einstufig', stufen: [KARTE],
+    text: 'Du ziehst eine Karte und schaust nur auf die Farbe. Baue den Baum selbst: Ziehe jede Kachel auf einen freien Ast — welche Kachel auf welchen Ast kommt, ist egal, Hauptsache jede taucht genau einmal auf. Danach trägst du pro Ast die Wahrscheinlichkeit ein.' },
+  { key: 'k2', titel: 'Kartenfarbe, dann Münze — zweistufig', stufen: [KARTE, MUENZE],
+    text: 'Jetzt kommt eine 2. Stufe dazu: nach der Karte wirfst du eine Münze. Die 1. Stufe kennst du schon von eben — ergänze jetzt an jedem Ast die 2. Stufe per Kachel. Trag zusätzlich die Pfadwahrscheinlichkeit ein (Stufe 1 × Stufe 2).' },
+];
+
+let teil = 1;
+let rIndex1 = 0, rIndex2 = 0;
+let t1 = null; // Zustand aktuelle Teil-1-Runde
+let t2 = null; // Zustand aktuelle Teil-2-Runde
+
+/* ═══════ Hilfsfunktionen ═══════ */
+function bruchGleich(a1, a2, b1, b2) { return b1 !== 0 && b2 !== 0 && a1 * b2 === a2 * b1; }
+function zufaelligesErgebnis(ergebnisse) { return ergebnisse[Math.floor(Math.random() * ergebnisse.length)]; }
+function shuffle(arr) { const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+
+const DOT_PATTERNS = {
+  1: [4], 2: [0,8], 3: [0,4,8], 4: [0,2,6,8], 5: [0,2,4,6,8], 6: [0,2,3,5,6,8]
+};
+function buildDieDotsHTML(wert) {
+  const aktiv = new Set(DOT_PATTERNS[wert] || []);
+  let html = '';
+  for (let i = 0; i < 9; i++) html += `<span class="die-dot ${aktiv.has(i) ? 'on' : ''}"></span>`;
+  return html;
+}
+function setDieFaceEl(id, wert) {
+  const el = document.getElementById(id);
+  if (el) el.innerHTML = buildDieDotsHTML(wert);
+}
+
+/* ═══════ Zieh-Animationen (Münze/Würfel), Teil 1 ═══════ */
+function buehneTeilHTML(stufe, suffix, label) {
+  if (stufe.typ === 'muenze') {
+    return `
+      <div class="m2-buehne-teil">
+        <div class="m2-buehne-label">${label}</div>
+        <div class="coin" style="width:70px;height:70px;">
+          <div class="coin-inner" id="m2Coin${suffix}">
+            <div class="coin-face kopf" style="font-size:1.6rem;">👑</div>
+            <div class="coin-face zahl" style="font-size:1.6rem;">2️⃣</div>
+          </div>
+        </div>
+      </div>`;
+  }
+  if (stufe.typ === 'wuerfel') {
+    return `
+      <div class="m2-buehne-teil">
+        <div class="m2-buehne-label">${label}</div>
+        <div class="die" id="m2Die${suffix}" style="width:70px;height:70px;">${buildDieDotsHTML(1)}</div>
+      </div>`;
+  }
+  return '';
+}
+
+function spieleStufenAnimation(stufe, suffix, ziel, fertig) {
+  if (stufe.typ === 'muenze') {
+    const inner = document.getElementById('m2Coin' + suffix);
+    inner.classList.remove('flipping'); void inner.offsetWidth; inner.classList.add('flipping');
+    const extraSpins = ziel.label === 'Kopf' ? 1800 : 1980;
+    inner.style.transform = `rotateY(${extraSpins}deg)`;
+    setTimeout(() => { inner.classList.remove('flipping'); fertig(); }, 1200);
+  } else if (stufe.typ === 'wuerfel') {
+    const die = document.getElementById('m2Die' + suffix);
+    die.classList.remove('rolling'); void die.offsetWidth; die.classList.add('rolling');
+    const iv = setInterval(() => setDieFaceEl('m2Die' + suffix, 1 + Math.floor(Math.random() * 6)), 70);
+    setTimeout(() => {
+      clearInterval(iv); die.classList.remove('rolling');
+      setDieFaceEl('m2Die' + suffix, Number(ziel.label));
+      fertig();
+    }, 600);
+  }
+}
+
+function ruhezustandSetzen(runde, ergebnisse) {
+  runde.stufen.forEach((stufe, i) => {
+    const erg = ergebnisse && ergebnisse[i];
+    if (stufe.typ === 'muenze') {
+      const inner = document.getElementById('m2Coin' + i);
+      if (inner) inner.style.transform = erg ? (erg.label === 'Kopf' ? 'rotateY(0deg)' : 'rotateY(180deg)') : 'rotateY(0deg)';
+    } else if (stufe.typ === 'wuerfel') {
+      setDieFaceEl('m2Die' + i, erg ? Number(erg.label) : 1);
+    }
+  });
+}
+
+function ziehenKlickT1() {
+  if (t1.amZiehen) return;
+  t1.amZiehen = true;
+  const runde = TEIL1_RUNDEN[rIndex1];
+  const ergebnisse = [];
+  function stufe(i) {
+    const s = runde.stufen[i];
+    const ziel = zufaelligesErgebnis(s.ergebnisse);
+    spieleStufenAnimation(s, String(i), ziel, () => {
+      ergebnisse.push(ziel);
+      if (i + 1 < runde.stufen.length) stufe(i + 1);
+      else fertigZugT1(ergebnisse);
+    });
+  }
+  stufe(0);
+}
+
+function fertigZugT1(ergebnisse) {
+  t1.gezogen++;
+  let prefix = '';
+  ergebnisse.forEach(e => { prefix = prefix ? prefix + '|' + e.label : e.label; t1.gesehen.add(prefix); });
+  t1.letzteErgebnisse = ergebnisse;
+  t1.letzterPfad = ergebnisse.map(e => e.symbol + ' ' + e.label).join('  →  ');
+  t1.amZiehen = false;
+  renderTeil1();
+}
+
+/* Kurzform für die Kreis-Beschriftung (wie im klassischen Baumdiagramm: ein Buchstabe/Zeichen pro Knoten) */
+function kurzLabel(e) {
+  if (e.label === 'Kopf') return 'K';
+  if (e.label === 'Zahl') return 'Z';
+  return e.label; // Würfel: '1'..'6', Karte: Symbol ist schon kurz
+}
+
+const SVG_FARBEN = { text: '#F0F0FF', muted: '#8890BB', gelb: '#FFD93D', orange: '#FF6B35', mint: '#4ECDC4', dunkel: '#1a1f3a' };
+
+function svgLinie(x1, y1, x2, y2, sichtbar) {
+  const stroke = sichtbar ? SVG_FARBEN.orange : 'rgba(255,255,255,0.15)';
+  const dash = sichtbar ? '' : 'stroke-dasharray="4 4"';
+  return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${stroke}" stroke-width="2.5" ${dash}/>`;
+}
+/* Echter, übereinander stehender Bruch (Zähler / Strich / Nenner) statt "1/2" als Fließtext */
+function svgBruch(x, y, zaehler, nenner, farbe, groesse) {
+  const fs = groesse || 12.5;
+  const breite = Math.max(String(zaehler).length, String(nenner).length) * fs * 0.62 + 4;
+  return `<g font-family="Nunito, sans-serif" font-weight="800" font-size="${fs}" text-anchor="middle" fill="${farbe}">
+    <text x="${x}" y="${y - 2.5}">${zaehler}</text>
+    <line x1="${x - breite/2}" y1="${y + 3}" x2="${x + breite/2}" y2="${y + 3}" stroke="${farbe}" stroke-width="1.4"/>
+    <text x="${x}" y="${y + 16}">${nenner}</text>
+  </g>`;
+}
+function svgKanteBruch(x1, y1, x2, y2, zaehler, nenner, sichtbar) {
+  const mx = (x1 + x2) / 2, my = (y1 + y2) / 2;
+  // Bruch leicht senkrecht zur Linie versetzt, damit er nicht auf der Linie sitzt
+  const dx = x2 - x1, dy = y2 - y1, len = Math.hypot(dx, dy) || 1;
+  const nx = -dy / len, ny = dx / len;
+  const off = 15;
+  const lx = mx + nx * off, ly = my + ny * off;
+  const farbe = sichtbar ? SVG_FARBEN.orange : 'rgba(255,255,255,0.35)';
+  return svgBruch(lx, ly, zaehler, nenner, farbe);
+}
+function svgKnoten(x, y, r, label, sichtbar, neu) {
+  const fill = sichtbar ? SVG_FARBEN.gelb : 'rgba(255,255,255,0.06)';
+  const stroke = sichtbar ? SVG_FARBEN.dunkel : 'rgba(255,255,255,0.25)';
+  const dash = sichtbar ? '' : 'stroke-dasharray="3 3"';
+  const textFarbe = sichtbar ? SVG_FARBEN.dunkel : 'rgba(255,255,255,0.4)';
+  const fontSize = r >= 16 ? 14 : 11;
+  const cls = neu ? ' class="m2-node-neu"' : '';
+  return `<g${cls}>
+    <circle cx="${x}" cy="${y}" r="${r}" fill="${fill}" stroke="${stroke}" stroke-width="2" ${dash}/>
+    <text x="${x}" y="${y + fontSize * 0.36}" fill="${textFarbe}" font-size="${fontSize}" font-weight="800" text-anchor="middle" font-family="Nunito, sans-serif">${sichtbar ? label : '?'}</text>
+  </g>`;
+}
+function svgBlattText(x, y, text) {
+  return `<text x="${x}" y="${y + 4.5}" fill="${SVG_FARBEN.text}" font-size="13" font-weight="700" font-family="Nunito, sans-serif">${text}</text>`;
+}
+/* Blatt-Beschriftung mit angehängtem echten Bruch (z.B. "K·K" gefolgt von einem Bruch 1/4) */
+function svgBlattMitBruch(x, y, kurzText, zaehler, nenner) {
+  const textEl = `<text x="${x}" y="${y + 4.5}" fill="${SVG_FARBEN.text}" font-size="13" font-weight="700" font-family="Nunito, sans-serif">${kurzText}</text>`;
+  const bruchX = x + kurzText.length * 7.2 + 22;
+  return textEl + svgBruch(bruchX, y, zaehler, nenner, SVG_FARBEN.mint, 12.5);
+}
+function svgHinweisText(x, y, text) {
+  return `<text x="${x}" y="${y + 4}" fill="${SVG_FARBEN.muted}" font-size="11.5" font-style="italic" font-family="Nunito, sans-serif">${text}</text>`;
+}
+function svgStartPunkt(x, y) {
+  return `<circle cx="${x}" cy="${y}" r="4.5" fill="${SVG_FARBEN.text}"/><text x="${x-14}" y="${y+4.5}" fill="${SVG_FARBEN.text}" font-size="13" font-weight="700" text-anchor="end" font-family="Nunito, sans-serif">Start</text>`;
+}
+/* "Fächer": zeigt die 2. Stufe kompakt als dünne Strahlen statt großer Kreise —
+   ABER jeder bereits gezogene Strahl bekommt die tatsächliche Augenzahl als Beschriftung,
+   damit erkennbar bleibt, welches Ergebnis vorliegt. Nur noch nicht gezogene bleiben leer/gestrichelt. */
+function svgFaecher(x1, y1, xEnde, ergebnisse, gesehenPruefer) {
+  const n = ergebnisse.length;
+  const spread = Math.min(n * 9, 54);
+  let inhalt = '';
+  ergebnisse.forEach((e, i) => {
+    const t = n === 1 ? 0 : (i / (n - 1) - 0.5);
+    const yEnde = y1 + t * spread;
+    const istSichtbar = gesehenPruefer(e);
+    const farbe = istSichtbar ? SVG_FARBEN.orange : 'rgba(255,255,255,0.18)';
+    const dash = istSichtbar ? '' : 'stroke-dasharray="2 3"';
+    inhalt += `<line x1="${x1}" y1="${y1}" x2="${xEnde}" y2="${yEnde}" stroke="${farbe}" stroke-width="1.6" ${dash}/>`;
+    if (istSichtbar) {
+      inhalt += `<circle cx="${xEnde}" cy="${yEnde}" r="8" fill="${SVG_FARBEN.gelb}" stroke="${SVG_FARBEN.dunkel}" stroke-width="1.4"/>`;
+      inhalt += `<text x="${xEnde}" y="${yEnde + 3}" fill="${SVG_FARBEN.dunkel}" font-size="9" font-weight="800" text-anchor="middle" font-family="Nunito, sans-serif">${kurzLabel(e)}</text>`;
+    }
+  });
+  return inhalt;
+}
+
+/* Baut das komplette Baumdiagramm für Teil 1 als ein SVG (Kreis-Knoten, diagonale Kanten,
+   echter Bruch an jeder Kante, Pfad-Kürzel + Bruch am Blatt) — Struktur immer sichtbar,
+   unbekannte Äste erscheinen gestrichelt/grau mit "?" bis sie zum ersten Mal gezogen wurden. */
+function baumSVGTeil1(runde, t1) {
+  const stufen = runde.stufen;
+  const zweistufig = stufen.length > 1;
+  const kollabiert = !!runde.kollabiert;
+  const zeigeStufe2 = !zweistufig || !kollabiert || t1.alleAnzeigen;
+  const n1 = stufen[0].ergebnisse.length;
+  const n2 = zweistufig ? stufen[1].ergebnisse.length : 0;
+  const vieleBlaetter = zweistufig && zeigeStufe2 && n1 * n2 > 16;
+  const r = vieleBlaetter ? 11 : 20;
+  const kollabierteAnsicht = zweistufig && !zeigeStufe2;
+  const rowH = kollabierteAnsicht ? 74 : Math.max(r * 2.5, 30);
+
+  const xStart = 46;
+  const xS1 = 210;
+  const xS2 = 400;
+  const xFaecherEnde = xS1 + r + 60;
+  const xLabel = (zweistufig && zeigeStufe2) ? xS2 + r + 20 : (zweistufig ? xFaecherEnde + 14 : xS1 + r + 16);
+  const svgWidth = xLabel + (zweistufig && zeigeStufe2 ? 60 : (zweistufig ? 120 : 40));
+
+  let kanten = [], knoten = [], labels = [];
+  let svgHeight;
+
+  if (!zweistufig) {
+    svgHeight = n1 * rowH + 16;
+    const yStart = svgHeight / 2;
+    stufen[0].ergebnisse.forEach((e, i) => {
+      const y = 8 + i * rowH + rowH / 2;
+      const pfad = e.label;
+      const sichtbar = t1.phase === 'fertig' || t1.gesehen.has(pfad);
+      const neu = t1.phase === 'fertig' && !t1.gesehen.has(pfad);
+      kanten.push(svgLinie(xStart, yStart, xS1, y, sichtbar));
+      kanten.push(svgKanteBruch(xStart, yStart, xS1, y, 1, n1, sichtbar));
+      knoten.push(svgKnoten(xS1, y, r, kurzLabel(e), sichtbar, neu));
+      if (sichtbar) labels.push(svgBlattText(xLabel, y, e.label));
+    });
+  } else if (!zeigeStufe2) {
+    svgHeight = n1 * rowH + 16;
+    const yStart = svgHeight / 2;
+    stufen[0].ergebnisse.forEach((e, i) => {
+      const y = 8 + i * rowH + rowH / 2;
+      const pfad = e.label;
+      const sichtbar = t1.phase === 'fertig' || t1.gesehen.has(pfad);
+      const neu = t1.phase === 'fertig' && !t1.gesehen.has(pfad);
+      kanten.push(svgLinie(xStart, yStart, xS1, y, sichtbar));
+      kanten.push(svgKanteBruch(xStart, yStart, xS1, y, 1, n1, sichtbar));
+      knoten.push(svgKnoten(xS1, y, r, kurzLabel(e), sichtbar, neu));
+      if (sichtbar) {
+        // Fächer statt einzeln gezeichneter Kreise: kompakt, aber jede gezogene Augenzahl
+        // wird trotzdem als kleine Zahl an ihrem Strahl angezeigt.
+        kanten.push(svgFaecher(xS1 + r, y, xFaecherEnde, stufen[1].ergebnisse, e2 => t1.gesehen.has(pfad + '|' + e2.label)));
+      }
+    });
+  } else {
+    svgHeight = n1 * n2 * rowH + 16;
+    const yStart = svgHeight / 2;
+    let k = 0;
+    stufen[0].ergebnisse.forEach(e1 => {
+      const yKinder = [];
+      stufen[1].ergebnisse.forEach(e2 => {
+        const y = 8 + k * rowH + rowH / 2; k++;
+        yKinder.push(y);
+        const pfad2 = e1.label + '|' + e2.label;
+        const sichtbar2 = t1.phase === 'fertig' || t1.gesehen.has(pfad2);
+        const neu2 = t1.phase === 'fertig' && !t1.gesehen.has(pfad2);
+        if (sichtbar2) labels.push(svgBlattMitBruch(xLabel, y, `${kurzLabel(e1)}·${kurzLabel(e2)}`, 1, n1 * n2));
+        e2._y = y; e2._sichtbar2 = sichtbar2; e2._neu2 = neu2;
+      });
+      const y1 = (yKinder[0] + yKinder[yKinder.length - 1]) / 2;
+      const sichtbar1 = t1.phase === 'fertig' || t1.gesehen.has(e1.label);
+      const neu1 = t1.phase === 'fertig' && !t1.gesehen.has(e1.label);
+      kanten.push(svgLinie(xStart, yStart, xS1, y1, sichtbar1));
+      kanten.push(svgKanteBruch(xStart, yStart, xS1, y1, 1, n1, sichtbar1));
+      knoten.push(svgKnoten(xS1, y1, r, kurzLabel(e1), sichtbar1, neu1));
+      stufen[1].ergebnisse.forEach(e2 => {
+        kanten.push(svgLinie(xS1, y1, xS2, e2._y, e2._sichtbar2));
+        if (!vieleBlaetter) kanten.push(svgKanteBruch(xS1, y1, xS2, e2._y, 1, n2, e2._sichtbar2));
+        knoten.push(svgKnoten(xS2, e2._y, r, kurzLabel(e2), e2._sichtbar2, e2._neu2));
+      });
+    });
+  }
+
+  return `<svg viewBox="0 0 ${svgWidth} ${svgHeight}" width="${svgWidth}" style="max-width:100%;min-width:${Math.min(svgWidth, 420)}px;height:auto;display:block;margin:0 auto;">
+    ${svgStartPunkt(xStart, svgHeight / 2)}
+    ${kanten.join('')}
+    ${knoten.join('')}
+    ${labels.join('')}
+  </svg>`;
+}
+
+function renderTeil1() {
+  const runde = TEIL1_RUNDEN[rIndex1];
+  const el = document.getElementById('mainArea');
+  const baumHtml = baumSVGTeil1(runde, t1);
+
+  const buehneHtml = runde.stufen.map((s, i) => buehneTeilHTML(s, String(i), runde.stufen.length > 1 ? `${i+1}. Wurf` : 'Ziehung')).join('');
+
+  const kannVervollstaendigen = t1.phase === 'bauen' && t1.gezogen >= runde.minZuege;
+
+  el.innerHTML = `
+    <div class="m2-fortschritt">
+      <span><span class="m2-teil-badge">Teil 1 von 2</span>Runde ${rIndex1 + 1} von ${TEIL1_RUNDEN.length}</span>
+      <span class="m2-runde-info">${t1.gezogen}× gezogen</span>
+    </div>
+    <div class="m2-karte">
+      <div class="m2-titel">${runde.titel}</div>
+      <div class="m2-beschreibung">${runde.text}</div>
+
+      <div class="m2-buehne-row">${buehneHtml}</div>
+      <div class="m2-ziehen-row">
+        ${t1.phase === 'bauen' ? `<button class="btn btn-mint m2-ziehen-btn" ${t1.amZiehen ? 'disabled' : ''} onclick="ziehenKlickT1()">${runde.ziehenLabel}</button>` : ''}
+        <div class="m2-letzter-pfad">${t1.letzterPfad ? 'Zuletzt: ' + t1.letzterPfad : ''}</div>
+      </div>
+
+      <div class="m2-baum-legende">Jeder Ast zeigt ein mögliches Ergebnis mit seiner Wahrscheinlichkeit.</div>
+      <div class="m2-baum-scroll">${baumHtml}</div>
+
+      ${runde.kollabiert && (t1.phase === 'fertig') ? `<div class="m2-alle-toggle"><button class="btn btn-ghost" onclick="toggleAlleAnzeigen()">${t1.alleAnzeigen ? '▲ Wieder zusammenfassen' : '🔍 Trotzdem alle 36 Pfade anzeigen'}</button></div>` : ''}
+
+      ${t1.phase === 'bauen' ? `
+        <div class="m2-info-row">${kannVervollstaendigen ? '' : `Zieh noch ${runde.minZuege - t1.gezogen}× , dann kannst du den Baum vervollständigen.`}</div>
+        ${kannVervollstaendigen ? `<div class="m2-weiter-row"><button class="btn btn-orange" onclick="vervollstaendigenT1()">🌳 Baum vervollständigen</button></div>` : ''}
+      ` : `
+        <div class="m2-weiter-row"><button class="btn btn-yellow" onclick="naechsteRundeT1()">${rIndex1 < TEIL1_RUNDEN.length - 1 ? 'Weiter →' : 'Weiter zu Teil 2 →'}</button></div>
+      `}
+    </div>
+  `;
+  ruhezustandSetzen(runde, t1.letzteErgebnisse);
+}
+
+function toggleAlleAnzeigen() { t1.alleAnzeigen = !t1.alleAnzeigen; renderTeil1(); }
+
+function vervollstaendigenT1() {
+  t1.phase = 'fertig';
+  renderTeil1();
+}
+
+function starteRundeT1() {
+  const runde = TEIL1_RUNDEN[rIndex1];
+  t1 = { gezogen: 0, gesehen: new Set(), phase: 'bauen', alleAnzeigen: false, letzterPfad: null, letzteErgebnisse: null, amZiehen: false };
+  renderTeil1();
+}
+
+function naechsteRundeT1() {
+  rIndex1++;
+  if (rIndex1 >= TEIL1_RUNDEN.length) { zeigeUebergangZuTeil2(); return; }
+  starteRundeT1();
+}
+
+/* ═══════ Übergang zwischen den Teilen ═══════ */
+function zeigeUebergangZuTeil2() {
+  document.getElementById('mainArea').innerHTML = `
+    <div class="m2-karte m2-transition">
+      <div class="m2-transition-emoji">🔨</div>
+      <div class="m2-transition-titel">Jetzt drehen wir den Spieß um</div>
+      <p class="m2-transition-text">Bisher ist der Baum von selbst gewachsen. Jetzt baust <strong>du</strong> ihn selbst — genau wie du in Klasse 5/6 schon eigene Diagramme gebaut hast: Äste beschriften, Wahrscheinlichkeiten eintragen, bei Bedarf verbessern.</p>
+      <button class="btn btn-orange" onclick="starteTeil2()">Los geht's →</button>
+    </div>
+  `;
+}
+
+function starteTeil2() {
+  teil = 2; rIndex2 = 0;
+  starteRundeT2();
+}
+
+/* ═══════ Teil 2: Werkstatt (Puzzle im selben SVG-Kreis-Stil wie Teil 1) ═══════
+   Prinzip: alle Kreise sind immer sichtbar (fixe, nicht zufällige Reihenfolge —
+   genau wie in Teil 1). Kacheln aus der Palette lassen sich beliebig oft hinein-
+   und wieder herausziehen (auch falsche/Distraktor-Kacheln). Geprüft wird erst,
+   wenn man auf "Prüfen" klickt — nicht bei jedem einzelnen Ast sofort. */
+
+const WS_DISTRAKTOREN = {
+  karte:   { label: 'Joker', symbol: '🃏' },
+  muenze:  { label: 'Stern', symbol: '⭐' },
+};
+
+function starteRundeT2() {
+  const runde = TEIL2_RUNDEN[rIndex2];
+  t2 = { platzierungen: {}, platzierungenP: {}, ausgewaehlt: null, ergebnis: null };
+  if (runde.stufen.length === 2) {
+    // Stufe 1 ist aus Runde 1 bereits bekannt -> direkt korrekt vorbelegt, kein Puzzle mehr nötig
+    runde.stufen[0].ergebnisse.forEach((e, i) => {
+      t2.platzierungen['s1_' + i] = { label: e.label, symbol: e.symbol };
+      t2.platzierungenP['s1_' + i] = { num: 1, den: runde.stufen[0].ergebnisse.length };
+    });
+  }
+  renderTeil2();
+}
+
+function kurzAnzeige(o) {
+  if (o.label === 'Kopf') return 'K';
+  if (o.label === 'Zahl') return 'Z';
+  if (o.symbol && [...o.symbol].length <= 2) return o.symbol;
+  return o.label;
+}
+
+/* ── Materialkasten: Ergebnis-Kacheln pro Stufe (0 oder 1), unabhängig vom Elternast —
+   Kopf/Zahl gelten für JEDEN Münzast, nicht pro Ast eine eigene Palette. ── */
+function ergebnisKachelnFuerStufe(runde, stufenIndex) {
+  const basis = runde.stufen[stufenIndex].ergebnisse.map(e => ({ label: e.label, symbol: e.symbol }));
+  const distraktor = WS_DISTRAKTOREN[runde.stufen[stufenIndex].typ];
+  return distraktor ? [...basis, distraktor] : basis;
+}
+/* Bruch-Kacheln: alle tatsächlich benötigten Nenner (einmal, da unendlich oft ziehbar) + 1 Distraktor */
+function bruchKachelnFuerRunde(runde) {
+  const noetig = new Set();
+  runde.stufen.forEach((s, i) => {
+    const vorbelegt = i === 0 && runde.stufen.length === 2;
+    if (!vorbelegt) noetig.add(s.ergebnisse.length);
+  });
+  const echte = [...noetig].sort((a, b) => a - b).map(n => ({ num: 1, den: n }));
+  const kandidaten = [{ num: 1, den: 3 }, { num: 1, den: 5 }, { num: 2, den: 3 }];
+  const distraktor = kandidaten.find(k => !noetig.has(k.den));
+  return distraktor ? [...echte, distraktor] : echte;
+}
+
+/* ── Kacheln platzieren: per Drag&Drop ODER per Antippen. Nichts wird verbraucht —
+   dieselbe Kachel lässt sich beliebig oft (auch mehrfach gleichzeitig) ziehen. ── */
+function wsTileKlick(art, payload) {
+  const gleich = t2.ausgewaehlt && t2.ausgewaehlt.art === art && JSON.stringify(t2.ausgewaehlt.payload) === JSON.stringify(payload);
+  t2.ausgewaehlt = gleich ? null : { art, payload };
+  renderTeil2();
+}
+function wsDragStart(event, art, payload) {
+  event.dataTransfer.setData('text/plain', JSON.stringify({ art, payload }));
+  event.dataTransfer.effectAllowed = 'copy';
+}
+function wsDropErgebnis(event, id, stufenIndex) {
+  event.preventDefault();
+  let daten; try { daten = JSON.parse(event.dataTransfer.getData('text/plain')); } catch (e) { return; }
+  if (!daten || daten.art !== 'ergebnis' || daten.payload.stufe !== stufenIndex) return;
+  t2.platzierungen[id] = { label: daten.payload.label, symbol: daten.payload.symbol };
+  t2.ergebnis = null;
+  renderTeil2();
+}
+function wsSlotKlick(id, stufenIndex) {
+  if (t2.ausgewaehlt && t2.ausgewaehlt.art === 'ergebnis' && t2.ausgewaehlt.payload.stufe === stufenIndex) {
+    t2.platzierungen[id] = { label: t2.ausgewaehlt.payload.label, symbol: t2.ausgewaehlt.payload.symbol };
+    t2.ausgewaehlt = null;
+  } else if (t2.platzierungen[id]) {
+    delete t2.platzierungen[id];
+  }
+  t2.ergebnis = null;
+  renderTeil2();
+}
+function wsDropBruch(event, id) {
+  event.preventDefault();
+  let daten; try { daten = JSON.parse(event.dataTransfer.getData('text/plain')); } catch (e) { return; }
+  if (!daten || daten.art !== 'bruch') return;
+  t2.platzierungenP[id] = { num: daten.payload.num, den: daten.payload.den };
+  t2.ergebnis = null;
+  renderTeil2();
+}
+function wsBruchKlick(id) {
+  if (t2.ausgewaehlt && t2.ausgewaehlt.art === 'bruch') {
+    t2.platzierungenP[id] = { num: t2.ausgewaehlt.payload.num, den: t2.ausgewaehlt.payload.den };
+    t2.ausgewaehlt = null;
+  } else if (t2.platzierungenP[id]) {
+    delete t2.platzierungenP[id];
+  }
+  t2.ergebnis = null;
+  renderTeil2();
+}
+
+/* ── Prüfen: vergleicht ALLE Äste + Wahrscheinlichkeiten auf einmal, erst auf Klick ── */
+function wsPruefen() {
+  const runde = TEIL2_RUNDEN[rIndex2];
+  const proSlot = {}, proP = {};
+  let alleRichtig = true;
+  function pruefeSlot(id, ziel, zielDen) {
+    const p = t2.platzierungen[id];
+    if (!p) { proSlot[id] = 'leer'; alleRichtig = false; }
+    else if (p.label === ziel.label) { proSlot[id] = 'ok'; }
+    else { proSlot[id] = 'falsch'; alleRichtig = false; }
+
+    const b = t2.platzierungenP[id];
+    if (!b) { proP[id] = 'leer'; alleRichtig = false; }
+    else if (bruchGleich(b.num, b.den, 1, zielDen)) { proP[id] = 'ok'; }
+    else { proP[id] = 'falsch'; alleRichtig = false; }
+  }
+  if (runde.stufen.length === 1) {
+    runde.stufen[0].ergebnisse.forEach((e, i) => pruefeSlot('s1_' + i, e, runde.stufen[0].ergebnisse.length));
+  } else {
+    runde.stufen[0].ergebnisse.forEach((e1, i) => {
+      runde.stufen[1].ergebnisse.forEach((e2, j) => pruefeSlot('s2_' + i + '_' + j, e2, runde.stufen[1].ergebnisse.length));
+    });
+  }
+  t2.ergebnis = { proSlot, proP, alleRichtig };
+  renderTeil2();
+}
+
+/* ── SVG-Baum im selben Stil wie Teil 1: Kreise + Bruch-Kästchen sind hier Drop-Ziele ── */
+function slotKreisSVG(id, stufenIndex, x, y, r, gesperrt) {
+  const p = t2.platzierungen[id];
+  const status = t2.ergebnis && t2.ergebnis.proSlot[id];
+  let fill = gesperrt ? 'rgba(78,205,196,0.18)' : (p ? SVG_FARBEN.gelb : 'rgba(255,255,255,0.06)');
+  let stroke = gesperrt ? SVG_FARBEN.mint : (p ? SVG_FARBEN.dunkel : 'rgba(255,255,255,0.3)');
+  let strokeW = 2;
+  const dash = (p || gesperrt) ? '' : 'stroke-dasharray="3 3"';
+  if (!gesperrt && status === 'ok') { stroke = SVG_FARBEN.mint; strokeW = 3.5; }
+  if (!gesperrt && status === 'falsch') { stroke = '#ff6b6b'; strokeW = 3.5; }
+  const textFarbe = (p || gesperrt) ? SVG_FARBEN.dunkel : 'rgba(255,255,255,0.4)';
+  const label = p ? kurzAnzeige(p) : (gesperrt ? '' : '+');
+  const handler = gesperrt ? '' : `ondragover="event.preventDefault()" ondrop="wsDropErgebnis(event,'${id}',${stufenIndex})" onclick="wsSlotKlick('${id}',${stufenIndex})" style="cursor:pointer;"`;
+  return `<g ${handler}>
+    <circle cx="${x}" cy="${y}" r="${r}" fill="${fill}" stroke="${stroke}" stroke-width="${strokeW}" ${dash}/>
+    <text x="${x}" y="${y + 5.5}" text-anchor="middle" font-size="15" font-weight="800" fill="${textFarbe}" font-family="Nunito, sans-serif" style="pointer-events:none;">${label}</text>
+  </g>`;
+}
+/* Bruch-Kästchen sitzt seitlich versetzt an der Kante (wie der Bruch in Teil 1), aber als Drop-Ziel */
+function bruchDropSVG(id, x1, y1, x2, y2, gesperrt) {
+  const mx = (x1 + x2) / 2, my = (y1 + y2) / 2;
+  const dx = x2 - x1, dy = y2 - y1, len = Math.hypot(dx, dy) || 1;
+  const nx = -dy / len, ny = dx / len;
+  const off = 17;
+  const x = mx + nx * off, y = my + ny * off;
+  const b = t2.platzierungenP[id];
+  const status = t2.ergebnis && t2.ergebnis.proP[id];
+  let fill = gesperrt ? 'rgba(78,205,196,0.18)' : (b ? 'rgba(255,217,61,0.18)' : 'rgba(255,255,255,0.05)');
+  let stroke = gesperrt ? SVG_FARBEN.mint : (b ? SVG_FARBEN.dunkel : 'rgba(255,255,255,0.3)');
+  let strokeW = 1.6;
+  const dash = (b || gesperrt) ? '' : 'stroke-dasharray="2.5 2.5"';
+  if (!gesperrt && status === 'ok') { stroke = SVG_FARBEN.mint; strokeW = 2.6; }
+  if (!gesperrt && status === 'falsch') { stroke = '#ff6b6b'; strokeW = 2.6; }
+  const w = 30, h = 30;
+  const handler = gesperrt ? '' : `ondragover="event.preventDefault()" ondrop="wsDropBruch(event,'${id}')" onclick="wsBruchKlick('${id}')" style="cursor:pointer;"`;
+  const inhalt = b
+    ? `<text x="${x}" y="${y - 2}" text-anchor="middle" font-size="10.5" font-weight="800" fill="${SVG_FARBEN.dunkel}" font-family="Nunito, sans-serif">${b.num}</text>
+       <line x1="${x - 8}" y1="${y + 2}" x2="${x + 8}" y2="${y + 2}" stroke="${SVG_FARBEN.dunkel}" stroke-width="1.3"/>
+       <text x="${x}" y="${y + 13.5}" text-anchor="middle" font-size="10.5" font-weight="800" fill="${SVG_FARBEN.dunkel}" font-family="Nunito, sans-serif">${b.den}</text>`
+    : `<text x="${x}" y="${y + 4}" text-anchor="middle" font-size="12" fill="rgba(255,255,255,0.35)" font-family="Nunito, sans-serif">?</text>`;
+  return `<g ${handler}>
+    <rect x="${x - w/2}" y="${y - h/2}" width="${w}" height="${h}" rx="7" fill="${fill}" stroke="${stroke}" stroke-width="${strokeW}" ${dash}/>
+    ${inhalt}
+  </g>`;
+}
+
+function baumSVGTeil2(runde) {
+  const zweistufig = runde.stufen.length > 1;
+  const n1 = runde.stufen[0].ergebnisse.length;
+  const n2 = zweistufig ? runde.stufen[1].ergebnisse.length : 0;
+  const r = 22, rowH = 68;
+  const xStart = 42, xS1 = 190, xS2 = 370;
+  let kanten = [], knoten = [], labels = [];
+  let svgHeight, svgWidth;
+
+  if (!zweistufig) {
+    svgHeight = n1 * rowH + 34;
+    svgWidth = xS1 + 60;
+    const yStart = svgHeight / 2;
+    runde.stufen[0].ergebnisse.forEach((e, i) => {
+      const y = 22 + i * rowH + rowH / 2;
+      const id = 's1_' + i;
+      kanten.push(svgLinie(xStart, yStart, xS1, y, true));
+      kanten.push(bruchDropSVG(id, xStart, yStart, xS1, y, false));
+      knoten.push(slotKreisSVG(id, 0, xS1, y, r, false));
+    });
+    labels.push(`<text x="${xS1}" y="14" text-anchor="middle" font-size="12" font-weight="800" fill="${SVG_FARBEN.orange}" font-family="Nunito, sans-serif">1. Stufe</text>`);
+  } else {
+    svgHeight = n1 * n2 * rowH + 34;
+    svgWidth = xS2 + 60;
+    const yStart = svgHeight / 2;
+    let k = 0;
+    runde.stufen[0].ergebnisse.forEach((e1, i) => {
+      const yKinder = [];
+      runde.stufen[1].ergebnisse.forEach((e2, j) => {
+        const y = 22 + k * rowH + rowH / 2; k++;
+        yKinder.push(y);
+        e2._y = y;
+      });
+      const y1 = (yKinder[0] + yKinder[yKinder.length - 1]) / 2;
+      const id1 = 's1_' + i;
+      kanten.push(svgLinie(xStart, yStart, xS1, y1, true));
+      kanten.push(bruchDropSVG(id1, xStart, yStart, xS1, y1, true));
+      knoten.push(slotKreisSVG(id1, 0, xS1, y1, r, true));
+      runde.stufen[1].ergebnisse.forEach((e2, j) => {
+        const id2 = 's2_' + i + '_' + j;
+        kanten.push(svgLinie(xS1, y1, xS2, e2._y, true));
+        kanten.push(bruchDropSVG(id2, xS1, y1, xS2, e2._y, false));
+        knoten.push(slotKreisSVG(id2, 1, xS2, e2._y, r, false));
+      });
+    });
+    labels.push(`<text x="${xS1}" y="14" text-anchor="middle" font-size="12" font-weight="800" fill="${SVG_FARBEN.orange}" font-family="Nunito, sans-serif">1. Stufe</text>`);
+    labels.push(`<text x="${xS2}" y="14" text-anchor="middle" font-size="12" font-weight="800" fill="${SVG_FARBEN.orange}" font-family="Nunito, sans-serif">2. Stufe</text>`);
+  }
+
+  return `<svg viewBox="0 0 ${svgWidth} ${svgHeight}" style="max-width:100%;max-height:100%;width:auto;height:auto;display:block;">
+    ${svgStartPunkt(xStart, svgHeight / 2)}
+    ${kanten.join('')}
+    ${knoten.join('')}
+    ${labels.join('')}
+  </svg>`;
+}
+
+function ergebnisKachelHTML(o, stufenIndex) {
+  const payload = { stufe: stufenIndex, label: o.label, symbol: o.symbol };
+  const gewaehlt = t2.ausgewaehlt && t2.ausgewaehlt.art === 'ergebnis' && JSON.stringify(t2.ausgewaehlt.payload) === JSON.stringify(payload);
+  return `<div class="m2-material-tile ${gewaehlt ? 'ausgewaehlt' : ''}" draggable="true" ondragstart='wsDragStart(event,"ergebnis",${JSON.stringify(payload)})' onclick='wsTileKlick("ergebnis",${JSON.stringify(payload)})'>${o.symbol} ${o.label}</div>`;
+}
+function bruchKachelHTML(b) {
+  const gewaehlt = t2.ausgewaehlt && t2.ausgewaehlt.art === 'bruch' && JSON.stringify(t2.ausgewaehlt.payload) === JSON.stringify(b);
+  return `<div class="m2-material-tile m2-material-bruch ${gewaehlt ? 'ausgewaehlt' : ''}" draggable="true" ondragstart='wsDragStart(event,"bruch",${JSON.stringify(b)})' onclick='wsTileKlick("bruch",${JSON.stringify(b)})'>${bruchHTML(b.num, b.den)}</div>`;
+}
+function bruchHTML(z, n) {
+  return `<span class="m2-bruch"><span class="z">${z}</span><span class="n">${n}</span></span>`;
+}
+
+function renderTeil2() {
+  const runde = TEIL2_RUNDEN[rIndex2];
+  const el = document.getElementById('mainArea');
+  const zweistufig = runde.stufen.length > 1;
+  const svgHtml = baumSVGTeil2(runde);
+
+  const ergebnisAbschnitt = zweistufig
+    ? ergebnisKachelnFuerStufe(runde, 1).map(o => ergebnisKachelHTML(o, 1)).join('')
+    : ergebnisKachelnFuerStufe(runde, 0).map(o => ergebnisKachelHTML(o, 0)).join('');
+  const bruchAbschnitt = bruchKachelnFuerRunde(runde).map(bruchKachelHTML).join('');
+
+  const alleRichtig = t2.ergebnis && t2.ergebnis.alleRichtig;
+  const geprueftInfo = !t2.ergebnis ? '' : (alleRichtig ? '🎉 Alles richtig!' : 'Noch nicht alles richtig — rot Markiertes korrigieren und nochmal prüfen.');
+
+  el.innerHTML = `
+    <div class="m2-fortschritt">
+      <span><span class="m2-teil-badge">Teil 2 von 2</span>Runde ${rIndex2 + 1} von ${TEIL2_RUNDEN.length}</span>
+    </div>
+    <div class="m2-karte">
+      <div class="m2-titel">${runde.titel}</div>
+      <div class="m2-beschreibung">${runde.text}</div>
+      <div class="m2-board">
+        <div class="m2-board-tree">${svgHtml}</div>
+        <div class="m2-board-material">
+          <div class="m2-material-abschnitt">
+            <div class="m2-material-titel">🎯 Ergebnisse</div>
+            <div class="m2-material-kacheln">${ergebnisAbschnitt}</div>
+          </div>
+          <div class="m2-material-abschnitt">
+            <div class="m2-material-titel">🔢 Wahrscheinlichkeiten</div>
+            <div class="m2-material-kacheln">${bruchAbschnitt}</div>
+          </div>
+        </div>
+      </div>
+      <div class="m2-pruef-row">
+        <button class="btn btn-orange" onclick="wsPruefen()">✓ Prüfen</button>
+        <span class="m2-pruef-info ${alleRichtig ? 'richtig' : ''}">${geprueftInfo}</span>
+        ${alleRichtig ? `<button class="btn btn-yellow" onclick="naechsteRundeT2()">${rIndex2 < TEIL2_RUNDEN.length - 1 ? 'Weiter →' : 'Zur Auswertung →'}</button>` : ''}
+      </div>
+    </div>
+  `;
+}
+
+function naechsteRundeT2() {
+  rIndex2++;
+  if (rIndex2 >= TEIL2_RUNDEN.length) { zeigeEnde(); return; }
+  starteRundeT2();
+}
+
+/* ═══════ Ende ═══════ */
+function zeigeEnde() {
+  document.getElementById('mainArea').innerHTML = `
+    <div class="m2-karte m2-ende">
+      <div class="m2-ende-emoji">🌳</div>
+      <div class="m2-ende-titel">Baum gebaut, Prinzip verstanden!</div>
+      <p class="m2-ende-merksatz">Merksatz: Ein Baumdiagramm zeigt alle möglichen Pfade eines mehrstufigen Zufallsexperiments. An jedem Ast steht die Wahrscheinlichkeit dieser einen Stufe — und multiplizierst du die Wahrscheinlichkeiten entlang eines Pfades, erhältst du die Wahrscheinlichkeit für genau diesen Pfad. Je mehr Stufen, desto schneller wächst der Baum — deshalb suchen wir uns später (Modul 3: Laplace) Wege, um daraus direkt eine einzelne Zahl zu berechnen, ohne jeden Ast einzeln zu betrachten.</p>
+      <button class="btn btn-mint" onclick="starteAlles()">🔄 Nochmal von vorne</button>
+    </div>
+  `;
+}
+
+function starteAlles() {
+  teil = 1; rIndex1 = 0; rIndex2 = 0;
+  starteRundeT1();
+}
+
+starteAlles();
+</script>
+<script src="../js/sidebar.js"></script>
+</body>
+</html>

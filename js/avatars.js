@@ -114,7 +114,7 @@ const AvatarGen = (() => {
       <text x="${cx+r*0.55}" y="${cy-r*0.55}" font-size="${r*0.4}" fill="#FFD93D" stroke="#1a1f3a" stroke-width="1">⭐</text>`,
   ];
 
-  // Mouth expressions
+  // Mouth expressions (resting face — no "black hole" mouth here, see YAWN_SHAPE for that)
   const MOUTHS = [
     // Big smile
     (cx, cy, r) => `<path d="M${cx-r*0.3},${cy+r*0.35} Q${cx},${cy+r*0.6} ${cx+r*0.3},${cy+r*0.35}" fill="none" stroke="#1a1f3a" stroke-width="3" stroke-linecap="round"/>`,
@@ -124,9 +124,11 @@ const AvatarGen = (() => {
       <line x1="${cx}" y1="${cy+r*0.32}" x2="${cx}" y2="${cy+r*0.5}" stroke="#1a1f3a" stroke-width="1.5"/>`,
     // Smirk
     (cx, cy, r) => `<path d="M${cx-r*0.1},${cy+r*0.38} Q${cx+r*0.2},${cy+r*0.55} ${cx+r*0.3},${cy+r*0.35}" fill="none" stroke="#1a1f3a" stroke-width="3" stroke-linecap="round"/>`,
-    // Surprised O
-    (cx, cy, r) => `<ellipse cx="${cx}" cy="${cy+r*0.42}" rx="${r*0.18}" ry="${r*0.14}" fill="#1a1f3a"/>`,
   ];
+
+  // Offener Mund — wird NICHT als Ruhe-Ausdruck vergeben, sondern nur kurz
+  // während der Gähn-Animation eingeblendet (siehe av-mouth-yawn in generate()).
+  const YAWN_SHAPE = (cx, cy, r) => `<ellipse cx="${cx}" cy="${cy + r*0.4}" rx="${r*0.16}" ry="${r*0.22}" fill="#3a2420"/>`;
 
   // Eyes
   const EYES = [
@@ -186,15 +188,27 @@ const AvatarGen = (() => {
     // Body (small, Brawl-Stars proportion)
     const bodyW = r * 1.1, bodyH = r * 0.85;
     const bodyY = cy + r * 0.88;
+    const armW = bodyW * 0.22, armH = bodyH * 0.7;
+    const armLX = cx - bodyW * 0.62, armRX = cx + bodyW * 0.4;
+    const armY  = bodyY + bodyH * 0.1;
+    // Sehr dezente, individuell versetzte Idle-Bewegung pro Kind (Seed-basiert, damit
+    // die Klasse nicht im Gleichschritt "atmet", aber bei Reload gleich bleibt)
+    const waveDelay  = (sr() * 6).toFixed(2),  waveDur  = (5 + sr() * 3).toFixed(2);
+    const blinkDelay = (sr() * 5).toFixed(2),  blinkDur = (4 + sr() * 3).toFixed(2);
+    const yawnDelay  = (sr() * 15).toFixed(2), yawnDur  = (12 + sr() * 8).toFixed(2);
+    const bobDelay   = (sr() * 4).toFixed(2),  bobDur   = (3.5 + sr() * 2).toFixed(2);
+
     const body = `
       <rect x="${cx - bodyW/2}" y="${bodyY}" width="${bodyW}" height="${bodyH}"
             rx="12" fill="${shirtC[0]}" stroke="#1a1f3a" stroke-width="3"/>
       <rect x="${cx - bodyW/2}" y="${bodyY}" width="${bodyW}" height="${bodyH*0.35}"
             rx="12" fill="${shirtC[1]}" opacity="0.5"/>
-      <rect x="${cx - bodyW*0.62}" y="${bodyY + bodyH*0.1}" width="${bodyW*0.22}" height="${bodyH*0.7}"
+      <rect x="${armLX}" y="${armY}" width="${armW}" height="${armH}"
             rx="8" fill="${shirtC[0]}" stroke="#1a1f3a" stroke-width="2.5"/>
-      <rect x="${cx + bodyW*0.4}"  y="${bodyY + bodyH*0.1}" width="${bodyW*0.22}" height="${bodyH*0.7}"
-            rx="8" fill="${shirtC[0]}" stroke="#1a1f3a" stroke-width="2.5"/>`;
+      <g class="av-arm-right" style="transform-origin:${(armRX+armW/2).toFixed(1)}px ${armY.toFixed(1)}px; animation-delay:-${waveDelay}s; animation-duration:${waveDur}s;">
+        <rect x="${armRX}" y="${armY}" width="${armW}" height="${armH}"
+              rx="8" fill="${shirtC[0]}" stroke="#1a1f3a" stroke-width="2.5"/>
+      </g>`;
 
     // Ears
     const ears = `
@@ -210,6 +224,7 @@ const AvatarGen = (() => {
       <path d="M${cx+r*0.14},${cy-r*0.24} Q${cx+r*0.28},${cy-r*0.32} ${cx+r*0.42},${cy-r*0.22}" fill="none" stroke="${hairC}" stroke-width="3" stroke-linecap="round"/>`;
 
     return `<svg viewBox="0 0 120 140" xmlns="http://www.w3.org/2000/svg">
+      <g class="av-figure" style="animation-delay:-${bobDelay}s; animation-duration:${bobDur}s;">
       ${body}
       ${hairStyle.back ? hairStyle.back(cx, cy, r, hairC) : ''}
       ${ears}
@@ -218,10 +233,12 @@ const AvatarGen = (() => {
       ${blush}
       ${freckles}
       ${brows}
-      ${eyeFn(cx, cy, r, eyeC)}
+      <g class="av-eyes" style="transform-origin:${cx}px ${cy.toFixed(1)}px; animation-delay:-${blinkDelay}s; animation-duration:${blinkDur}s;">${eyeFn(cx, cy, r, eyeC)}</g>
       ${nose}
-      ${mouthFn(cx, cy, r)}
+      <g class="av-mouth-normal" style="animation-delay:-${yawnDelay}s; animation-duration:${yawnDur}s;">${mouthFn(cx, cy, r)}</g>
+      <g class="av-mouth-yawn" style="animation-delay:-${yawnDelay}s; animation-duration:${yawnDur}s;">${YAWN_SHAPE(cx, cy, r)}</g>
       ${accFn ? accFn(cx, cy, r) : ''}
+      </g>
     </svg>`;
   }
 

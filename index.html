@@ -22,9 +22,29 @@ body { background: radial-gradient(ellipse at 30% 20%, #2a1a4a 0%, #1a1f3a 60%);
 .portal-logo span { color: var(--text); font-size: 1rem; font-family:'Nunito',sans-serif; font-weight:600; display:block; }
 .creator-badge { color: var(--muted); font-size: .72rem; font-weight: 600; margin-top: .3rem; }
 
-.portal-hero { text-align: center; padding: 3rem 2rem 2rem; }
+.portal-hero { text-align: center; padding: 3rem 2rem 1.5rem; }
 .portal-hero h1 { font-size: clamp(2rem,6vw,4rem); color: var(--yellow); line-height: 1.1; margin-bottom: .75rem; }
-.portal-hero p  { font-size: 1rem; color: var(--muted); max-width: 480px; margin: 0 auto 2.5rem; line-height: 1.7; }
+.portal-hero p  { font-size: 1rem; color: var(--muted); max-width: 520px; margin: 0 auto 1.8rem; line-height: 1.7; }
+
+.zielgruppen { display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; margin: 0 auto 2.5rem; max-width: 640px; padding: 0 1rem; }
+.zg-karte {
+  flex: 1 1 240px; max-width: 280px; text-align: left;
+  background: var(--card-bg); border: 2px solid rgba(255,255,255,0.08);
+  border-radius: 16px; padding: 1rem 1.2rem;
+}
+.zg-karte .zg-kopf { display: flex; align-items: center; gap: .5rem; font-weight: 800; font-size: .92rem; margin-bottom: .3rem; }
+.zg-karte:nth-child(1) .zg-kopf { color: var(--mint); }
+.zg-karte:nth-child(2) .zg-kopf { color: var(--orange); }
+.zg-karte p { color: var(--muted); font-size: .8rem; line-height: 1.5; margin: 0; max-width: none; }
+
+.kennzahlen {
+  display: flex; justify-content: center; gap: 2.5rem; flex-wrap: wrap;
+  max-width: 700px; margin: 0 auto 3rem; padding: 1.1rem 1.5rem;
+  border-top: 1px solid rgba(255,255,255,0.08); border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.kz-item { text-align: center; }
+.kz-zahl { font-family:'Fredoka One',cursive; font-size: 1.6rem; color: var(--yellow); display: block; line-height: 1; }
+.kz-label { font-size: .72rem; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; margin-top: .25rem; }
 
 .jahrgaenge { max-width: 1000px; margin: 0 auto; padding: 0 1.5rem 4rem; }
 .jahrgaenge-titel { font-family:'Fredoka One',cursive; font-size: 1.1rem; color: var(--muted); letter-spacing: .1em; margin-bottom: 1.5rem; text-align: center; }
@@ -63,23 +83,55 @@ body { background: radial-gradient(ellipse at 30% 20%, #2a1a4a 0%, #1a1f3a 60%);
 .jg-arrow { position: absolute; bottom: 1.2rem; right: 1.2rem; color: var(--yellow); font-size: 1.2rem; opacity: 0; transform: translateX(-6px); transition: all .2s; }
 .jahrgang-card.active:hover .jg-arrow { opacity: 1; transform: translateX(0); }
 
-.paradox-banner {
-  max-width: 1000px; margin: 0 auto 2rem;
-  padding: 0 1.5rem;
+.jg-tools { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: 1rem; }
+.jg-tool-chip {
+  font-size: .7rem; font-weight: 700; color: var(--text);
+  background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 20px; padding: .25rem .6rem;
 }
-.paradox-card {
+.jg-tool-chip.gesperrt { color: var(--muted); opacity: .55; }
+
+/* ── Roadmap: kompakte Zeile für noch nicht verfügbare Jahrgänge ── */
+.roadmap-titel { font-family:'Fredoka One',cursive; font-size: .85rem; color: var(--muted); letter-spacing: .08em; margin: 2.2rem 0 .8rem; text-align: center; opacity: .8; }
+.roadmap-zeile { display: flex; gap: .8rem; flex-wrap: wrap; justify-content: center; }
+.roadmap-item {
+  display: flex; align-items: center; gap: .6rem;
+  background: rgba(255,255,255,0.03); border: 2px dashed rgba(255,255,255,0.1);
+  border-radius: 14px; padding: .7rem 1rem; flex: 1 1 260px; max-width: 320px;
+  opacity: .65;
+}
+.roadmap-item .jg-icon { font-size: 1.5rem; margin: 0; }
+.roadmap-item-text { flex: 1; }
+.roadmap-item-text .jg-titel { font-size: .95rem; margin-bottom: .15rem; }
+.roadmap-item-text .jg-desc { font-size: .74rem; line-height: 1.4; }
+
+/* ── PARADOX: schwebendes Side-Banner, bewusst abgesetzt vom Jahrgangs-Angebot ── */
+.paradox-side {
+  position: fixed; right: 1.1rem; bottom: 1.1rem; width: 220px; z-index: 500;
   background: linear-gradient(135deg, #1a0d2e 0%, #2a1a4a 100%);
-  border-radius: 20px; border: 3px solid rgba(123,79,255,0.4);
-  padding: 1.5rem 2rem;
-  display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap;
-  cursor: pointer;
-  transition: all .2s;
-  text-decoration: none;
+  border-radius: 18px; border: 3px solid rgba(168,85,247,0.45);
+  padding: 1rem 1.1rem; text-decoration: none; display: block;
+  box-shadow: 0 12px 34px rgba(0,0,0,0.45);
+  transition: transform .2s, border-color .2s, box-shadow .2s;
 }
-.paradox-card:hover { border-color: #A855F7; transform: translateY(-3px); box-shadow: 0 16px 40px rgba(0,0,0,0.4), 0 0 30px rgba(168,85,247,0.2); }
-.paradox-icon { font-size: 3rem; flex-shrink: 0; }
-.paradox-text h2 { font-size: 1.4rem; color: #A855F7; margin-bottom: .3rem; }
-.paradox-text p  { font-size: .85rem; color: var(--muted); line-height: 1.6; }
+.paradox-side:hover { transform: translateY(-4px); border-color: #A855F7; box-shadow: 0 18px 40px rgba(0,0,0,0.5), 0 0 30px rgba(168,85,247,0.25); }
+.paradox-side .paradox-badge {
+  font-size: .62rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase;
+  color: #A855F7; background: rgba(168,85,247,0.12); border: 1px solid rgba(168,85,247,0.3);
+  border-radius: 20px; padding: .15rem .55rem; display: inline-block; margin-bottom: .55rem;
+}
+.paradox-side .paradox-icon { font-size: 1.9rem; margin-bottom: .3rem; display: block; }
+.paradox-side h2 { font-size: 1.05rem; color: #A855F7; margin-bottom: .3rem; }
+.paradox-side p  { font-size: .74rem; color: var(--muted); line-height: 1.5; }
+
+@media (max-width: 900px) {
+  .paradox-side {
+    position: static; width: auto; max-width: 1000px; margin: 0 auto 3rem;
+    display: flex; align-items: center; gap: 1.2rem; padding: 1.2rem 1.5rem;
+  }
+  .paradox-side .paradox-icon { font-size: 2.4rem; margin-bottom: 0; }
+  .paradox-side .paradox-text { flex: 1; }
+}
 </style>
 </head>
 <body>
@@ -95,7 +147,24 @@ body { background: radial-gradient(ellipse at 30% 20%, #2a1a4a 0%, #1a1f3a 60%);
 
 <div class="portal-hero">
   <h1>Mathematik<br>erleben.</h1>
-  <p>Interaktive Experimente und Modelle für den Unterricht nach Hamburger Bildungsplan</p>
+  <p>Fertige interaktive Module für den Matheunterricht nach Hamburger Bildungsplan — direkt einsetzbar am Beamer oder zum eigenständigen Üben.</p>
+</div>
+
+<div class="zielgruppen">
+  <div class="zg-karte">
+    <div class="zg-kopf">👩‍🏫 Für Lehrkräfte</div>
+    <p>Simulationen und Experimente für den Beamer — spart Vorbereitungszeit und visualisiert Zufall live im Unterricht.</p>
+  </div>
+  <div class="zg-karte">
+    <div class="zg-kopf">🎓 Für Schüler:innen</div>
+    <p>Zum eigenständigen Ausprobieren, Üben und Verstehen — jederzeit am eigenen Tablet oder Laptop.</p>
+  </div>
+</div>
+
+<div class="kennzahlen">
+  <div class="kz-item"><span class="kz-zahl">12+</span><span class="kz-label">Module &amp; Experimente</span></div>
+  <div class="kz-item"><span class="kz-zahl">2</span><span class="kz-label">Jahrgangsstufen live</span></div>
+  <div class="kz-item"><span class="kz-zahl">HH</span><span class="kz-label">Bildungsplan-konform</span></div>
 </div>
 
 <!-- Jahrgänge -->
@@ -107,7 +176,12 @@ body { background: radial-gradient(ellipse at 30% 20%, #2a1a4a 0%, #1a1f3a 60%);
       <span class="jg-icon">🎒</span>
       <div class="jg-tag"><span class="badge badge-yellow">Verfügbar</span></div>
       <div class="jg-titel">Klasse 5 &amp; 6</div>
-      <p class="jg-desc">Digitale Klasse, Spielecke und mehr — Daten sammeln, Zufall erleben, Wahrscheinlichkeit verstehen.</p>
+      <p class="jg-desc">Daten sammeln, Zufall erleben, Wahrscheinlichkeit verstehen.</p>
+      <div class="jg-tools">
+        <span class="jg-tool-chip">📊 Digitale Klasse</span>
+        <span class="jg-tool-chip">🎲 Spielecke (5)</span>
+        <span class="jg-tool-chip">📈 Diagramm-Labor</span>
+      </div>
       <div class="jg-arrow">→</div>
     </a>
 
@@ -115,38 +189,45 @@ body { background: radial-gradient(ellipse at 30% 20%, #2a1a4a 0%, #1a1f3a 60%);
       <span class="jg-icon">📐</span>
       <div class="jg-tag"><span class="badge badge-orange">Verfügbar</span></div>
       <div class="jg-titel">Klasse 7 &amp; 8</div>
-      <p class="jg-desc">Wahrscheinlichkeit, Zufallsexperimente, Baumdiagramme, relative Häufigkeit.</p>
+      <p class="jg-desc">Wahrscheinlichkeit, Zufallsexperimente, relative Häufigkeit.</p>
+      <div class="jg-tools">
+        <span class="jg-tool-chip">🎰 Ergebnisräume</span>
+        <span class="jg-tool-chip">🌳 Baumdiagramme</span>
+        <span class="jg-tool-chip gesperrt">⚖️ Laplace</span>
+      </div>
       <div class="jg-arrow">→</div>
     </a>
 
-    <div class="jahrgang-card locked">
+  </div>
+
+  <div class="roadmap-titel">DEMNÄCHST</div>
+  <div class="roadmap-zeile">
+    <div class="roadmap-item">
       <span class="jg-icon">📈</span>
-      <div class="jg-tag"><span class="badge badge-orange">Bald</span></div>
-      <div class="jg-titel">Klasse 9 &amp; 10</div>
-      <p class="jg-desc">Normalverteilung, Konfidenzintervalle, Regressionsanalyse, Stochastik.</p>
+      <div class="roadmap-item-text">
+        <div class="jg-titel">Klasse 9 &amp; 10</div>
+        <p class="jg-desc">Normalverteilung, Konfidenzintervalle, Regressionsanalyse.</p>
+      </div>
     </div>
-
-    <div class="jahrgang-card locked">
+    <div class="roadmap-item">
       <span class="jg-icon">🎓</span>
-      <div class="jg-tag"><span class="badge badge-purple">Oberstufe</span></div>
-      <div class="jg-titel">Oberstufe</div>
-      <p class="jg-desc">Analysis, Stochastik, Analytische Geometrie — abiturrelevante Themen interaktiv.</p>
+      <div class="roadmap-item-text">
+        <div class="jg-titel">Oberstufe</div>
+        <p class="jg-desc">Analysis, Stochastik, Analytische Geometrie.</p>
+      </div>
     </div>
-
   </div>
 </div>
 
-<!-- Paradox Banner -->
-<div class="paradox-banner">
-  <a class="paradox-card" href="../paradox/index.html">
-    <div class="paradox-icon">🎲</div>
-    <div class="paradox-text">
-      <h2>PARADOX — Mind Games</h2>
-      <p>Monty Hall, Gambler's Fallacy, Bayes'sches Urteil, Geburtstagsproblem — Wahrscheinlichkeit die überrascht.</p>
-    </div>
-    <div style="margin-left:auto;color:#A855F7;font-size:1.4rem">→</div>
-  </a>
-</div>
+<!-- Paradox Side-Banner: bewusst separat, jahrgangsübergreifend -->
+<a class="paradox-side" href="../paradox/index.html">
+  <span class="paradox-badge">Für alle Jahrgänge</span>
+  <div class="paradox-text">
+    <span class="paradox-icon">🎲</span>
+    <h2>PARADOX</h2>
+    <p>Monty Hall, Gambler's Fallacy &amp; Co. — kniffelige Denkaufgaben zur Wahrscheinlichkeit.</p>
+  </div>
+</a>
 
 <nav class="footer-nav">
   <div class="nav-links">
