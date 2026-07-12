@@ -40,17 +40,25 @@
       kinder: [
         { typ: 'item', href: prefix + 'jahrgang/Jg78.html', label: '🎯 Übersicht' },
         { typ: 'item', href: prefix + 'modul1/index.html', label: '🎰 Modul 1: Ergebnisräume' },
-        { typ: 'item', href: prefix + 'modul2/index.html', label: '🌳 Modul 2: Baumdiagramme' },
+        {
+          typ: 'dropdown', id: 'modul2', href: prefix + 'modul2/index.html', label: '🌳 Modul 2: Baumdiagramme',
+          kinder: [
+            { typ: 'item', href: prefix + 'modul2/index.html', label: 'Kennenlernen (von Anfang)' },
+            { typ: 'item', href: prefix + 'modul2/index.html?teil=werkstatt', label: '🔨 Werkstatt (direkt)' },
+          ]
+        },
         { typ: 'locked', label: '⚖️ Modul 3 · Laplace' },
         { typ: 'locked', label: '🔮 Modul 4 · Prognose' },
       ]
     },
   ];
 
-  /* Aktuelle Seite (ohne Query/Hash) für Aktiv-Markierung normalisieren */
+  /* Aktuelle Seite (inkl. relevanter Query-Parameter wie ?teil=) für Aktiv-Markierung normalisieren */
   function normPath(href) {
-    try { return new URL(href, location.href).pathname.replace(/\/+$/, ''); }
-    catch (e) { return href; }
+    try {
+      const u = new URL(href, location.href);
+      return u.pathname.replace(/\/+$/, '') + u.search;
+    } catch (e) { return href; }
   }
   const aktuellerPfad = normPath(location.href);
 

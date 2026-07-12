@@ -119,7 +119,10 @@ body { background: radial-gradient(ellipse at 30% 10%, #3a2410 0%, #1a1f3a 55%);
 
 <header class="m2-header">
   <div class="m2-logo">🌳 Modul 2: Baumdiagramme<span>/ Jahrgang 7 &amp; 8</span></div>
-  <button class="btn btn-ghost" onclick="location.href='../jahrgang/Jg78.html'">← Jahrgang 7 &amp; 8</button>
+  <div style="display:flex;gap:.6rem;flex-wrap:wrap;">
+    <button class="btn btn-ghost" onclick="location.href='index.html?teil=werkstatt'">🔨 Direkt zur Werkstatt</button>
+    <button class="btn btn-ghost" onclick="location.href='../jahrgang/Jg78.html'">← Jahrgang 7 &amp; 8</button>
+  </div>
 </header>
 
 <div class="m2-hero">
@@ -131,11 +134,11 @@ body { background: radial-gradient(ellipse at 30% 10%, #3a2410 0%, #1a1f3a 55%);
 
 <script>
 /* ── Experimente ── */
-const MUENZE = { typ: 'muenze', titel: 'Münze', ergebnisse: [
+const MUENZE = { typ: 'muenze', titel: 'Münze', aktion: 'eine Münze wirfst', ergebnisse: [
   { label: 'Kopf', symbol: '👑' }, { label: 'Zahl', symbol: '2️⃣' }
 ]};
-const WUERFEL = { typ: 'wuerfel', titel: 'Würfel', ergebnisse: [1,2,3,4,5,6].map(n => ({ label: String(n), symbol: '⚀⚁⚂⚃⚄⚅'[n-1] })) };
-const KARTE = { typ: 'karte', titel: 'Kartenfarbe', ergebnisse: [
+const WUERFEL = { typ: 'wuerfel', titel: 'Würfel', aktion: 'würfelst', ergebnisse: [1,2,3,4,5,6].map(n => ({ label: String(n), symbol: '⚀⚁⚂⚃⚄⚅'[n-1] })) };
+const KARTE = { typ: 'karte', titel: 'Kartenfarbe', aktion: 'eine Karte ziehst und nur auf die Farbe schaust', ergebnisse: [
   { label: 'Pik', symbol: '♠', farbe: '#c9c9e0' }, { label: 'Herz', symbol: '♥', farbe: '#ff6b6b' },
   { label: 'Karo', symbol: '♦', farbe: '#ff6b6b' }, { label: 'Kreuz', symbol: '♣', farbe: '#c9c9e0' }
 ]};
@@ -144,21 +147,31 @@ const KARTE = { typ: 'karte', titel: 'Kartenfarbe', ergebnisse: [
 const TEIL1_RUNDEN = [
   { key: 'm1', titel: 'Münzwurf — einstufig', stufen: [MUENZE], minZuege: 3, ziehenLabel: '🪙 Münze werfen',
     text: 'Wirf ein paarmal die Münze. Sobald du ein Ergebnis zum ersten Mal ziehst, wächst der passende Ast im Baumdiagramm.' },
-  { key: 'w1', titel: 'Würfel — einstufig', stufen: [WUERFEL], minZuege: 5, ziehenLabel: '🎲 Würfeln',
+  { key: 'w1', titel: 'Würfel — einstufig', stufen: [WUERFEL], minZuege: 3, ziehenLabel: '🎲 Würfeln',
     text: 'Diesmal gibt es 6 statt 2 mögliche Äste — der Baum wird schon deutlich breiter.' },
-  { key: 'm2', titel: 'Münzwurf — zweistufig', stufen: [MUENZE, MUENZE], minZuege: 5, ziehenLabel: '🪙 Zweimal werfen',
+  { key: 'm2', titel: 'Münzwurf — zweistufig', stufen: [MUENZE, MUENZE], minZuege: 3, ziehenLabel: '🪙 Zweimal werfen',
     text: 'Jetzt wirfst du zweimal hintereinander. An jedem Ast der 1. Stufe wachsen eigene Äste für die 2. Stufe — und an jedem Pfadende steht die Pfadwahrscheinlichkeit (1. Stufe × 2. Stufe).' },
-  { key: 'w2', titel: 'Würfel — zweistufig', stufen: [WUERFEL, WUERFEL], minZuege: 6, kollabiert: true, ziehenLabel: '🎲 Zweimal würfeln',
+  { key: 'w2', titel: 'Würfel — zweistufig', stufen: [WUERFEL, WUERFEL], minZuege: 3, kollabiert: true, ziehenLabel: '🎲 Zweimal würfeln',
     text: '6 × 6 = 36 mögliche Pfade! Damit es übersichtlich bleibt, fassen wir die 2. Stufe erstmal zusammen — du kannst sie dir aber komplett aufklappen, wenn du willst.' },
 ];
 
-/* ── Teil 2: Selbst bauen (Werkstatt) ── */
-const TEIL2_RUNDEN = [
-  { key: 'k1', titel: 'Kartenfarbe ziehen — einstufig', stufen: [KARTE],
-    text: 'Du ziehst eine Karte und schaust nur auf die Farbe. Baue den Baum selbst: Ziehe jede Kachel auf einen freien Ast — welche Kachel auf welchen Ast kommt, ist egal, Hauptsache jede taucht genau einmal auf. Danach trägst du pro Ast die Wahrscheinlichkeit ein.' },
-  { key: 'k2', titel: 'Kartenfarbe, dann Münze — zweistufig', stufen: [KARTE, MUENZE],
-    text: 'Jetzt kommt eine 2. Stufe dazu: nach der Karte wirfst du eine Münze. Die 1. Stufe kennst du schon von eben — ergänze jetzt an jedem Ast die 2. Stufe per Kachel. Trag zusätzlich die Pfadwahrscheinlichkeit ein (Stufe 1 × Stufe 2).' },
-];
+/* ── Teil 2: Selbst bauen (Werkstatt) ──
+   Die Experimente werden bei jedem Einstieg neu zufällig aus Münze/Karte kombiniert
+   (bewusst ohne Würfel — der hätte 6 Äste und würde die Werkstatt zu unübersichtlich machen).
+   Möglich sind z.B. Karte→Münze, Münze→Karte, Münze→Münze oder Karte→Karte. */
+const WERKSTATT_EXPERIMENTE = [MUENZE, KARTE];
+let TEIL2_RUNDEN = [];
+
+function baueTeil2Runden() {
+  const e1 = WERKSTATT_EXPERIMENTE[Math.floor(Math.random() * WERKSTATT_EXPERIMENTE.length)];
+  const e2 = WERKSTATT_EXPERIMENTE[Math.floor(Math.random() * WERKSTATT_EXPERIMENTE.length)];
+  TEIL2_RUNDEN = [
+    { key: 'r1', titel: `${e1.titel} — einstufig`, stufen: [e1],
+      text: `Du ${e1.aktion}. Baue den Baum selbst: Ziehe jede Kachel auf einen freien Ast — welche Kachel auf welchen Ast kommt, ist egal, Hauptsache jede taucht genau einmal auf. Danach trägst du pro Ast die Wahrscheinlichkeit ein.` },
+    { key: 'r2', titel: `${e1.titel}, dann ${e2.titel} — zweistufig`, stufen: [e1, e2],
+      text: `Jetzt kommt eine 2. Stufe dazu: nachdem du ${e1.aktion}, ${e2.typ === e1.typ ? 'machst du das noch einmal' : e2.aktion}. Die 1. Stufe kennst du schon von eben — ergänze jetzt an jedem Ast die 2. Stufe per Kachel und trag die Wahrscheinlichkeit ein.` },
+  ];
+}
 
 let teil = 1;
 let rIndex1 = 0, rIndex2 = 0;
@@ -514,6 +527,7 @@ function zeigeUebergangZuTeil2() {
 
 function starteTeil2() {
   teil = 2; rIndex2 = 0;
+  baueTeil2Runden();
   starteRundeT2();
 }
 
@@ -825,7 +839,15 @@ function starteAlles() {
   starteRundeT1();
 }
 
-starteAlles();
+/* Direkter Einstieg in die Werkstatt möglich: modul2/index.html?teil=werkstatt */
+const startParam = new URLSearchParams(location.search).get('teil');
+if (startParam === 'werkstatt') {
+  teil = 2; rIndex1 = TEIL1_RUNDEN.length; rIndex2 = 0;
+  baueTeil2Runden();
+  starteRundeT2();
+} else {
+  starteAlles();
+}
 </script>
 <script src="../js/sidebar.js"></script>
 </body>
