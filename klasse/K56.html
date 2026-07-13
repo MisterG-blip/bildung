@@ -25,8 +25,8 @@ body { font-size: 18px; background: radial-gradient(ellipse at 30% 10%, #2a1a30 
   flex-wrap: wrap; gap: .75rem;
   position: sticky; top: 0; z-index: 50;
 }
-.kl-logo { font-size: 1.4rem; color: var(--yellow); }
-.kl-logo span { color: var(--text); font-size: 1rem; font-family: 'Nunito',sans-serif; font-weight: 600; }
+.kl-logo { font-size: var(--fs-xl); color: var(--yellow); }
+.kl-logo span { color: var(--text); font-size: var(--fs-base); font-family: 'Nunito',sans-serif; font-weight: 600; }
 .kl-header-btns { display: flex; gap: .5rem; flex-wrap: wrap; }
 
 /* ── Echter Bruch (CSS fraction) ── */
@@ -35,21 +35,21 @@ body { font-size: 18px; background: radial-gradient(ellipse at 30% 10%, #2a1a30 
 }
 .bruch-wrap {
   display: inline-flex; flex-direction: column; align-items: center;
-  vertical-align: middle; font-size: .72rem; line-height: 1.05;
+  vertical-align: middle; font-size: var(--fs-2xs); line-height: 1.05;
 }
 .bruch-zaehler { font-weight: 800; color: var(--text); }
 .bruch-strich  { display: block; width: 100%; height: 2px; background: var(--text); margin: 1px 0; min-width: 16px; }
 .bruch-nenner  { font-weight: 800; color: var(--text); }
-.rel-gleich { color: var(--muted); font-size: .78rem; }
-.rel-dez { font-size: .78rem; color: var(--muted); }
-.rel-pct { font-size: .82rem; font-weight: 700; color: var(--text); }
+.rel-gleich { color: var(--muted); font-size: var(--fs-xs); }
+.rel-dez { font-size: var(--fs-xs); color: var(--muted); }
+.rel-pct { font-size: var(--fs-xs); font-weight: 700; color: var(--text); }
 
 /* ── Werkstatt layout: Strichliste-Sidebar links neben dem Koordinatensystem ── */
-.werkst-sl-titel { font-family: 'Fredoka One',cursive; font-size: 1rem; color: var(--yellow); margin-bottom: .6rem; }
-.werkst-sl-table { width: 100%; border-collapse: collapse; font-size: .82rem; margin-bottom: 1rem; }
+.werkst-sl-titel { font-family: 'Fredoka One',cursive; font-size: var(--fs-base); color: var(--yellow); margin-bottom: .6rem; }
+.werkst-sl-table { width: 100%; border-collapse: collapse; font-size: var(--fs-xs); margin-bottom: 1rem; }
 .werkst-sl-table th {
   text-align: left; padding: .4rem .5rem;
-  color: var(--muted); font-weight: 700; font-size: .68rem;
+  color: var(--muted); font-weight: 700; font-size: var(--fs-2xs);
   text-transform: uppercase; letter-spacing: .04em;
   border-bottom: 2px solid rgba(255,255,255,0.08);
 }
@@ -67,7 +67,7 @@ body { font-size: 18px; background: radial-gradient(ellipse at 30% 10%, #2a1a30 
 
 /* ── Diagrammart-Toggle (Säulen-/Balkendiagramm) ── */
 .diagrammart-toggle { display: flex; gap: .6rem; align-items: center; justify-content: center; flex-wrap: wrap; margin-bottom: .75rem; }
-.diagrammart-label { font-size: .95rem; color: var(--muted); }
+.diagrammart-label { font-size: var(--fs-sm); color: var(--muted); }
 
 /* ── Main layout ── */
 .kl-main {
@@ -95,7 +95,7 @@ body { font-size: 18px; background: radial-gradient(ellipse at 30% 10%, #2a1a30 
   background: rgba(255,211,61,0.06);
   border-bottom: 2px solid rgba(255,255,255,0.07);
   display: flex; align-items: center; gap: .8rem; flex-wrap: wrap;
-  font-family: 'Fredoka One', cursive; font-size: 1.3rem; color: var(--yellow);
+  font-family: 'Fredoka One', cursive; font-size: var(--fs-lg); color: var(--yellow);
 }
 .auswertung-body { padding: 1.6rem; }
 
@@ -105,8 +105,8 @@ body { font-size: 18px; background: radial-gradient(ellipse at 30% 10%, #2a1a30 
 .klasse-info {
   display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;
 }
-.klasse-titel { font-size: 1.8rem; color: var(--yellow); }
-.klasse-meta  { font-size: .85rem; color: var(--muted); }
+.klasse-titel { font-size: var(--fs-2xl); color: var(--yellow); }
+.klasse-meta  { font-size: var(--fs-sm); color: var(--muted); }
 
 /* ── Tafel (blackboard behind class) ── */
 .tafel-wrap {
@@ -120,7 +120,7 @@ body { font-size: 18px; background: radial-gradient(ellipse at 30% 10%, #2a1a30 
 .tafel-line {
   font-family: 'Fredoka One', cursive;
   color: rgba(255,255,255,0.15);
-  font-size: .75rem;
+  font-size: var(--fs-xs);
   letter-spacing: .1em;
   text-align: center;
   margin-bottom: .5rem;
@@ -186,15 +186,15 @@ body { font-size: 18px; background: radial-gradient(ellipse at 30% 10%, #2a1a30 
 .kind-modal-avatar { animation: kindModalPop .4s ease-out; }
 
 .kind-name {
-  font-size: .7rem; font-weight: 800;
+  font-size: var(--fs-2xs); font-weight: 800;
   color: var(--text);
   text-align: center;
   line-height: 1.2;
 }
 
 /* Easter egg glow */
-.kind-card.hat-easter .kind-avatar-wrap { border-color: rgba(168,85,247,0.5); }
-.kind-card.hat-easter .kind-name::after { content: '✨'; font-size: .6rem; }
+.kind-card.hat-easter .kind-avatar-wrap { border-color: rgba(192,132,252,0.5); }
+.kind-card.hat-easter .kind-name::after { content: '✨'; font-size: var(--fs-2xs); }
 
 /* ── Sidebar / Tools ── */
 .sidebar { display: flex; flex-direction: column; gap: 1rem; }
@@ -210,7 +210,7 @@ body { font-size: 18px; background: radial-gradient(ellipse at 30% 10%, #2a1a30 
   background: rgba(255,255,255,0.04);
   border-bottom: 2px solid rgba(255,255,255,0.06);
   display: flex; align-items: center; gap: .6rem;
-  font-family: 'Fredoka One', cursive; font-size: 1rem; color: var(--yellow);
+  font-family: 'Fredoka One', cursive; font-size: var(--fs-base); color: var(--yellow);
 }
 .tool-body { padding: 1rem 1.2rem; }
 
@@ -218,7 +218,7 @@ body { font-size: 18px; background: radial-gradient(ellipse at 30% 10%, #2a1a30 
 .merkmal-btns { display: flex; flex-wrap: wrap; gap: .5rem; }
 .merkmal-btn {
   padding: .4rem .9rem; border-radius: 100px;
-  font-size: .78rem; font-weight: 700;
+  font-size: var(--fs-xs); font-weight: 700;
   cursor: pointer; border: 2px solid rgba(255,255,255,0.15);
   background: var(--surface2); color: var(--muted);
   transition: all .15s ease;
@@ -239,15 +239,15 @@ body { font-size: 18px; background: radial-gradient(ellipse at 30% 10%, #2a1a30 
   0%   { background: rgba(255,211,61,0.25); }
   100% { background: rgba(255,255,255,0.03); }
 }
-.strich-key   { font-size: .78rem; font-weight: 700; min-width: 90px; color: var(--text); }
-.strich-marks { font-family: monospace; font-size: .85rem; color: var(--mint); flex: 1; letter-spacing: .05em; }
-.strich-count { font-size: .85rem; font-weight: 800; color: var(--yellow); min-width: 24px; text-align: right; }
+.strich-key   { font-size: var(--fs-xs); font-weight: 700; min-width: 90px; color: var(--text); }
+.strich-marks { font-family: monospace; font-size: var(--fs-sm); color: var(--mint); flex: 1; letter-spacing: .05em; }
+.strich-count { font-size: var(--fs-sm); font-weight: 800; color: var(--yellow); min-width: 24px; text-align: right; }
 
 /* ── Daten-Auswertung tabs ── */
 .auswert-tabs { display: flex; gap: .4rem; flex-wrap: wrap; margin-bottom: 1rem; }
 .auswert-tab {
   padding: .35rem .9rem; border-radius: 100px;
-  font-size: .75rem; font-weight: 700;
+  font-size: var(--fs-xs); font-weight: 700;
   cursor: pointer; border: 2px solid rgba(255,255,255,0.12);
   background: transparent; color: var(--muted);
   transition: all .15s;
@@ -256,11 +256,11 @@ body { font-size: 18px; background: radial-gradient(ellipse at 30% 10%, #2a1a30 
 
 /* ── Häufigkeitstabelle styles ── */
 .tabelle-wrap { overflow-x: auto; }
-.tabelle-titel { font-family: 'Fredoka One', cursive; color: var(--yellow); margin-bottom: .75rem; font-size: 1rem; }
-.haeufig-tabelle { width: 100%; border-collapse: collapse; font-size: .82rem; }
+.tabelle-titel { font-family: 'Fredoka One', cursive; color: var(--yellow); margin-bottom: .75rem; font-size: var(--fs-base); }
+.haeufig-tabelle { width: 100%; border-collapse: collapse; font-size: var(--fs-xs); }
 .haeufig-tabelle th {
   text-align: left; padding: .5rem .6rem;
-  color: var(--muted); font-weight: 700; font-size: .72rem;
+  color: var(--muted); font-weight: 700; font-size: var(--fs-2xs);
   text-transform: uppercase; letter-spacing: .05em;
   border-bottom: 2px solid rgba(255,255,255,0.08);
 }
@@ -291,13 +291,13 @@ canvas.chart-canvas { width: 100%; height: 420px; display: block; }
   background: var(--surface2); border-radius: 16px; padding: 1.6rem 1.2rem;
   border: 2px solid rgba(255,255,255,0.07); text-align: center;
 }
-.kg-label { font-size: .72rem; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; margin-bottom: .5rem; }
+.kg-label { font-size: var(--fs-2xs); color: var(--muted); text-transform: uppercase; letter-spacing: .05em; margin-bottom: .5rem; }
 .kg-value { font-family: 'Fredoka One', cursive; font-size: 2.6rem; color: var(--yellow); line-height: 1; }
 
 /* ── Diagramm-Werkstatt: drag the bars into the coordinate system ── */
 .werkstatt-wrap { display: flex; flex-direction: column; gap: 1.2rem; align-items: center; }
 .werkstatt-hinweis {
-  font-size: .85rem; color: var(--muted); text-align: center; max-width: 560px; line-height: 1.7;
+  font-size: var(--fs-sm); color: var(--muted); text-align: center; max-width: 560px; line-height: 1.7;
 }
 .werkstatt-hinweis strong { color: var(--text); }
 
@@ -316,10 +316,10 @@ canvas.chart-canvas { width: 100%; height: 420px; display: block; }
   width: 46px; height: 46px; border-radius: 8px;
   border: 3px solid #1a1f3a;
   display: flex; align-items: center; justify-content: center;
-  font-weight: 800; font-size: .8rem; color: #1a1f3a;
+  font-weight: 800; font-size: var(--fs-xs); color: #1a1f3a;
   box-shadow: 0 4px 10px rgba(0,0,0,0.3);
 }
-.werk-block-label { font-size: .68rem; color: var(--muted); font-weight: 700; text-align: center; max-width: 64px; }
+.werk-block-label { font-size: var(--fs-2xs); color: var(--muted); font-weight: 700; text-align: center; max-width: 64px; }
 
 .koordinatensystem-wrap {
   width: 100%; max-width: 760px;
@@ -330,7 +330,7 @@ svg#koordSystem { width: 100%; height: 440px; display: block; }
 .koord-droptarget { fill: transparent; }
 .koord-droptarget.drag-over { fill: rgba(255,211,61,0.08); }
 
-.werkstatt-feedback { font-family: 'Fredoka One', cursive; font-size: 1rem; min-height: 1.6rem; text-align: center; }
+.werkstatt-feedback { font-family: 'Fredoka One', cursive; font-size: var(--fs-base); min-height: 1.6rem; text-align: center; }
 .werkstatt-feedback.richtig { color: var(--mint); }
 .werkstatt-feedback.falsch  { color: var(--red); }
 
@@ -339,7 +339,7 @@ svg#koordSystem { width: 100%; height: 440px; display: block; }
 /* ── Kenngrößen-Labor ── */
 .kg-lab-tabs { display: flex; gap: .5rem; flex-wrap: wrap; justify-content: center; margin-bottom: 1.2rem; }
 .kg-lab-tab {
-  padding: .5rem 1.1rem; border-radius: 100px; font-size: .82rem; font-weight: 700;
+  padding: .5rem 1.1rem; border-radius: 100px; font-size: var(--fs-xs); font-weight: 700;
   cursor: pointer; border: 2px solid rgba(255,255,255,0.12);
   background: var(--surface2); color: var(--muted); transition: all .15s;
 }
@@ -347,7 +347,7 @@ svg#koordSystem { width: 100%; height: 440px; display: block; }
 .kg-lab-tab:hover:not(.active) { color: var(--text); border-color: rgba(255,255,255,0.25); }
 
 .kg-aufgabe-hinweis {
-  font-size: .85rem; color: var(--muted); line-height: 1.7;
+  font-size: var(--fs-sm); color: var(--muted); line-height: 1.7;
   max-width: 620px; margin: 0 auto 1.2rem; text-align: center;
 }
 .kg-aufgabe-hinweis strong { color: var(--text); }
@@ -361,19 +361,19 @@ svg#koordSystem { width: 100%; height: 440px; display: block; }
   width: 52px; height: 52px; border-radius: 10px;
   background: var(--surface2); border: 3px solid rgba(255,255,255,0.15);
   display: flex; align-items: center; justify-content: center;
-  font-family: 'Fredoka One', cursive; font-size: 1.2rem; color: var(--text);
+  font-family: 'Fredoka One', cursive; font-size: var(--fs-lg); color: var(--text);
   cursor: pointer; transition: all .15s ease;
 }
 .kg-karte:hover { transform: translateY(-3px); border-color: var(--yellow); }
 .kg-karte-mitte { background: var(--yellow); color: #1a1f3a; border-color: #c9a83c; }
-.kg-karte-min { background: #22C55E; color: #fff; border-color: #15803d; }
-.kg-karte-max { background: #EF4444; color: #fff; border-color: #b91c1c; }
+.kg-karte-min { background: #22C55E; color: var(--on-accent); border-color: #15803d; }
+.kg-karte-max { background: #F87171; color: var(--on-accent); border-color: #b91c1c; }
 .kg-karte-dragging { opacity: .4; transform: scale(0.95); }
 .kg-karte-dragover { border-color: var(--yellow) !important; background: rgba(255,211,61,0.15); transform: scale(1.08); }
 
 .kg-sortier-actions { display: flex; gap: .6rem; justify-content: center; flex-wrap: wrap; margin-bottom: .8rem; }
 
-.kg-feedback { font-family: 'Fredoka One', cursive; font-size: .95rem; min-height: 1.5rem; text-align: center; color: var(--muted); }
+.kg-feedback { font-family: 'Fredoka One', cursive; font-size: var(--fs-sm); min-height: 1.5rem; text-align: center; color: var(--muted); }
 .kg-feedback.richtig { color: var(--mint); }
 .kg-feedback.falsch  { color: var(--red); }
 
@@ -381,12 +381,12 @@ svg#koordSystem { width: 100%; height: 440px; display: block; }
   background: rgba(255,211,61,0.08); border: 2px solid rgba(255,211,61,0.3);
   border-radius: 12px; padding: 1rem 1.3rem; margin-top: .8rem; text-align: center;
 }
-.kg-rechenweg { font-size: .95rem; color: var(--text); }
-.kg-rechenweg strong { color: var(--yellow); font-size: 1.2rem; }
+.kg-rechenweg { font-size: var(--fs-sm); color: var(--text); }
+.kg-rechenweg strong { color: var(--yellow); font-size: var(--fs-lg); }
 
 .kg-modus-zeile { display: flex; gap: .6rem; justify-content: center; margin-bottom: 1rem; flex-wrap: wrap; }
 .kg-modus-tag {
-  padding: .4rem 1rem; border-radius: 100px; font-size: .78rem; font-weight: 700;
+  padding: .4rem 1rem; border-radius: 100px; font-size: var(--fs-xs); font-weight: 700;
   background: var(--surface2); color: var(--muted); border: 2px solid rgba(255,255,255,0.1);
 }
 .kg-modus-tag.active { background: rgba(255,211,61,0.15); color: var(--yellow); border-color: rgba(255,211,61,0.4); }
@@ -407,7 +407,7 @@ svg#koordSystem { width: 100%; height: 440px; display: block; }
 .kg-ausgleich-bars { display: flex; align-items: flex-end; gap: 1rem; z-index: 2; height: 100%; }
 .kg-ausgleich-col { display: flex; align-items: flex-end; height: 100%; }
 .kg-ausgleich-bar {
-  width: 38px; background: linear-gradient(180deg, #FF6B35, #FFD93D);
+  width: 38px; background: linear-gradient(180deg, #FF7A47, #FFD93D);
   border-radius: 8px 8px 0 0; border: 3px solid #1a1f3a; border-bottom: none;
   position: relative; transition: background .3s ease;
   display: flex; align-items: flex-start; justify-content: center;
@@ -421,10 +421,10 @@ svg#koordSystem { width: 100%; height: 440px; display: block; }
   cursor: ns-resize; touch-action: none;
   display: flex; align-items: center; justify-content: center;
 }
-.kg-bar-handle::before { content: '↕'; font-size: .7rem; color: #1a1f3a; font-weight: 800; }
+.kg-bar-handle::before { content: '↕'; font-size: var(--fs-2xs); color: #1a1f3a; font-weight: 800; }
 .kg-bar-val {
   position: absolute; top: -38px; left: 50%; transform: translateX(-50%);
-  font-size: .75rem; font-weight: 800; color: var(--text);
+  font-size: var(--fs-xs); font-weight: 800; color: var(--text);
 }
 /* Eigene Zeile UNTER dem Balken-Track — dieselben Spaltenmaße (38px + 1rem-Abstand),
    damit jede Beschriftung exakt unter ihrem Balken sitzt, aber die Balken selbst
@@ -436,36 +436,36 @@ svg#koordSystem { width: 100%; height: 440px; display: block; }
   background: rgba(255,255,255,0.03); border-radius: 0 0 14px 14px;
   margin-bottom: 1rem;
 }
-.kg-bar-label { width: 38px; text-align: center; font-size: .68rem; color: var(--muted); }
+.kg-bar-label { width: 38px; text-align: center; font-size: var(--fs-2xs); color: var(--muted); }
 
 /* Linienbeschriftung */
 .kg-linie-label {
   position: absolute; left: 4px; top: -18px;
-  font-size: .7rem; font-weight: 800; color: var(--mint);
+  font-size: var(--fs-2xs); font-weight: 800; color: var(--mint);
   white-space: nowrap; background: var(--surface2);
   padding: .1rem .4rem; border-radius: 4px;
 }
 
 /* Tabelle: Bruch + Prozent gestapelt */
-.anteil-bruch { display: block; font-size: .78rem; font-weight: 700; color: var(--text); }
-.anteil-pct   { display: block; font-size: .68rem; color: var(--muted); }
+.anteil-bruch { display: block; font-size: var(--fs-xs); font-weight: 700; color: var(--text); }
+.anteil-pct   { display: block; font-size: var(--fs-2xs); color: var(--muted); }
 
 /* Strichliste: Gruppen + Summe darunter */
 .strich-gruppe { font-family: monospace; letter-spacing: .05em; color: var(--mint); }
-.strich-summe  { font-size: .62rem; color: var(--muted); margin-top: .15rem; }
+.strich-summe  { font-size: var(--fs-2xs); color: var(--muted); margin-top: .15rem; }
 
-.kg-sub   { font-size: .65rem; color: var(--muted); margin-top: .2rem; }
+.kg-sub   { font-size: var(--fs-2xs); color: var(--muted); margin-top: .2rem; }
 
 /* ── Modal — Kind-Profil ── */
 .kind-modal-avatar { width: 110px; height: 125px; margin: 0 auto 1rem; }
 .kind-modal-avatar svg { width: 100%; height: 100%; }
-.kind-modal-name { font-family: 'Fredoka One', cursive; font-size: 1.6rem; text-align: center; color: var(--yellow); margin-bottom: .25rem; }
-.kind-modal-klasse { text-align: center; color: var(--muted); font-size: .8rem; margin-bottom: 1.2rem; }
+.kind-modal-name { font-family: 'Fredoka One', cursive; font-size: var(--fs-xl); text-align: center; color: var(--yellow); margin-bottom: .25rem; }
+.kind-modal-klasse { text-align: center; color: var(--muted); font-size: var(--fs-xs); margin-bottom: 1.2rem; }
 .kind-speech-bubble {
   background: var(--surface2);
   border-radius: 16px 16px 16px 4px;
   padding: 1rem 1.2rem;
-  font-size: .9rem;
+  font-size: var(--fs-sm);
   line-height: 1.7;
   color: var(--text);
   position: relative;
@@ -476,7 +476,7 @@ svg#koordSystem { width: 100%; height: 440px; display: block; }
   content: '💬';
   position: absolute;
   top: -14px; left: 12px;
-  font-size: 1.1rem;
+  font-size: var(--fs-md);
 }
 .kind-facts {
   display: grid; grid-template-columns: 1fr 1fr;
@@ -485,15 +485,15 @@ svg#koordSystem { width: 100%; height: 440px; display: block; }
 .kind-fact {
   background: rgba(255,255,255,0.04);
   border-radius: 10px; padding: .6rem .8rem;
-  font-size: .78rem;
+  font-size: var(--fs-xs);
 }
-.kind-fact-label { color: var(--muted); font-size: .65rem; text-transform: uppercase; letter-spacing: .05em; }
+.kind-fact-label { color: var(--muted); font-size: var(--fs-2xs); text-transform: uppercase; letter-spacing: .05em; }
 .kind-fact-value { font-weight: 800; margin-top: .15rem; }
 
 /* Easter egg modal */
 .easter-badge {
-  background: linear-gradient(135deg, #A855F7, #FF6B9D);
-  color: white; font-size: .7rem; font-weight: 800;
+  background: linear-gradient(135deg, #C084FC, #FF6B9D);
+  color: white; font-size: var(--fs-2xs); font-weight: 800;
   padding: .2rem .7rem; border-radius: 100px;
   display: inline-block; margin: 0 auto .5rem;
   text-align: center;
@@ -506,13 +506,13 @@ svg#koordSystem { width: 100%; height: 440px; display: block; }
 }
 .mc-option {
   padding: .65rem .8rem; border-radius: 10px;
-  font-family: 'Nunito', sans-serif; font-size: .82rem; font-weight: 700;
+  font-family: 'Nunito', sans-serif; font-size: var(--fs-xs); font-weight: 700;
   cursor: pointer; border: 2px solid rgba(255,255,255,0.12);
   background: var(--surface2); color: var(--text);
   transition: all .15s ease;
 }
 .mc-option:hover { border-color: var(--yellow); background: rgba(255,211,61,0.08); transform: translateY(-1px); }
-.mc-option.mc-wrong { animation: mcShake .4s ease; border-color: var(--red); background: rgba(239,68,68,0.15); }
+.mc-option.mc-wrong { animation: mcShake .4s ease; border-color: var(--red); background: rgba(248,113,113,0.15); }
 @keyframes mcShake {
   0%,100% { transform: translateX(0); }
   25%     { transform: translateX(-5px); }
@@ -521,7 +521,7 @@ svg#koordSystem { width: 100%; height: 440px; display: block; }
 
 /* ── Fortschrittsbalken (wie viele Kinder befragt) ── */
 .fortschritt-wrap { margin-top: .75rem; }
-.fortschritt-label { font-size: .72rem; color: var(--muted); margin-bottom: .3rem; display: flex; justify-content: space-between; }
+.fortschritt-label { font-size: var(--fs-2xs); color: var(--muted); margin-bottom: .3rem; display: flex; justify-content: space-between; }
 .fortschritt-track { height: 8px; background: rgba(255,255,255,0.08); border-radius: 100px; overflow: hidden; }
 .fortschritt-fill  { height: 100%; background: var(--mint); border-radius: 100px; transition: width .4s ease; }
 
@@ -531,7 +531,7 @@ svg#koordSystem { width: 100%; height: 440px; display: block; }
 /* ── Empty state ── */
 .empty-state { text-align: center; padding: 2rem 1rem; color: var(--muted); }
 .empty-state .empty-icon { font-size: 2.5rem; margin-bottom: .5rem; }
-.empty-state p { font-size: .85rem; line-height: 1.6; }
+.empty-state p { font-size: var(--fs-sm); line-height: 1.6; }
 </style>
 </head>
 <body>
@@ -958,7 +958,7 @@ function renderStrichButton(id) {
 
   if (erfasste.has(id)) {
     area.innerHTML = `
-      <div style="background:rgba(34,197,94,0.1);border:2px solid rgba(34,197,94,0.3);border-radius:12px;padding:.8rem 1rem;font-size:.82rem;text-align:center;color:#4ade80;font-weight:700">
+      <div style="background:rgba(34,197,94,0.1);border:2px solid rgba(34,197,94,0.3);border-radius:12px;padding:.8rem 1rem;font-size:.82rem;text-align:center;color:var(--green);font-weight:700">
         ✓ Schon erfasst: ${merkmal.label.replace(/^\S+\s/, '')} = ${wert}
       </div>`;
   } else {

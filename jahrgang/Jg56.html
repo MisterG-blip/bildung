@@ -15,12 +15,12 @@ body { background: radial-gradient(ellipse at 30% 10%, #2a1a30 0%, #1a1f3a 55%);
   display: flex; align-items: center; justify-content: space-between;
   flex-wrap: wrap; gap: .75rem;
 }
-.jg-logo { font-size: 1.3rem; color: var(--yellow); letter-spacing: .05em; }
-.jg-logo span { color: var(--text); font-size: .9rem; font-family: 'Nunito', sans-serif; font-weight: 600; }
+.jg-logo { font-size: var(--fs-lg); color: var(--yellow); letter-spacing: .05em; }
+.jg-logo span { color: var(--text); font-size: var(--fs-sm); font-family: 'Nunito', sans-serif; font-weight: 600; }
 
 .jg-hero { text-align: center; padding: 2.5rem 1.5rem 1.5rem; }
 .jg-hero h1 { font-size: clamp(1.8rem,5vw,3rem); color: var(--yellow); margin-bottom: .5rem; }
-.jg-hero p  { font-size: .95rem; color: var(--muted); max-width: 540px; margin: 0 auto; line-height: 1.7; }
+.jg-hero p  { font-size: var(--fs-md); color: var(--muted); max-width: 540px; margin: 0 auto; line-height: 1.7; }
 
 .lernwelten-grid {
   display: grid;
@@ -54,9 +54,9 @@ body { background: radial-gradient(ellipse at 30% 10%, #2a1a30 0%, #1a1f3a 55%);
 .lw-card.daten:hover   { border-color: var(--yellow); box-shadow: 0 20px 50px rgba(0,0,0,0.4), 0 0 30px rgba(255,211,61,0.15); }
 .lw-card.daten::before { background: radial-gradient(ellipse at top left, rgba(255,211,61,0.1), transparent 60%); }
 
-.lw-card.zufall  { border-color: rgba(168,85,247,0.3); }
-.lw-card.zufall:hover  { border-color: var(--purple); box-shadow: 0 20px 50px rgba(0,0,0,0.4), 0 0 30px rgba(168,85,247,0.15); }
-.lw-card.zufall::before { background: radial-gradient(ellipse at top left, rgba(168,85,247,0.1), transparent 60%); }
+.lw-card.zufall  { border-color: rgba(192,132,252,0.3); }
+.lw-card.zufall:hover  { border-color: var(--purple); box-shadow: 0 20px 50px rgba(0,0,0,0.4), 0 0 30px rgba(192,132,252,0.15); }
+.lw-card.zufall::before { background: radial-gradient(ellipse at top left, rgba(192,132,252,0.1), transparent 60%); }
 
 .lw-card.analyse { border-color: rgba(78,205,196,0.3); }
 .lw-card.analyse:hover   { border-color: var(--mint); box-shadow: 0 20px 50px rgba(0,0,0,0.4), 0 0 30px rgba(78,205,196,0.15); }
@@ -66,16 +66,16 @@ body { background: radial-gradient(ellipse at 30% 10%, #2a1a30 0%, #1a1f3a 55%);
 .lw-card:hover::before { opacity: 1; }
 
 .lw-icon  { font-size: 3rem; margin-bottom: .9rem; display: block; }
-.lw-titel { font-family:'Fredoka One',cursive; font-size: 1.5rem; color: var(--text); margin-bottom: .5rem; }
-.lw-fokus { font-size: .72rem; color: var(--mint); text-transform: uppercase; letter-spacing: .08em; margin-bottom: .6rem; font-weight: 700; }
-.lw-desc  { font-size: .85rem; color: var(--muted); line-height: 1.65; }
+.lw-titel { font-family:'Fredoka One',cursive; font-size: var(--fs-xl); color: var(--text); margin-bottom: .5rem; }
+.lw-fokus { font-size: var(--fs-2xs); color: var(--mint); text-transform: uppercase; letter-spacing: .08em; margin-bottom: .6rem; font-weight: 700; }
+.lw-desc  { font-size: var(--fs-xs); color: var(--muted); line-height: 1.65; }
 .lw-arrow { position: absolute; bottom: 1.4rem; right: 1.4rem; font-size: 1.3rem; opacity: 0; transform: translateX(-6px); transition: all .2s; }
 .lw-card:hover .lw-arrow { opacity: 1; transform: translateX(0); }
 .lw-tag { position: absolute; top: 1.2rem; right: 1.2rem; }
 
 .kerngedanke {
   max-width: 700px; margin: 0 auto 1rem; padding: 0 1.5rem;
-  text-align: center; font-size: .85rem; color: var(--muted);
+  text-align: center; font-size: var(--fs-sm); color: var(--muted);
   font-style: italic; line-height: 1.7;
 }
 .kerngedanke strong { color: var(--yellow); font-style: normal; }

@@ -8,14 +8,14 @@
 <link rel="stylesheet" href="../styles/spielecke.css">
 <style>
 body { background: radial-gradient(ellipse at 30% 10%, #2a1a30 0%, #1a1f3a 55%); }
-.zurueck-row { display: flex; gap: .5rem; align-items: center; font-size: .78rem; color: var(--muted); }
+.zurueck-row { display: flex; gap: .5rem; align-items: center; font-size: var(--fs-sm); color: var(--muted); }
 .zurueck-toggle {
   display: flex; align-items: center; gap: .4rem; cursor: pointer;
   background: var(--surface2); padding: .4rem .8rem; border-radius: 100px;
   border: 2px solid rgba(255,255,255,0.1);
 }
 .zurueck-toggle input { accent-color: var(--mint); }
-.beutel-inhalt-info { font-size: .75rem; color: var(--muted); text-align: center; }
+.beutel-inhalt-info { font-size: var(--fs-xs); color: var(--muted); text-align: center; }
 </style>
 </head>
 <body>
@@ -39,7 +39,7 @@ body { background: radial-gradient(ellipse at 30% 10%, #2a1a30 0%, #1a1f3a 55%);
         <svg viewBox="0 0 200 220" xmlns="http://www.w3.org/2000/svg">
           <path d="M40,80 Q30,200 100,210 Q170,200 160,80 Z" fill="#8B5CF6" stroke="#1a1f3a" stroke-width="4"/>
           <path d="M40,80 Q100,100 160,80 L150,60 Q100,75 50,60 Z" fill="#7c3aed" stroke="#1a1f3a" stroke-width="4"/>
-          <ellipse cx="100" cy="55" rx="55" ry="14" fill="#A855F7" stroke="#1a1f3a" stroke-width="4"/>
+          <ellipse cx="100" cy="55" rx="55" ry="14" fill="#C084FC" stroke="#1a1f3a" stroke-width="4"/>
           <path d="M70,45 Q100,15 130,45" fill="none" stroke="#5a3888" stroke-width="6" stroke-linecap="round"/>
           <text x="100" y="150" font-size="40" text-anchor="middle">❓</text>
         </svg>
@@ -99,8 +99,8 @@ body { background: radial-gradient(ellipse at 30% 10%, #2a1a30 0%, #1a1f3a 55%);
 <script>
 // Initial bag setup: name, color, count
 let farben = [
-  { name: 'Rot',  farbe: '#EF4444', anzahl: 5 },
-  { name: 'Blau', farbe: '#3B82F6', anzahl: 3 },
+  { name: 'Rot',  farbe: '#F87171', anzahl: 5 },
+  { name: 'Blau', farbe: '#60A5FA', anzahl: 3 },
   { name: 'Gelb', farbe: '#FFD93D', anzahl: 2 },
 ];
 

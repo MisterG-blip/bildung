@@ -9,10 +9,10 @@
 <style>
 body { background: radial-gradient(ellipse at 30% 10%, #2a1a30 0%, #1a1f3a 55%); }
 .segment-config { display: flex; flex-direction: column; gap: .5rem; max-width: 340px; width: 100%; margin-top: .5rem; }
-.seg-row { display: flex; align-items: center; gap: .6rem; font-size: .8rem; }
+.seg-row { display: flex; align-items: center; gap: .6rem; font-size: var(--fs-xs); }
 .seg-row .seg-dot { width: 18px; height: 18px; border-radius: 50%; border: 2px solid #1a1f3a; flex-shrink: 0; }
 .seg-row input[type=range] { flex: 1; }
-.seg-row .seg-pct { width: 42px; text-align: right; font-weight: 800; font-size: .78rem; }
+.seg-row .seg-pct { width: 42px; text-align: right; font-weight: 800; font-size: var(--fs-sm); }
 </style>
 </head>
 <body>
@@ -84,10 +84,10 @@ const TWO_PI = Math.PI * 2;
 
 // Default 4 segments with names + colors
 let segmente = [
-  { name: 'Rot',    farbe: '#EF4444', anteil: 25 },
+  { name: 'Rot',    farbe: '#F87171', anteil: 25 },
   { name: 'Gelb',   farbe: '#FFD93D', anteil: 25 },
   { name: 'Grün',   farbe: '#22C55E', anteil: 25 },
-  { name: 'Blau',   farbe: '#3B82F6', anteil: 25 },
+  { name: 'Blau',   farbe: '#60A5FA', anteil: 25 },
 ];
 
 let daten = {};

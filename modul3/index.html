@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Modul 3: Laplace-Wahrscheinlichkeit — MaLa - Das Mathematik Labor</title>
+<link rel="stylesheet" href="../styles/base.css">
+<link rel="stylesheet" href="../styles/spielecke.css">
+<style>
+body { background: radial-gradient(ellipse at 30% 10%, #3a2410 0%, #1a1f3a 55%); }
+
+.m3-header {
+  background: linear-gradient(135deg, #1a1f3a 0%, #4a2e1a 100%);
+  border-bottom: 3px solid rgba(255,122,71,0.35);
+  padding: 1rem 1.5rem;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: .75rem;
+  position: sticky; top: 0; z-index: 50;
+}
+.m3-logo { font-size: var(--fs-lg); color: var(--orange); letter-spacing: .05em; }
+.m3-logo span { color: var(--muted); font-size: var(--fs-xs); font-family: 'Nunito', sans-serif; font-weight: 600; margin-left: .4rem; }
+
+.m3-hero { text-align: center; padding: 2rem 1.5rem 1rem; max-width: 700px; margin: 0 auto; }
+.m3-hero h1 { font-size: clamp(1.6rem,4.5vw,2.4rem); color: var(--orange); margin-bottom: .5rem; }
+.m3-hero p  { font-size: var(--fs-sm); color: var(--muted); line-height: 1.7; }
+
+.m3-main { max-width: 880px; margin: 0 auto; padding: 0 1.2rem 4rem; }
+
+.m3-fortschritt {
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: .6rem;
+  margin-bottom: 1.2rem; padding: .7rem 1rem;
+  background: var(--card-bg); border-radius: 14px; border: 2px solid rgba(255,255,255,0.08);
+  font-size: var(--fs-xs);
+}
+.m3-teil-badge {
+  background: rgba(255,122,71,0.15); color: var(--orange); font-weight: 800;
+  border-radius: 20px; padding: .25rem .7rem; margin-right: .6rem; font-size: var(--fs-2xs);
+}
+.m3-runde-info { color: var(--muted); }
+
+.m3-karte {
+  background: var(--card-bg); border-radius: 22px; border: 3px solid rgba(255,122,71,0.25);
+  padding: 1.6rem 1.6rem 1.8rem;
+}
+.m3-titel { font-family:'Fredoka One',cursive; font-size: var(--fs-lg); color: var(--text); margin-bottom: .4rem; text-align: center; }
+.m3-beschreibung { font-size: var(--fs-xs); color: var(--muted); line-height: 1.65; margin-bottom: 1.3rem; text-align: center; max-width: 640px; margin-left: auto; margin-right: auto; }
+
+/* ── Bruch-Typografie (Zähler / Strich / Nenner) ── */
+.m3-bruch { display: inline-flex; flex-direction: column; align-items: center; line-height: 1; vertical-align: middle; margin: 0 .15em; }
+.m3-bruch .z { border-bottom: 2px solid currentColor; padding: 0 .3em .1em; }
+.m3-bruch .n { padding: .1em .3em 0; }
+.m3-bruch.gross { font-size: 1.5rem; font-weight: 800; }
+
+/* ══════════════ Teil 1: Sortieren ══════════════ */
+.m3-karten-stapel { position: relative; width: 100%; max-width: 380px; min-height: 190px; margin: 0 auto 1.4rem; }
+.m3-sortier-karte {
+  position: relative; width: 100%; min-height: 190px;
+  background: var(--surface2);
+  border-radius: 18px; border: 3px solid rgba(255,255,255,0.12);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .6rem;
+  padding: 1.5rem; text-align: center;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.35);
+  transition: transform .3s ease, opacity .3s ease;
+  user-select: none;
+}
+.m3-sortier-karte .emoji { font-size: 2.6rem; }
+.m3-sortier-karte .txt { font-size: var(--fs-base); font-weight: 700; color: var(--text); line-height: 1.5; }
+.m3-sortier-karte.swipe-left  { transform: translateX(-420px) rotate(-20deg); opacity: 0; }
+.m3-sortier-karte.swipe-right { transform: translateX(420px) rotate(20deg); opacity: 0; }
+
+.m3-kategorien-row { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-bottom: .9rem; }
+.m3-kategorie-btn {
+  display: flex; flex-direction: column; align-items: center; gap: .3rem;
+  padding: 1rem 1.6rem; border-radius: 16px; cursor: pointer;
+  border: 3px solid; transition: all .15s; min-width: 160px;
+}
+.m3-kategorie-btn:hover { transform: translateY(-3px); }
+.m3-kategorie-btn.ja  { border-color: rgba(34,197,94,0.4);  background: rgba(34,197,94,0.08); }
+.m3-kategorie-btn.nein { border-color: rgba(248,113,113,0.4); background: rgba(248,113,113,0.08); }
+.m3-kategorie-icon { font-size: 1.7rem; }
+.m3-kategorie-label { font-size: var(--fs-sm); font-weight: 800; }
+.m3-kategorie-count { font-size: var(--fs-2xs); color: var(--muted); }
+
+.m3-feedback-text { font-family: 'Fredoka One', cursive; font-size: var(--fs-md); min-height: 1.5rem; text-align: center; margin-bottom: .3rem; }
+.m3-feedback-text.richtig { color: var(--mint); }
+.m3-feedback-text.falsch  { color: #ff8787; }
+.m3-begruendung { font-size: var(--fs-sm); color: var(--muted); text-align: center; max-width: 520px; margin: 0 auto; line-height: 1.6; min-height: 1.4em; font-style: italic; }
+
+/* ══════════════ Übergang / Merksatz ══════════════ */
+.m3-transition, .m3-ende { text-align: center; padding: 2.2rem 1.5rem; }
+.m3-transition-emoji, .m3-ende-emoji { font-size: 3rem; margin-bottom: .8rem; }
+.m3-transition-titel, .m3-ende-titel { font-family:'Fredoka One',cursive; font-size: var(--fs-xl); color: var(--orange); margin-bottom: .8rem; }
+.m3-transition-text { font-size: var(--fs-sm); color: var(--muted); line-height: 1.7; max-width: 560px; margin: 0 auto 1.3rem; }
+
+.m3-merksatz-box {
+  background: rgba(255,211,61,0.08); border: 2px solid rgba(255,211,61,0.3);
+  border-radius: 16px; padding: 1.3rem 1.4rem; max-width: 560px; margin: 0 auto 1.4rem; text-align: left;
+}
+.m3-merksatz-label { font-size: var(--fs-2xs); color: var(--yellow); font-weight: 800; text-transform: uppercase; letter-spacing: .06em; margin-bottom: .5rem; }
+.m3-merksatz-box p { font-size: var(--fs-sm); color: var(--text); line-height: 1.65; margin-bottom: .6rem; }
+.m3-merksatz-box p:last-child { margin-bottom: 0; }
+
+.m3-formel-box {
+  display: flex; align-items: center; justify-content: center; gap: .7rem; flex-wrap: wrap;
+  background: rgba(255,255,255,0.04); border-radius: 14px; padding: 1rem 1.2rem; margin-top: .8rem;
+  font-size: var(--fs-md); font-weight: 700; color: var(--text);
+}
+.m3-formel-box .m3-bruch { color: var(--mint); }
+
+/* ══════════════ Teil 2: Zählen ══════════════ */
+.m3-experiment-badge {
+  display: inline-flex; align-items: center; gap: .4rem;
+  background: rgba(255,122,71,0.12); border-radius: 20px; padding: .3rem .8rem;
+  font-size: var(--fs-xs); font-weight: 800; color: var(--orange); margin: 0 auto .8rem; text-align: center;
+}
+.m3-experiment-row { text-align: center; margin-bottom: .8rem; }
+.m3-ereignis-frage {
+  background: rgba(78,205,196,0.08); border: 2px solid rgba(78,205,196,0.3);
+  border-radius: 14px; padding: .9rem 1.1rem; text-align: center; font-size: var(--fs-sm); font-weight: 700;
+  color: var(--text); margin-bottom: 1.2rem;
+}
+.m3-ereignis-frage span { color: var(--mint); }
+
+.m3-outcome-grid { display: flex; flex-wrap: wrap; gap: .7rem; justify-content: center; margin-bottom: 1rem; }
+.m3-outcome-tile {
+  width: 66px; height: 66px; border-radius: 14px;
+  background: var(--surface2); border: 3px solid rgba(255,255,255,0.14);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  cursor: pointer; transition: all .15s; user-select: none;
+  font-size: 1.5rem; font-weight: 800; color: var(--text);
+}
+.m3-outcome-tile .lbl { font-size: .62rem; color: var(--muted); font-weight: 700; margin-top: .1rem; }
+.m3-outcome-tile:hover { transform: translateY(-2px); }
+.m3-outcome-tile.gewaehlt { border-color: var(--yellow); background: rgba(255,211,61,0.15); box-shadow: 0 0 0 2px rgba(255,211,61,0.3); }
+.m3-outcome-tile.richtig { border-color: var(--mint); background: rgba(78,205,196,0.18); }
+.m3-outcome-tile.falsch-plus { border-color: #ff6b6b; background: rgba(255,107,107,0.15); }
+.m3-outcome-tile.falsch-minus { border-color: #ff6b6b; border-style: dashed; opacity: .7; }
+.m3-outcome-tile.gesperrt { cursor: default; }
+
+.m3-zaehl-row { display: flex; align-items: center; justify-content: center; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem; }
+.m3-zaehl-counter { font-size: var(--fs-xs); color: var(--muted); font-weight: 700; }
+.m3-zaehl-counter strong { color: var(--yellow); }
+
+.m3-pruef-row { display: flex; align-items: center; justify-content: center; gap: .9rem; flex-wrap: wrap; margin-top: .3rem; }
+.m3-pruef-info { font-size: var(--fs-xs); color: var(--muted); font-weight: 700; text-align: center; }
+.m3-pruef-info.richtig { color: var(--mint); }
+.m3-pruef-info.falsch { color: #ff8787; }
+
+.m3-ergebnis-box {
+  margin-top: 1.2rem; padding: 1.1rem 1.3rem; border-radius: 16px;
+  background: rgba(78,205,196,0.08); border: 2px solid rgba(78,205,196,0.35);
+  text-align: center; animation: m3Pop .4s ease;
+}
+@keyframes m3Pop { 0% { transform: scale(0.85); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+.m3-ergebnis-rechnung { display: flex; align-items: center; justify-content: center; gap: .6rem; flex-wrap: wrap; font-size: var(--fs-md); font-weight: 800; color: var(--text); }
+.m3-ergebnis-rechnung .m3-bruch { color: var(--mint); }
+.m3-ergebnis-prozent { font-size: var(--fs-xs); color: var(--muted); margin-top: .5rem; }
+
+.m3-ende-merksatz { font-size: var(--fs-sm); color: var(--muted); line-height: 1.7; max-width: 560px; margin: 1rem auto 1.6rem; font-style: italic; }
+</style>
+</head>
+<body>
+
+<header class="m3-header">
+  <div class="m3-logo">⚖️ Modul 3: Laplace-Wahrscheinlichkeit<span>/ Jahrgang 7 &amp; 8</span></div>
+  <button class="btn btn-ghost" onclick="location.href='../jahrgang/Jg78.html'">← Jahrgang 7 &amp; 8</button>
+</header>
+
+<div class="m3-hero">
+  <h1>Aus Struktur wird eine Zahl</h1>
+  <p>Bisher habt ihr Ergebnisräume aufgebaut und Baumdiagramme gezeichnet. Jetzt geht es darum, aus dieser Struktur eine konkrete <strong>Wahrscheinlichkeit</strong> zu berechnen.</p>
+</div>
+
+<div class="m3-main" id="mainArea"></div>
+
+<script>
+/* ═══════════════════════ Hilfsfunktionen ═══════════════════════ */
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+function ggT(a, b) { return b === 0 ? a : ggT(b, a % b); }
+function kuerze(z, n) { const g = ggT(z, n) || 1; return [z / g, n / g]; }
+function bruchHTML(z, n, gross) {
+  return `<span class="m3-bruch${gross ? ' gross' : ''}"><span class="z">${z}</span><span class="n">${n}</span></span>`;
+}
+
+/* ── Glücksrad als SVG zeichnen (statt Riesenrad-Emoji 🎡) ── */
+function sektorPfad(cx, cy, r, start, ende) {
+  const x1 = cx + r * Math.cos(start), y1 = cy + r * Math.sin(start);
+  const x2 = cx + r * Math.cos(ende),  y2 = cy + r * Math.sin(ende);
+  const grossBogen = (ende - start) > Math.PI ? 1 : 0;
+  return `M ${cx} ${cy} L ${x1.toFixed(2)} ${y1.toFixed(2)} A ${r} ${r} 0 ${grossBogen} 1 ${x2.toFixed(2)} ${y2.toFixed(2)} Z`;
+}
+function svgGluecksrad(sektoren, groesse) {
+  const r = groesse / 2 - 4, cx = groesse / 2, cy = groesse / 2;
+  let winkel = -Math.PI / 2, pfade = '';
+  sektoren.forEach(s => {
+    const naechster = winkel + s.anteil * Math.PI * 2;
+    pfade += `<path d="${sektorPfad(cx, cy, r, winkel, naechster)}" fill="${s.farbe}" stroke="#1a1f3a" stroke-width="1.3"/>`;
+    winkel = naechster;
+  });
+  return `<svg viewBox="0 0 ${groesse} ${groesse}" width="${groesse}" height="${groesse}" style="display:block;flex-shrink:0;">
+    <circle cx="${cx}" cy="${cy}" r="${r + 2.5}" fill="none" stroke="#1a1f3a" stroke-width="2.5"/>
+    ${pfade}
+    <circle cx="${cx}" cy="${cy}" r="3.5" fill="#1a1f3a"/>
+    <polygon points="${cx - 6},1 ${cx + 6},1 ${cx},11" fill="#F0F0FF" stroke="#1a1f3a" stroke-width="1"/>
+  </svg>`;
+}
+const RAD_FARBEN = ['#FF7A47', '#4ECDC4', '#FFD93D', '#C084FC', '#FF6B9D', '#60A5FA', '#22C55E', '#F87171'];
+const RAD_FAIR = svgGluecksrad([0.25, 0.25, 0.25, 0.25].map((a, i) => ({ anteil: a, farbe: RAD_FARBEN[i] })), 60);
+const RAD_UNFAIR = svgGluecksrad([
+  { anteil: 0.7, farbe: '#F87171' }, { anteil: 0.12, farbe: '#4ECDC4' },
+  { anteil: 0.1,  farbe: '#FFD93D' }, { anteil: 0.08, farbe: '#C084FC' },
+], 60);
+const RAD_8 = svgGluecksrad(Array(8).fill().map((_, i) => ({ anteil: 1 / 8, farbe: RAD_FARBEN[i] })), 40);
+const RAD_8_KLEIN = svgGluecksrad(Array(8).fill().map((_, i) => ({ anteil: 1 / 8, farbe: RAD_FARBEN[i] })), 22);
+
+/* ═══════════════════════ Teil 1: Laplace-Experimente sortieren ═══════════════════════ */
+const TEIL1_KARTEN = [
+  { emoji: '🪙', text: 'Du wirfst eine normale Münze. Kopf und Zahl sind möglich.', kat: 'ja',
+    begruendung: 'Eine faire Münze zeigt Kopf und Zahl mit je 50 % — beide Ergebnisse sind gleich wahrscheinlich.' },
+  { emoji: '🎲', text: 'Du würfelst mit einem ganz normalen Würfel.', kat: 'ja',
+    begruendung: 'Jede der sechs Seiten eines fairen Würfels hat die gleiche Chance: je 1/6.' },
+  { emoji: '🎯', text: 'Du würfelst mit einem gezinkten Würfel, bei dem die 6 öfter fällt als alle anderen Zahlen.', kat: 'nein',
+    begruendung: 'Die 6 ist wahrscheinlicher als die anderen Zahlen — die Ergebnisse sind nicht gleich wahrscheinlich.' },
+  { emoji: RAD_FAIR, text: 'Ein Glücksrad hat vier gleich große Felder.', kat: 'ja',
+    begruendung: 'Gleich große Felder bedeuten: jedes Feld hat die gleiche Trefferchance.' },
+  { emoji: RAD_UNFAIR, text: 'Ein Glücksrad hat ein riesiges rotes Feld und drei winzige andere Felder.', kat: 'nein',
+    begruendung: 'Das große Feld wird viel häufiger getroffen als die kleinen — nicht gleich wahrscheinlich.' },
+  { emoji: '📌', text: 'Du wirfst einen Reißnagel. Er kann mit der Spitze nach oben oder nach unten landen.', kat: 'nein',
+    begruendung: 'Durch seine Form landet ein Reißnagel fast immer öfter auf einer Seite als auf der anderen — auch wenn es nur zwei Möglichkeiten gibt.' },
+  { emoji: '⚽', text: 'Ein Profi mit starker Schusstechnik tritt einen Elfmeter. Ergebnis: Tor oder kein Tor.', kat: 'nein',
+    begruendung: 'Ein guter Schütze trifft viel häufiger, als dass er verschießt — Tor und kein Tor sind nicht gleich wahrscheinlich.' },
+  { emoji: '🎫', text: 'Aus einer Box mit 20 gleich großen, gleich gefalteten Losen wird eines gezogen.', kat: 'ja',
+    begruendung: 'Da alle Lose gleich groß und gleich gefaltet sind, hat jedes Los die gleiche Chance, gezogen zu werden.' },
+  { emoji: '🌦️', text: 'Morgen regnet es — oder es regnet nicht.', kat: 'nein',
+    begruendung: 'Nur weil es zwei Möglichkeiten gibt, heißt das nicht, dass sie gleich wahrscheinlich sind. Meistens ist eine der beiden wahrscheinlicher.' },
+];
+
+let t1 = { reihenfolge: [], index: 0, richtig: { ja: 0, nein: 0 }, sperre: false };
+
+function zeigeIntro() {
+  document.getElementById('mainArea').innerHTML = `
+    <div class="m3-karte m3-transition">
+      <div class="m3-transition-emoji">⚖️</div>
+      <div class="m3-transition-titel">Was ist ein Laplace-Experiment?</div>
+      <div class="m3-merksatz-box" style="text-align:center;">
+        <p style="margin-bottom:0;">Ein Zufallsexperiment, bei dem <strong>alle möglichen Ergebnisse gleich wahrscheinlich</strong> sind. Man sagt auch: es ist <strong>fair</strong>.</p>
+      </div>
+      <button class="btn btn-orange" onclick="starteTeil1()">Kann ich das erkennen? →</button>
+    </div>
+  `;
+}
+
+function starteTeil1() {
+  t1 = { reihenfolge: shuffle(TEIL1_KARTEN), index: 0, richtig: { ja: 0, nein: 0 }, sperre: false };
+  renderTeil1();
+}
+
+function renderTeil1() {
+  const el = document.getElementById('mainArea');
+  const gesamt = t1.reihenfolge.length;
+
+  if (t1.index >= gesamt) { zeigeUebergangZuMerksatz(); return; }
+
+  const karte = t1.reihenfolge[t1.index];
+  el.innerHTML = `
+    <div class="m3-fortschritt">
+      <span><span class="m3-teil-badge">Teil 1 von 2</span>Karte ${t1.index + 1} von ${gesamt}</span>
+      <span class="m3-runde-info" id="m3GesamtRichtig">✅ ${t1.richtig.ja + t1.richtig.nein} richtig einsortiert</span>
+    </div>
+    <div class="m3-karte">
+      <div class="m3-titel">Ist das ein Laplace-Experiment?</div>
+      <div class="m3-beschreibung">Ein Laplace-Experiment nennt man <strong>fair</strong>: Alle möglichen Ergebnisse müssen gleich wahrscheinlich sein. Lies dir jede Situation durch und ordne sie ein.</div>
+
+      <div class="m3-karten-stapel">
+        <div class="m3-sortier-karte" id="aktiveKarte">
+          <div class="emoji">${karte.emoji}</div>
+          <div class="txt">${karte.text}</div>
+        </div>
+      </div>
+
+      <div class="m3-kategorien-row">
+        <div class="m3-kategorie-btn nein" onclick="einordnenT1('nein')">
+          <span class="m3-kategorie-icon">❌</span>
+          <span class="m3-kategorie-label">Kein Laplace-Experiment</span>
+          <span class="m3-kategorie-count" id="m3CountNein">${t1.richtig.nein} richtig</span>
+        </div>
+        <div class="m3-kategorie-btn ja" onclick="einordnenT1('ja')">
+          <span class="m3-kategorie-icon">✅</span>
+          <span class="m3-kategorie-label">Laplace-Experiment</span>
+          <span class="m3-kategorie-count" id="m3CountJa">${t1.richtig.ja} richtig</span>
+        </div>
+      </div>
+
+      <div class="m3-feedback-text" id="m3Feedback"></div>
+      <div class="m3-begruendung" id="m3Begruendung"></div>
+    </div>
+  `;
+}
+
+function einordnenT1(kat) {
+  if (t1.sperre) return;
+  t1.sperre = true;
+  const karte = t1.reihenfolge[t1.index];
+  const aktiveKarte = document.getElementById('aktiveKarte');
+  const feedback = document.getElementById('m3Feedback');
+  const begruendung = document.getElementById('m3Begruendung');
+
+  const istRichtig = karte.kat === kat;
+  if (istRichtig) {
+    t1.richtig[kat]++;
+    feedback.textContent = '✅ Richtig!';
+    feedback.className = 'm3-feedback-text richtig';
+  } else {
+    feedback.textContent = karte.kat === 'ja' ? 'Eigentlich: Laplace-Experiment' : 'Eigentlich: kein Laplace-Experiment';
+    feedback.className = 'm3-feedback-text falsch';
+  }
+  begruendung.textContent = karte.begruendung;
+  document.getElementById('m3CountJa').textContent = `${t1.richtig.ja} richtig`;
+  document.getElementById('m3CountNein').textContent = `${t1.richtig.nein} richtig`;
+  document.getElementById('m3GesamtRichtig').textContent = `✅ ${t1.richtig.ja + t1.richtig.nein} richtig einsortiert`;
+
+  if (aktiveKarte) aktiveKarte.classList.add(kat === 'ja' ? 'swipe-right' : 'swipe-left');
+
+  setTimeout(() => {
+    t1.index++;
+    t1.sperre = false;
+    renderTeil1();
+  }, 1400);
+}
+
+/* ═══════════════════════ Übergang: Merksatz + Formel ═══════════════════════ */
+function zeigeUebergangZuMerksatz() {
+  document.getElementById('mainArea').innerHTML = `
+    <div class="m3-karte m3-transition">
+      <div class="m3-transition-emoji">⚖️</div>
+      <div class="m3-transition-titel">Was macht ein Experiment "fair"?</div>
+      <p class="m3-transition-text">Du hast gerade gespürt, worauf es ankommt: nicht die Anzahl der Ergebnisse zählt, sondern ob sie <strong>gleich wahrscheinlich</strong> sind.</p>
+
+      <div class="m3-merksatz-box">
+        <div class="m3-merksatz-label">Merksatz</div>
+        <p>Ein Zufallsexperiment heißt <strong>Laplace-Experiment</strong> (oder: es ist <strong>fair</strong>), wenn alle möglichen Ergebnisse die gleiche Wahrscheinlichkeit haben.</p>
+        <p>Nur dann darfst du eine gesuchte Wahrscheinlichkeit so berechnen:</p>
+        <div class="m3-formel-box">
+          Wahrscheinlichkeit &nbsp;=&nbsp; ${bruchHTML('Anzahl der günstigen Ergebnisse', 'Anzahl der möglichen Ergebnisse')}
+        </div>
+      </div>
+
+      <p class="m3-transition-text">"Günstig" heißt: das Ergebnis passt zu dem, wonach gefragt ist — zum Beispiel "gerade Zahl" oder "rote Kugel". Jetzt übst du genau das: zählen, was günstig ist, und zählen, was überhaupt möglich ist.</p>
+      <button class="btn btn-orange" onclick="starteTeil2()">Los geht's →</button>
+    </div>
+  `;
+}
+
+/* ═══════════════════════ Teil 2: Ergebnisse zu Ereignissen zählen ═══════════════════════ */
+const TEIL2_RUNDEN = [
+  {
+    experiment: '🎲 Würfel (fair)', titel: 'Gerade Zahl würfeln', kurzlabel: 'eine gerade Zahl',
+    ereignis: 'Du würfelst mit einem fairen Würfel. Wie groß ist die Wahrscheinlichkeit für eine <span>gerade Zahl</span>?',
+    ergebnisse: [1,2,3,4,5,6].map(n => ({ label: String(n), symbol: '⚀⚁⚂⚃⚄⚅'[n-1], guenstig: n % 2 === 0 })),
+  },
+  {
+    experiment: '🎲 Würfel (fair)', titel: 'Zahl größer als 4', kurzlabel: 'eine Zahl größer als 4',
+    ereignis: 'Du würfelst mit einem fairen Würfel. Wie groß ist die Wahrscheinlichkeit für eine <span>Zahl größer als 4</span>?',
+    ergebnisse: [1,2,3,4,5,6].map(n => ({ label: String(n), symbol: '⚀⚁⚂⚃⚄⚅'[n-1], guenstig: n > 4 })),
+  },
+  {
+    experiment: `<span style="display:inline-flex;align-items:center;gap:.35rem;vertical-align:middle;">${RAD_8_KLEIN} Glücksrad (8 gleich große Felder)</span>`, titel: 'Zahl teilbar durch 3', kurzlabel: 'eine durch 3 teilbare Zahl',
+    ereignis: 'Ein faires Glücksrad hat 8 gleich große Felder, nummeriert von 1 bis 8. Wie groß ist die Wahrscheinlichkeit, dass die Zahl <span>durch 3 teilbar</span> ist?',
+    ergebnisse: [1,2,3,4,5,6,7,8].map(n => ({ label: String(n), symbol: RAD_8, guenstig: n % 3 === 0 })),
+  },
+  {
+    experiment: '👝 Kugelbeutel (10 Kugeln)', titel: 'Rote Kugel ziehen', kurzlabel: 'eine rote Kugel',
+    ereignis: 'Ein Beutel enthält 10 gleich große Kugeln: 4 rote, 3 blaue, 3 gelbe. Du ziehst blind eine Kugel. Wie groß ist die Wahrscheinlichkeit für <span>Rot</span>?',
+    ergebnisse: [
+      ...Array(4).fill().map((_, i) => ({ label: 'rot', symbol: '🔴', guenstig: true })),
+      ...Array(3).fill().map((_, i) => ({ label: 'blau', symbol: '🔵', guenstig: false })),
+      ...Array(3).fill().map((_, i) => ({ label: 'gelb', symbol: '🟡', guenstig: false })),
+    ],
+  },
+  {
+    experiment: '🃏 Kartenfarbe', titel: 'Rote Farbe ziehen', kurzlabel: 'eine rote Farbe',
+    ereignis: 'Du ziehst blind eine Karte und schaust nur auf die Farbe. Wie groß ist die Wahrscheinlichkeit für <span>Rot (Herz oder Karo)</span>?',
+    ergebnisse: [
+      { label: 'Pik', symbol: '♠', guenstig: false }, { label: 'Herz', symbol: '♥', guenstig: true },
+      { label: 'Karo', symbol: '♦', guenstig: true }, { label: 'Kreuz', symbol: '♣', guenstig: false },
+    ],
+  },
+];
+
+let rIndex2 = 0;
+let t2 = { ausgewaehlt: new Set(), geprueft: null };
+
+function starteTeil2() {
+  rIndex2 = 0;
+  starteRundeT2();
+}
+
+function starteRundeT2() {
+  t2 = { ausgewaehlt: new Set(), geprueft: null };
+  renderTeil2();
+}
+
+function outcomeToggle(i) {
+  if (t2.geprueft && t2.geprueft.alleRichtig) return;
+  if (t2.ausgewaehlt.has(i)) t2.ausgewaehlt.delete(i); else t2.ausgewaehlt.add(i);
+  t2.geprueft = null;
+  renderTeil2();
+}
+
+function outcomeTileClass(runde, i) {
+  if (!t2.geprueft) return t2.ausgewaehlt.has(i) ? 'gewaehlt' : '';
+  const istGuenstig = runde.ergebnisse[i].guenstig;
+  const gewaehlt = t2.ausgewaehlt.has(i);
+  const gesperrt = t2.geprueft.alleRichtig ? ' gesperrt' : '';
+  if (istGuenstig && gewaehlt) return 'richtig' + gesperrt;
+  if (!istGuenstig && gewaehlt) return 'falsch-plus' + gesperrt;
+  if (istGuenstig && !gewaehlt) return 'falsch-minus' + gesperrt;
+  return gesperrt.trim();
+}
+
+function pruefenT2() {
+  const runde = TEIL2_RUNDEN[rIndex2];
+  const guenstigeGesamt = runde.ergebnisse.filter(e => e.guenstig).length;
+  const moeglich = runde.ergebnisse.length;
+  const ausgewaehltRichtig = [...t2.ausgewaehlt].every(i => runde.ergebnisse[i].guenstig) && t2.ausgewaehlt.size === guenstigeGesamt;
+  t2.geprueft = { alleRichtig: ausgewaehltRichtig, guenstige: guenstigeGesamt, moeglich, kurzlabel: runde.kurzlabel };
+  renderTeil2();
+}
+
+function renderTeil2() {
+  const runde = TEIL2_RUNDEN[rIndex2];
+  const el = document.getElementById('mainArea');
+
+  const tilesHtml = runde.ergebnisse.map((e, i) => `
+    <div class="m3-outcome-tile ${outcomeTileClass(runde, i)}" onclick="outcomeToggle(${i})">
+      <div>${e.symbol}</div>
+      <div class="lbl">${e.label}</div>
+    </div>
+  `).join('');
+
+  let ergebnisBoxHtml = '';
+  if (t2.geprueft && t2.geprueft.alleRichtig) {
+    const [zk, nk] = kuerze(t2.geprueft.guenstige, t2.geprueft.moeglich);
+    const gekuerzt = (zk !== t2.geprueft.guenstige || nk !== t2.geprueft.moeglich);
+    const prozent = Math.round((zk / nk) * 1000) / 10;
+    ergebnisBoxHtml = `
+      <div class="m3-ergebnis-box">
+        <div class="m3-ergebnis-rechnung">
+          P(${t2.geprueft.kurzlabel}) = ${bruchHTML(t2.geprueft.guenstige, t2.geprueft.moeglich, true)}
+          ${gekuerzt ? `&nbsp;=&nbsp; ${bruchHTML(zk, nk, true)}` : ''}
+        </div>
+        <div class="m3-ergebnis-prozent">Das entspricht ${prozent}\u00A0%.</div>
+      </div>
+    `;
+  }
+
+  const info = !t2.geprueft ? ''
+    : (t2.geprueft.alleRichtig ? '🎉 Richtig gezählt!' : 'Noch nicht ganz — grün = richtig, rot ausgefüllt = falsch dazugezählt, rot gestrichelt = vergessen. Korrigiere per Klick.');
+
+  el.innerHTML = `
+    <div class="m3-fortschritt">
+      <span><span class="m3-teil-badge">Teil 2 von 2</span>Runde ${rIndex2 + 1} von ${TEIL2_RUNDEN.length}</span>
+      <span class="m3-runde-info">${t2.ausgewaehlt.size} ausgewählt</span>
+    </div>
+    <div class="m3-karte">
+      <div class="m3-experiment-row"><span class="m3-experiment-badge">${runde.experiment}</span></div>
+      <div class="m3-titel">${runde.titel}</div>
+      <div class="m3-ereignis-frage">${runde.ereignis}</div>
+
+      <div class="m3-outcome-grid">${tilesHtml}</div>
+
+      <div class="m3-zaehl-row">
+        <span class="m3-zaehl-counter">Ausgewählt: <strong>${t2.ausgewaehlt.size}</strong> von ${runde.ergebnisse.length} möglichen Ergebnissen</span>
+      </div>
+
+      ${ergebnisBoxHtml}
+
+      <div class="m3-pruef-row">
+        ${!t2.geprueft || !t2.geprueft.alleRichtig ? `<button class="btn btn-orange" onclick="pruefenT2()">✓ Prüfen</button>` : ''}
+        <span class="m3-pruef-info ${t2.geprueft && t2.geprueft.alleRichtig ? 'richtig' : (t2.geprueft ? 'falsch' : '')}">${info}</span>
+        ${t2.geprueft && t2.geprueft.alleRichtig ? `<button class="btn btn-yellow" onclick="naechsteRundeT2()">${rIndex2 < TEIL2_RUNDEN.length - 1 ? 'Weiter →' : 'Zur Auswertung →'}</button>` : ''}
+      </div>
+    </div>
+  `;
+}
+
+function naechsteRundeT2() {
+  rIndex2++;
+  if (rIndex2 >= TEIL2_RUNDEN.length) { zeigeEnde(); return; }
+  starteRundeT2();
+}
+
+/* ═══════════════════════ Ende ═══════════════════════ */
+function zeigeEnde() {
+  document.getElementById('mainArea').innerHTML = `
+    <div class="m3-karte m3-ende">
+      <div class="m3-ende-emoji">⚖️</div>
+      <div class="m3-ende-titel">Aus Struktur wird eine Zahl!</div>
+      <p class="m3-ende-merksatz">Merksatz: Bei einem Laplace-Experiment (alle Ergebnisse gleich wahrscheinlich) kannst du jede gesuchte Wahrscheinlichkeit als Verhältnis berechnen: Anzahl der günstigen Ergebnisse durch Anzahl der möglichen Ergebnisse. Wichtig bleibt: Diese Formel funktioniert nur, wenn das Experiment wirklich fair ist — sonst musst du die Wahrscheinlichkeiten einzeln kennen. Als Nächstes (Modul 4) schauen wir uns an, was passiert, wenn man ein Experiment sehr oft wiederholt: Trifft die berechnete Wahrscheinlichkeit dann auch ungefähr zu?</p>
+      <button class="btn btn-mint" onclick="starteAlles()">🔄 Nochmal von vorne</button>
+    </div>
+  `;
+}
+
+function starteAlles() {
+  zeigeIntro();
+}
+
+starteAlles();
+</script>
+<script src="../js/sidebar.js"></script>
+</body>
+</html>

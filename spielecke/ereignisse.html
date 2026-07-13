@@ -38,7 +38,7 @@ body { background: radial-gradient(ellipse at 30% 10%, #2a1a30 0%, #1a1f3a 55%);
   border: 3px solid; transition: all .15s; min-width: 140px;
 }
 .kategorie-btn:hover { transform: translateY(-3px); }
-.kategorie-btn.unmoeglich { border-color: rgba(239,68,68,0.4);  background: rgba(239,68,68,0.08); }
+.kategorie-btn.unmoeglich { border-color: rgba(248,113,113,0.4);  background: rgba(248,113,113,0.08); }
 .kategorie-btn.moeglich   { border-color: rgba(255,211,61,0.4); background: rgba(255,211,61,0.08); }
 .kategorie-btn.sicher     { border-color: rgba(34,197,94,0.4);  background: rgba(34,197,94,0.08); }
 .kategorie-icon { font-size: 1.8rem; }
@@ -66,9 +66,9 @@ body { background: radial-gradient(ellipse at 30% 10%, #2a1a30 0%, #1a1f3a 55%);
 
 <div class="sortier-main">
   <p style="text-align:center;color:var(--muted);font-size:.9rem;max-width:520px">
-    Lies dir jedes Ereignis durch und ordne es ein: Ist es <strong style="color:#f87171">unmöglich</strong>,
+    Lies dir jedes Ereignis durch und ordne es ein: Ist es <strong style="color:var(--red)">unmöglich</strong>,
     nur <strong style="color:var(--yellow)">möglich</strong> (kann passieren, muss aber nicht),
-    oder <strong style="color:#4ade80">sicher</strong> (passiert garantiert)?
+    oder <strong style="color:var(--green)">sicher</strong> (passiert garantiert)?
   </p>
 
   <div class="fortschritt-row">
