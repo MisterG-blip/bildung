@@ -21,7 +21,15 @@ body { background: radial-gradient(ellipse at 30% 10%, #2a1a30 0%, #1a1f3a 55%);
 <body>
 
 <header class="sp-header">
-  <div class="sp-logo">👜 Kugelbeutel <span>Die Spielecke — Klasse 5 &amp; 6</span></div>
+  <div class="sp-logo"><svg viewBox="0 0 46 46" width="22" height="22" style="display:inline-block;vertical-align:-5px;margin-right:.2em;">
+  <path d="M8 16 Q1 16 1 22 Q1 27 8 27" fill="none" stroke="#1a1f3a" stroke-width="2"/>
+  <path d="M38 16 Q45 16 45 22 Q45 27 38 27" fill="none" stroke="#1a1f3a" stroke-width="2"/>
+  <path d="M11 11 C6 17, 6 29, 11 36 C14 40, 32 40, 35 36 C40 29, 40 17, 35 11 Z" fill="#B87355" stroke="#1a1f3a" stroke-width="2"/>
+  <ellipse cx="23" cy="11" rx="12" ry="4" fill="#8A5638" stroke="#1a1f3a" stroke-width="2"/>
+  <circle cx="17" cy="8" r="3.6" fill="#FF6B9D" stroke="#1a1f3a" stroke-width="1.2"/>
+  <circle cx="24" cy="6" r="3.6" fill="#4ECDC4" stroke="#1a1f3a" stroke-width="1.2"/>
+  <circle cx="30" cy="9" r="3.6" fill="#FFD93D" stroke="#1a1f3a" stroke-width="1.2"/>
+</svg> Kugelbeutel <span>Die Spielecke — Klasse 5 &amp; 6</span></div>
   <div class="sp-header-btns">
     <button class="btn btn-ghost" onclick="location.href='index.html'">← Spielecke</button>
   </div>
@@ -31,16 +39,27 @@ body { background: radial-gradient(ellipse at 30% 10%, #2a1a30 0%, #1a1f3a 55%);
 
   <!-- Stage -->
   <div class="station-stage">
-    <div class="station-titel-row">👜 Blind ziehen</div>
+    <div class="station-titel-row"><svg viewBox="0 0 46 46" width="24" height="24" style="display:inline-block;vertical-align:-6px;margin-right:.2em;">
+  <path d="M8 16 Q1 16 1 22 Q1 27 8 27" fill="none" stroke="#1a1f3a" stroke-width="2"/>
+  <path d="M38 16 Q45 16 45 22 Q45 27 38 27" fill="none" stroke="#1a1f3a" stroke-width="2"/>
+  <path d="M11 11 C6 17, 6 29, 11 36 C14 40, 32 40, 35 36 C40 29, 40 17, 35 11 Z" fill="#B87355" stroke="#1a1f3a" stroke-width="2"/>
+  <ellipse cx="23" cy="11" rx="12" ry="4" fill="#8A5638" stroke="#1a1f3a" stroke-width="2"/>
+  <circle cx="17" cy="8" r="3.6" fill="#FF6B9D" stroke="#1a1f3a" stroke-width="1.2"/>
+  <circle cx="24" cy="6" r="3.6" fill="#4ECDC4" stroke="#1a1f3a" stroke-width="1.2"/>
+  <circle cx="30" cy="9" r="3.6" fill="#FFD93D" stroke="#1a1f3a" stroke-width="1.2"/>
+</svg> Blind ziehen</div>
     <p class="station-frage">Stelle deine eigene Mischung an Kugeln zusammen und ziehe blind. Was kommt häufiger — viele oder wenige Kugeln einer Farbe?</p>
 
     <div class="beutel-wrap">
       <div class="beutel-svg-wrap" id="beutelSvg" onclick="ziehen()">
         <svg viewBox="0 0 200 220" xmlns="http://www.w3.org/2000/svg">
-          <path d="M40,80 Q30,200 100,210 Q170,200 160,80 Z" fill="#8B5CF6" stroke="#1a1f3a" stroke-width="4"/>
-          <path d="M40,80 Q100,100 160,80 L150,60 Q100,75 50,60 Z" fill="#7c3aed" stroke="#1a1f3a" stroke-width="4"/>
-          <ellipse cx="100" cy="55" rx="55" ry="14" fill="#C084FC" stroke="#1a1f3a" stroke-width="4"/>
-          <path d="M70,45 Q100,15 130,45" fill="none" stroke="#5a3888" stroke-width="6" stroke-linecap="round"/>
+          <path d="M35,70 Q10,70 10,95 Q10,115 35,115" fill="none" stroke="#1a1f3a" stroke-width="6"/>
+          <path d="M165,70 Q190,70 190,95 Q190,115 165,115" fill="none" stroke="#1a1f3a" stroke-width="6"/>
+          <path d="M48,50 Q25,75 25,130 Q25,175 55,195 Q100,208 145,195 Q175,175 175,130 Q175,75 152,50 Z" fill="#B87355" stroke="#1a1f3a" stroke-width="4"/>
+          <ellipse cx="100" cy="50" rx="52" ry="16" fill="#8A5638" stroke="#1a1f3a" stroke-width="4"/>
+          <circle cx="78" cy="38" r="15" fill="#FF6B9D" stroke="#1a1f3a" stroke-width="3"/>
+          <circle cx="102" cy="30" r="15" fill="#4ECDC4" stroke="#1a1f3a" stroke-width="3"/>
+          <circle cx="124" cy="40" r="15" fill="#FFD93D" stroke="#1a1f3a" stroke-width="3"/>
           <text x="100" y="150" font-size="40" text-anchor="middle">❓</text>
         </svg>
       </div>
@@ -50,7 +69,7 @@ body { background: radial-gradient(ellipse at 30% 10%, #2a1a30 0%, #1a1f3a 55%);
     </div>
 
     <div class="station-actions">
-      <button class="btn btn-mint" onclick="ziehen()">👜 Kugel ziehen</button>
+      <button class="btn btn-mint" onclick="ziehen()">🫳 Kugel ziehen</button>
       <button class="btn btn-mint" onclick="ziehSerie(10)">⚡ 10× ziehen</button>
       <button class="btn btn-mint" onclick="ziehSerie(50)">⚡⚡ 50× ziehen</button>
     </div>

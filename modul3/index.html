@@ -68,6 +68,19 @@ body { background: radial-gradient(ellipse at 30% 10%, #3a2410 0%, #1a1f3a 55%);
 .m3-sortier-karte.swipe-left  { transform: translateX(-420px) rotate(-20deg); opacity: 0; }
 .m3-sortier-karte.swipe-right { transform: translateX(420px) rotate(20deg); opacity: 0; }
 
+.m3-feedback-karte {
+  position: relative; width: 100%; min-height: 190px;
+  background: var(--surface2);
+  border-radius: 18px; border: 3px solid rgba(255,255,255,0.12);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .6rem;
+  padding: 1.5rem; text-align: center;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.35);
+  animation: m3FeedbackEin .3s ease;
+}
+@keyframes m3FeedbackEin { from { opacity: 0; transform: scale(.92); } to { opacity: 1; transform: scale(1); } }
+.m3-feedback-karte.richtig { border-color: rgba(78,205,196,0.4); }
+.m3-feedback-karte.falsch  { border-color: rgba(248,113,113,0.4); }
+
 .m3-kategorien-row { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-bottom: .9rem; }
 .m3-kategorie-btn {
   display: flex; flex-direction: column; align-items: center; gap: .3rem;
@@ -81,10 +94,11 @@ body { background: radial-gradient(ellipse at 30% 10%, #3a2410 0%, #1a1f3a 55%);
 .m3-kategorie-label { font-size: var(--fs-sm); font-weight: 800; }
 .m3-kategorie-count { font-size: var(--fs-2xs); color: var(--muted); }
 
-.m3-feedback-text { font-family: 'Fredoka One', cursive; font-size: var(--fs-md); min-height: 1.5rem; text-align: center; margin-bottom: .3rem; }
+.m3-feedback-text { font-family: 'Fredoka One', cursive; font-size: var(--fs-md); text-align: center; }
 .m3-feedback-text.richtig { color: var(--mint); }
 .m3-feedback-text.falsch  { color: #ff8787; }
-.m3-begruendung { font-size: var(--fs-sm); color: var(--muted); text-align: center; max-width: 520px; margin: 0 auto; line-height: 1.6; min-height: 1.4em; font-style: italic; }
+.m3-begruendung { font-size: var(--fs-sm); color: var(--muted); text-align: center; line-height: 1.6; font-style: italic; }
+.m3-weiter-row { text-align: center; }
 
 /* ══════════════ Übergang / Merksatz ══════════════ */
 .m3-transition, .m3-ende { text-align: center; padding: 2.2rem 1.5rem; }
@@ -175,6 +189,17 @@ body { background: radial-gradient(ellipse at 30% 10%, #3a2410 0%, #1a1f3a 55%);
 
 <script>
 /* ═══════════════════════ Hilfsfunktionen ═══════════════════════ */
+/* Setzt den Inhalt von #mainArea neu, OHNE dass die Seite dabei
+   nach oben springt (Höhenänderung des Inhalts würde sonst die
+   Scroll-Position verschieben, weil oberhalb nichts mehr passt). */
+function setMainHTML(html) {
+  const el = document.getElementById('mainArea');
+  const y = window.scrollY;
+  el.innerHTML = html;
+  window.scrollTo(0, y);
+  requestAnimationFrame(() => window.scrollTo(0, y));
+  return el;
+}
 function shuffle(arr) {
   const a = [...arr];
   for (let i = a.length - 1; i > 0; i--) {
@@ -220,13 +245,45 @@ const RAD_UNFAIR = svgGluecksrad([
 const RAD_8 = svgGluecksrad(Array(8).fill().map((_, i) => ({ anteil: 1 / 8, farbe: RAD_FARBEN[i] })), 40);
 const RAD_8_KLEIN = svgGluecksrad(Array(8).fill().map((_, i) => ({ anteil: 1 / 8, farbe: RAD_FARBEN[i] })), 22);
 
+/* ── Urne als SVG zeichnen (statt Tasche 👜 — "Kugelbeutel" heißt eigentlich Urne) ── */
+function svgUrne(groesse) {
+  const s = groesse / 46; // Skalierung relativ zum 46er-Referenzraster
+  return `<svg viewBox="0 0 46 46" width="${groesse}" height="${groesse}" style="display:block;flex-shrink:0;">
+    <path d="M8 16 Q1 16 1 22 Q1 27 8 27" fill="none" stroke="#1a1f3a" stroke-width="2"/>
+    <path d="M38 16 Q45 16 45 22 Q45 27 38 27" fill="none" stroke="#1a1f3a" stroke-width="2"/>
+    <path d="M11 11 C6 17, 6 29, 11 36 C14 40, 32 40, 35 36 C40 29, 40 17, 35 11 Z" fill="#B87355" stroke="#1a1f3a" stroke-width="2"/>
+    <ellipse cx="23" cy="11" rx="12" ry="4" fill="#8A5638" stroke="#1a1f3a" stroke-width="2"/>
+    <circle cx="17" cy="8" r="3.6" fill="#FF6B9D" stroke="#1a1f3a" stroke-width="1.2"/>
+    <circle cx="24" cy="6" r="3.6" fill="#4ECDC4" stroke="#1a1f3a" stroke-width="1.2"/>
+    <circle cx="30" cy="9" r="3.6" fill="#FFD93D" stroke="#1a1f3a" stroke-width="1.2"/>
+  </svg>`;
+}
+const URNE = svgUrne(60);
+const URNE_KLEIN = svgUrne(22);
+
+/* ── Gezinkter Würfel als SVG zeichnen (statt Zielscheibe 🎯) — zeigt ein
+   verstecktes Gewicht in einer Ecke, das erklärt, warum er nicht fair ist ── */
+function svgGezinkterWuerfel(groesse) {
+  return `<svg viewBox="0 0 46 46" width="${groesse}" height="${groesse}" style="display:block;flex-shrink:0;">
+    <rect x="4" y="4" width="38" height="38" rx="8" fill="#F0F0FF" stroke="#1a1f3a" stroke-width="2.5"/>
+    <circle cx="13" cy="13" r="3.2" fill="#1a1f3a"/>
+    <circle cx="13" cy="23" r="3.2" fill="#1a1f3a"/>
+    <circle cx="13" cy="33" r="3.2" fill="#1a1f3a"/>
+    <circle cx="33" cy="13" r="3.2" fill="#1a1f3a"/>
+    <circle cx="33" cy="23" r="3.2" fill="#1a1f3a"/>
+    <circle cx="33" cy="33" r="3.2" fill="#1a1f3a"/>
+    <circle cx="33" cy="33" r="7.5" fill="#1a1f3a" opacity="0.4"/>
+  </svg>`;
+}
+const WUERFEL_GEZINKT = svgGezinkterWuerfel(60);
+
 /* ═══════════════════════ Teil 1: Laplace-Experimente sortieren ═══════════════════════ */
 const TEIL1_KARTEN = [
   { emoji: '🪙', text: 'Du wirfst eine normale Münze. Kopf und Zahl sind möglich.', kat: 'ja',
     begruendung: 'Eine faire Münze zeigt Kopf und Zahl mit je 50 % — beide Ergebnisse sind gleich wahrscheinlich.' },
   { emoji: '🎲', text: 'Du würfelst mit einem ganz normalen Würfel.', kat: 'ja',
     begruendung: 'Jede der sechs Seiten eines fairen Würfels hat die gleiche Chance: je 1/6.' },
-  { emoji: '🎯', text: 'Du würfelst mit einem gezinkten Würfel, bei dem die 6 öfter fällt als alle anderen Zahlen.', kat: 'nein',
+  { emoji: WUERFEL_GEZINKT, text: 'Du würfelst mit einem gezinkten Würfel, bei dem die 6 öfter fällt als alle anderen Zahlen.', kat: 'nein',
     begruendung: 'Die 6 ist wahrscheinlicher als die anderen Zahlen — die Ergebnisse sind nicht gleich wahrscheinlich.' },
   { emoji: RAD_FAIR, text: 'Ein Glücksrad hat vier gleich große Felder.', kat: 'ja',
     begruendung: 'Gleich große Felder bedeuten: jedes Feld hat die gleiche Trefferchance.' },
@@ -242,10 +299,10 @@ const TEIL1_KARTEN = [
     begruendung: 'Nur weil es zwei Möglichkeiten gibt, heißt das nicht, dass sie gleich wahrscheinlich sind. Meistens ist eine der beiden wahrscheinlicher.' },
 ];
 
-let t1 = { reihenfolge: [], index: 0, richtig: { ja: 0, nein: 0 }, sperre: false };
+let t1 = { reihenfolge: [], index: 0, richtig: { ja: 0, nein: 0 }, sperre: false, antwort: null };
 
 function zeigeIntro() {
-  document.getElementById('mainArea').innerHTML = `
+  setMainHTML(`
     <div class="m3-karte m3-transition">
       <div class="m3-transition-emoji">⚖️</div>
       <div class="m3-transition-titel">Was ist ein Laplace-Experiment?</div>
@@ -254,54 +311,62 @@ function zeigeIntro() {
       </div>
       <button class="btn btn-orange" onclick="starteTeil1()">Kann ich das erkennen? →</button>
     </div>
-  `;
+  `);
 }
 
 function starteTeil1() {
-  t1 = { reihenfolge: shuffle(TEIL1_KARTEN), index: 0, richtig: { ja: 0, nein: 0 }, sperre: false };
+  t1 = { reihenfolge: shuffle(TEIL1_KARTEN), index: 0, richtig: { ja: 0, nein: 0 }, sperre: false, antwort: null };
   renderTeil1();
 }
 
 function renderTeil1() {
-  const el = document.getElementById('mainArea');
   const gesamt = t1.reihenfolge.length;
 
   if (t1.index >= gesamt) { zeigeUebergangZuMerksatz(); return; }
 
   const karte = t1.reihenfolge[t1.index];
-  el.innerHTML = `
+
+  const kartenSlotHtml = t1.antwort
+    ? `<div class="m3-feedback-karte ${t1.antwort.richtig ? 'richtig' : 'falsch'}">
+         <div class="m3-feedback-text ${t1.antwort.richtig ? 'richtig' : 'falsch'}">${t1.antwort.richtig ? '✅ Richtig!' : t1.antwort.hinweis}</div>
+         <div class="m3-begruendung">${karte.begruendung}</div>
+       </div>`
+    : `<div class="m3-sortier-karte" id="aktiveKarte">
+         <div class="emoji">${karte.emoji}</div>
+         <div class="txt">${karte.text}</div>
+       </div>`;
+
+  const unterKarteHtml = t1.antwort
+    ? `<div class="m3-weiter-row">
+         <button class="btn btn-orange" onclick="naechsteKarteT1()">${t1.index < gesamt - 1 ? 'Weiter →' : 'Weiter zum Merksatz →'}</button>
+       </div>`
+    : `<div class="m3-kategorien-row">
+         <div class="m3-kategorie-btn nein" onclick="einordnenT1('nein')">
+           <span class="m3-kategorie-icon">❌</span>
+           <span class="m3-kategorie-label">Kein Laplace-Experiment</span>
+           <span class="m3-kategorie-count">${t1.richtig.nein} richtig</span>
+         </div>
+         <div class="m3-kategorie-btn ja" onclick="einordnenT1('ja')">
+           <span class="m3-kategorie-icon">✅</span>
+           <span class="m3-kategorie-label">Laplace-Experiment</span>
+           <span class="m3-kategorie-count">${t1.richtig.ja} richtig</span>
+         </div>
+       </div>`;
+
+  setMainHTML(`
     <div class="m3-fortschritt">
       <span><span class="m3-teil-badge">Teil 1 von 2</span>Karte ${t1.index + 1} von ${gesamt}</span>
-      <span class="m3-runde-info" id="m3GesamtRichtig">✅ ${t1.richtig.ja + t1.richtig.nein} richtig einsortiert</span>
+      <span class="m3-runde-info">✅ ${t1.richtig.ja + t1.richtig.nein} richtig einsortiert</span>
     </div>
     <div class="m3-karte">
       <div class="m3-titel">Ist das ein Laplace-Experiment?</div>
       <div class="m3-beschreibung">Ein Laplace-Experiment nennt man <strong>fair</strong>: Alle möglichen Ergebnisse müssen gleich wahrscheinlich sein. Lies dir jede Situation durch und ordne sie ein.</div>
 
-      <div class="m3-karten-stapel">
-        <div class="m3-sortier-karte" id="aktiveKarte">
-          <div class="emoji">${karte.emoji}</div>
-          <div class="txt">${karte.text}</div>
-        </div>
-      </div>
+      <div class="m3-karten-stapel">${kartenSlotHtml}</div>
 
-      <div class="m3-kategorien-row">
-        <div class="m3-kategorie-btn nein" onclick="einordnenT1('nein')">
-          <span class="m3-kategorie-icon">❌</span>
-          <span class="m3-kategorie-label">Kein Laplace-Experiment</span>
-          <span class="m3-kategorie-count" id="m3CountNein">${t1.richtig.nein} richtig</span>
-        </div>
-        <div class="m3-kategorie-btn ja" onclick="einordnenT1('ja')">
-          <span class="m3-kategorie-icon">✅</span>
-          <span class="m3-kategorie-label">Laplace-Experiment</span>
-          <span class="m3-kategorie-count" id="m3CountJa">${t1.richtig.ja} richtig</span>
-        </div>
-      </div>
-
-      <div class="m3-feedback-text" id="m3Feedback"></div>
-      <div class="m3-begruendung" id="m3Begruendung"></div>
+      ${unterKarteHtml}
     </div>
-  `;
+  `);
 }
 
 function einordnenT1(kat) {
@@ -309,35 +374,30 @@ function einordnenT1(kat) {
   t1.sperre = true;
   const karte = t1.reihenfolge[t1.index];
   const aktiveKarte = document.getElementById('aktiveKarte');
-  const feedback = document.getElementById('m3Feedback');
-  const begruendung = document.getElementById('m3Begruendung');
-
   const istRichtig = karte.kat === kat;
-  if (istRichtig) {
-    t1.richtig[kat]++;
-    feedback.textContent = '✅ Richtig!';
-    feedback.className = 'm3-feedback-text richtig';
-  } else {
-    feedback.textContent = karte.kat === 'ja' ? 'Eigentlich: Laplace-Experiment' : 'Eigentlich: kein Laplace-Experiment';
-    feedback.className = 'm3-feedback-text falsch';
-  }
-  begruendung.textContent = karte.begruendung;
-  document.getElementById('m3CountJa').textContent = `${t1.richtig.ja} richtig`;
-  document.getElementById('m3CountNein').textContent = `${t1.richtig.nein} richtig`;
-  document.getElementById('m3GesamtRichtig').textContent = `✅ ${t1.richtig.ja + t1.richtig.nein} richtig einsortiert`;
+  if (istRichtig) t1.richtig[kat]++;
 
   if (aktiveKarte) aktiveKarte.classList.add(kat === 'ja' ? 'swipe-right' : 'swipe-left');
 
   setTimeout(() => {
-    t1.index++;
+    t1.antwort = {
+      richtig: istRichtig,
+      hinweis: karte.kat === 'ja' ? 'Eigentlich: Laplace-Experiment' : 'Eigentlich: kein Laplace-Experiment',
+    };
     t1.sperre = false;
     renderTeil1();
-  }, 1400);
+  }, 350);
+}
+
+function naechsteKarteT1() {
+  t1.index++;
+  t1.antwort = null;
+  renderTeil1();
 }
 
 /* ═══════════════════════ Übergang: Merksatz + Formel ═══════════════════════ */
 function zeigeUebergangZuMerksatz() {
-  document.getElementById('mainArea').innerHTML = `
+  setMainHTML(`
     <div class="m3-karte m3-transition">
       <div class="m3-transition-emoji">⚖️</div>
       <div class="m3-transition-titel">Was macht ein Experiment "fair"?</div>
@@ -355,7 +415,7 @@ function zeigeUebergangZuMerksatz() {
       <p class="m3-transition-text">"Günstig" heißt: das Ergebnis passt zu dem, wonach gefragt ist — zum Beispiel "gerade Zahl" oder "rote Kugel". Jetzt übst du genau das: zählen, was günstig ist, und zählen, was überhaupt möglich ist.</p>
       <button class="btn btn-orange" onclick="starteTeil2()">Los geht's →</button>
     </div>
-  `;
+  `);
 }
 
 /* ═══════════════════════ Teil 2: Ergebnisse zu Ereignissen zählen ═══════════════════════ */
@@ -376,7 +436,7 @@ const TEIL2_RUNDEN = [
     ergebnisse: [1,2,3,4,5,6,7,8].map(n => ({ label: String(n), symbol: RAD_8, guenstig: n % 3 === 0 })),
   },
   {
-    experiment: '👝 Kugelbeutel (10 Kugeln)', titel: 'Rote Kugel ziehen', kurzlabel: 'eine rote Kugel',
+    experiment: `<span style="display:inline-flex;align-items:center;gap:.35rem;vertical-align:middle;">${URNE_KLEIN} Kugelbeutel (10 Kugeln)</span>`, titel: 'Rote Kugel ziehen', kurzlabel: 'eine rote Kugel',
     ereignis: 'Ein Beutel enthält 10 gleich große Kugeln: 4 rote, 3 blaue, 3 gelbe. Du ziehst blind eine Kugel. Wie groß ist die Wahrscheinlichkeit für <span>Rot</span>?',
     ergebnisse: [
       ...Array(4).fill().map((_, i) => ({ label: 'rot', symbol: '🔴', guenstig: true })),
@@ -436,7 +496,6 @@ function pruefenT2() {
 
 function renderTeil2() {
   const runde = TEIL2_RUNDEN[rIndex2];
-  const el = document.getElementById('mainArea');
 
   const tilesHtml = runde.ergebnisse.map((e, i) => `
     <div class="m3-outcome-tile ${outcomeTileClass(runde, i)}" onclick="outcomeToggle(${i})">
@@ -464,7 +523,7 @@ function renderTeil2() {
   const info = !t2.geprueft ? ''
     : (t2.geprueft.alleRichtig ? '🎉 Richtig gezählt!' : 'Noch nicht ganz — grün = richtig, rot ausgefüllt = falsch dazugezählt, rot gestrichelt = vergessen. Korrigiere per Klick.');
 
-  el.innerHTML = `
+  setMainHTML(`
     <div class="m3-fortschritt">
       <span><span class="m3-teil-badge">Teil 2 von 2</span>Runde ${rIndex2 + 1} von ${TEIL2_RUNDEN.length}</span>
       <span class="m3-runde-info">${t2.ausgewaehlt.size} ausgewählt</span>
@@ -488,7 +547,7 @@ function renderTeil2() {
         ${t2.geprueft && t2.geprueft.alleRichtig ? `<button class="btn btn-yellow" onclick="naechsteRundeT2()">${rIndex2 < TEIL2_RUNDEN.length - 1 ? 'Weiter →' : 'Zur Auswertung →'}</button>` : ''}
       </div>
     </div>
-  `;
+  `);
 }
 
 function naechsteRundeT2() {
@@ -499,14 +558,14 @@ function naechsteRundeT2() {
 
 /* ═══════════════════════ Ende ═══════════════════════ */
 function zeigeEnde() {
-  document.getElementById('mainArea').innerHTML = `
+  setMainHTML(`
     <div class="m3-karte m3-ende">
       <div class="m3-ende-emoji">⚖️</div>
       <div class="m3-ende-titel">Aus Struktur wird eine Zahl!</div>
       <p class="m3-ende-merksatz">Merksatz: Bei einem Laplace-Experiment (alle Ergebnisse gleich wahrscheinlich) kannst du jede gesuchte Wahrscheinlichkeit als Verhältnis berechnen: Anzahl der günstigen Ergebnisse durch Anzahl der möglichen Ergebnisse. Wichtig bleibt: Diese Formel funktioniert nur, wenn das Experiment wirklich fair ist — sonst musst du die Wahrscheinlichkeiten einzeln kennen. Als Nächstes (Modul 4) schauen wir uns an, was passiert, wenn man ein Experiment sehr oft wiederholt: Trifft die berechnete Wahrscheinlichkeit dann auch ungefähr zu?</p>
       <button class="btn btn-mint" onclick="starteAlles()">🔄 Nochmal von vorne</button>
     </div>
-  `;
+  `);
 }
 
 function starteAlles() {

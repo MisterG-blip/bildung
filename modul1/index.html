@@ -24,7 +24,7 @@ body { background: radial-gradient(ellipse at 30% 10%, #3a2410 0%, #1a1f3a 55%);
 .m1-hero h1 { font-size: clamp(1.5rem,3.2vw,2.2rem); color: var(--orange); margin-bottom: .4rem; }
 .m1-hero p  { font-size: clamp(.85rem,1.4vw,1rem); color: var(--muted); max-width: 680px; margin: 0 auto; line-height: 1.6; }
 
-.m1-main { max-width: 1040px; margin: 0 auto; padding: 1rem 1.5rem 4rem; }
+.m1-main { max-width: 1220px; margin: 0 auto; padding: 1rem 1.5rem 4rem; }
 
 .m1-fortschritt {
   display: flex; justify-content: space-between; align-items: center;
@@ -42,19 +42,20 @@ body { background: radial-gradient(ellipse at 30% 10%, #3a2410 0%, #1a1f3a 55%);
 
 .m1-inhalt { display: grid; grid-template-columns: 1fr; gap: 1.5rem; }
 @media (min-width: 820px) {
-  .m1-inhalt { grid-template-columns: minmax(280px, 340px) 1fr; align-items: start; }
-  .m1-inhalt.kombi { grid-template-columns: 1fr; }
+  .m1-inhalt { grid-template-columns: minmax(300px, 360px) 1fr; align-items: start; }
 }
 
 .m1-buehne {
   background: rgba(255,255,255,0.03); border-radius: 18px;
-  padding: 1.8rem 1.2rem; text-align: center;
+  padding: 1.6rem 1.2rem; text-align: center;
   display: flex; flex-direction: column; align-items: center; gap: .8rem;
-  min-height: 260px; justify-content: center;
+  min-height: 230px; justify-content: center;
 }
-.m1-kombi-row { display: flex; align-items: center; justify-content: center; gap: 1.2rem; flex-wrap: wrap; }
-.m1-kombi-plus { font-size: 1.8rem; font-weight: 800; color: var(--orange); }
-.m1-kombi-label { font-size: var(--fs-base); font-weight: 700; color: var(--muted); }
+.m1-kombi-row { display: flex; align-items: center; justify-content: center; gap: .5rem; flex-wrap: nowrap; }
+.m1-kombi-item { display: flex; flex-direction: column; align-items: center; gap: .3rem; min-width: 0; }
+.m1-kombi-mini { zoom: 0.6; }
+.m1-kombi-plus { font-size: 1.4rem; font-weight: 800; color: var(--orange); flex-shrink: 0; }
+.m1-kombi-label { font-size: var(--fs-xs); font-weight: 700; color: var(--muted); }
 
 .m1-ergebnis-label { font-size: var(--fs-md); font-weight: 800; color: var(--text); }
 .m1-ziehen-btn { min-height: 52px; font-size: var(--fs-md); padding: .9rem 1.8rem; }
@@ -292,6 +293,17 @@ body { background: radial-gradient(ellipse at 30% 10%, #3a2410 0%, #1a1f3a 55%);
 </nav>
 
 <script>
+/* Setzt den Inhalt von #mainArea neu, ohne dass die Seite dabei
+   nach oben springt (Höhenänderung des Inhalts verschiebt sonst
+   die Scroll-Position, weil oberhalb nichts mehr passt). */
+function setMainHTML(html) {
+  const el = document.getElementById('mainArea');
+  const y = window.scrollY;
+  el.innerHTML = html;
+  window.scrollTo(0, y);
+  requestAnimationFrame(() => window.scrollTo(0, y));
+  return el;
+}
 /* ── Würfel-Augen-Muster (identisch zur Spielecke) ── */
 const DOT_PATTERNS = {
   1: [4], 2: [0, 8], 3: [0, 4, 8], 4: [0, 2, 6, 8], 5: [0, 2, 4, 6, 8], 6: [0, 2, 3, 5, 6, 8],
@@ -529,9 +541,9 @@ function buehneHTML(exp) {
   const labelB = gleich ? '2. Ergebnis' : `2. Ergebnis (${kurzForTyp(exp.basisTypB)})`;
   return `
     <div class="m1-kombi-row">
-      <div>${buehneTeilHTML(exp.basisTypA, 'A')}<div class="m1-kombi-label">${labelA}</div></div>
+      <div class="m1-kombi-item"><div class="m1-kombi-mini">${buehneTeilHTML(exp.basisTypA, 'A')}</div><div class="m1-kombi-label">${labelA}</div></div>
       <span class="m1-kombi-plus">+</span>
-      <div>${buehneTeilHTML(exp.basisTypB, 'B')}<div class="m1-kombi-label">${labelB}</div></div>
+      <div class="m1-kombi-item"><div class="m1-kombi-mini">${buehneTeilHTML(exp.basisTypB, 'B')}</div><div class="m1-kombi-label">${labelB}</div></div>
     </div>`;
 }
 
@@ -718,7 +730,6 @@ function naechsteRunde() {
 /* ── Rendering ── */
 function render(letzteSchaetzungRichtig) {
   const exp = ALLE_RUNDEN[expIndex];
-  const el = document.getElementById('mainArea');
   const letzterZug = gezogen[gezogen.length - 1];
 
   const chipsHtml = gezogen.length === 0
@@ -765,7 +776,7 @@ function render(letzteSchaetzungRichtig) {
   const stufenLabel = `Stufe ${exp.stufe}`;
   const nummerInStufe = (expIndex % BASIS_EXPERIMENTE.length) + 1;
 
-  el.innerHTML = `
+  setMainHTML(`
     <div class="m1-fortschritt">
       <span><span class="m1-stufe-badge">${stufenLabel}</span>Experiment ${nummerInStufe} von ${BASIS_EXPERIMENTE.length}</span>
       <span class="m1-punkte">★ ${richtigeSchaetzungen} richtige Schätzung${richtigeSchaetzungen===1?'':'en'}</span>
@@ -773,7 +784,7 @@ function render(letzteSchaetzungRichtig) {
     <div class="m1-karte">
       <div class="m1-titel">${exp.titel}</div>
       <div class="m1-beschreibung">${exp.beschreibung}</div>
-      <div class="m1-inhalt ${exp.typ === 'kombiniert' ? 'kombi' : ''}">
+      <div class="m1-inhalt">
         <div class="m1-buehne">
           ${buehneHTML(exp)}
           <div class="m1-ergebnis-label">${letzterZug ? letzterZug.label : 'Noch kein Zug'}</div>
@@ -794,7 +805,7 @@ function render(letzteSchaetzungRichtig) {
           </button>
         </div>` : ''}
     </div>
-  `;
+  `);
 
   buehneAufRuhezustandSetzen(exp, letzterZug);
 
@@ -854,14 +865,14 @@ function zeigeStufenwechsel() {
            5 von 10 möglichen Paarungen sind für dich ausgelost — schätze auch hier wieder die Größe des Ergebnisraums.`,
     button: "Los geht's mit Stufe 3 →"
   };
-  document.getElementById('mainArea').innerHTML = `
+  setMainHTML(`
     <div class="m1-karte m1-transition">
       <div class="m1-transition-emoji">🔗</div>
       <div class="m1-transition-titel">${inhalt.titel}</div>
       <p class="m1-transition-text">${inhalt.text}</p>
       <button class="btn btn-orange" onclick="starteExperiment()">${inhalt.button}</button>
     </div>
-  `;
+  `);
 }
 
 function zeigeEnde() {
@@ -870,7 +881,7 @@ function zeigeEnde() {
   const emoji = quote >= 0.8 ? '🏆' : quote >= 0.5 ? '🎉' : '🔍';
   const spruch = quote >= 0.8 ? 'Ergebnisräume sind dein Ding!' : quote >= 0.5 ? 'Guter Blick fürs Ganze!' : 'Genau hinschauen lohnt sich!';
 
-  document.getElementById('mainArea').innerHTML = `
+  setMainHTML(`
     <div class="m1-karte m1-ende">
       <div class="m1-ende-emoji">${emoji}</div>
       <div class="m1-ende-titel">${spruch}</div>
@@ -878,7 +889,7 @@ function zeigeEnde() {
       <p class="m1-ende-merksatz">Merksatz: Der Ergebnisraum beschreibt, was <em>strukturell möglich</em> ist — nicht nur das, was du zufällig schon beobachtet hast. Und: Kombinierst du zwei Experimente, wächst der Ergebnisraum multiplikativ (z.&nbsp;B. 6 × 6 = 36 beim doppelten Würfeln). Genau darauf bauen wir in Modul 2 mit dem Baumdiagramm auf.</p>
       <button class="btn btn-mint" onclick="starteSpiel()">🔄 Nochmal von vorne</button>
     </div>
-  `;
+  `);
 }
 
 function starteSpiel() {

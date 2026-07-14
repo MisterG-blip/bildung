@@ -105,32 +105,51 @@ body { background: radial-gradient(ellipse at 30% 20%, #2a1a4a 0%, #1a1f3a 60%);
 .roadmap-item-text .jg-titel { font-size: var(--fs-sm); margin-bottom: .15rem; }
 .roadmap-item-text .jg-desc { font-size: var(--fs-xs); line-height: 1.4; }
 
-/* ── PARADOX: schwebendes Side-Banner, bewusst abgesetzt vom Jahrgangs-Angebot ── */
-.paradox-side {
-  position: fixed; right: 1.1rem; bottom: 1.1rem; width: 220px; z-index: 500;
-  background: linear-gradient(135deg, #1a0d2e 0%, #2a1a4a 100%);
-  border-radius: 18px; border: 3px solid rgba(192,132,252,0.45);
-  padding: 1rem 1.1rem; text-decoration: none; display: block;
-  box-shadow: 0 12px 34px rgba(0,0,0,0.45);
+/* ── PARADOX: auf schmalen/mittleren Screens ein breites In-Page-Banner.
+   Ab 1400px genug Seitenraum: wird zum großen, vertikal zentrierten
+   Skyscraper-Banner an der Seite (kein kleines Kästchen mehr in der Ecke). ── */
+.paradox-banner {
+  display: flex; align-items: center; gap: 1.6rem;
+  background: linear-gradient(115deg, #1a0d2e 0%, #2a1a4a 55%, #1a0d2e 100%);
+  border-radius: 20px; border: 3px solid rgba(192,132,252,0.45);
+  padding: 1.5rem 2rem; text-decoration: none;
+  box-shadow: 0 14px 38px rgba(0,0,0,0.4);
   transition: transform .2s, border-color .2s, box-shadow .2s;
+  margin: 2.2rem 0;
 }
-.paradox-side:hover { transform: translateY(-4px); border-color: var(--purple); box-shadow: 0 18px 40px rgba(0,0,0,0.5), 0 0 30px rgba(192,132,252,0.25); }
-.paradox-side .paradox-badge {
+.paradox-banner:hover { transform: translateY(-3px); border-color: var(--purple); box-shadow: 0 20px 46px rgba(0,0,0,0.45), 0 0 34px rgba(192,132,252,0.22); }
+.paradox-banner .paradox-icon { font-size: 3rem; flex-shrink: 0; }
+.paradox-banner .paradox-badge {
   font-size: var(--fs-2xs); font-weight: 800; letter-spacing: .06em; text-transform: uppercase;
   color: var(--purple); background: rgba(192,132,252,0.12); border: 1px solid rgba(192,132,252,0.3);
-  border-radius: 20px; padding: .15rem .55rem; display: inline-block; margin-bottom: .55rem;
+  border-radius: 20px; padding: .15rem .55rem; display: inline-block; margin-bottom: .4rem;
 }
-.paradox-side .paradox-icon { font-size: 1.9rem; margin-bottom: .3rem; display: block; }
-.paradox-side h2 { font-size: var(--fs-md); color: var(--purple); margin-bottom: .3rem; }
-.paradox-side p  { font-size: var(--fs-xs); color: var(--muted); line-height: 1.5; }
+.paradox-banner .paradox-text { flex: 1; min-width: 0; }
+.paradox-banner h2 { font-size: var(--fs-lg); color: var(--purple); margin-bottom: .25rem; letter-spacing: .03em; }
+.paradox-banner p  { font-size: var(--fs-sm); color: var(--muted); line-height: 1.5; }
+.paradox-banner .paradox-arrow { font-size: 1.6rem; color: var(--purple); flex-shrink: 0; }
 
-@media (max-width: 900px) {
-  .paradox-side {
-    position: static; width: auto; max-width: 1000px; margin: 0 auto 3rem;
-    display: flex; align-items: center; gap: 1.2rem; padding: 1.2rem 1.5rem;
+@media (max-width: 700px) {
+  .paradox-banner { flex-wrap: wrap; text-align: center; justify-content: center; padding: 1.3rem 1.5rem; }
+  .paradox-banner .paradox-arrow { display: none; }
+}
+
+/* Ab hier genug Platz neben dem 1000px breiten Hauptinhalt fuer ein
+   grosses Skyscraper-Banner an der Seite. */
+@media (min-width: 1400px) {
+  .paradox-banner {
+    position: fixed; right: 2rem; top: 50%; transform: translateY(-50%);
+    flex-direction: column; text-align: center; justify-content: flex-start;
+    width: 260px; min-height: 380px; margin: 0; z-index: 500;
+    padding: 2.2rem 1.6rem 1.8rem; gap: .9rem;
   }
-  .paradox-side .paradox-icon { font-size: 2.4rem; margin-bottom: 0; }
-  .paradox-side .paradox-text { flex: 1; }
+  .paradox-banner:hover { transform: translateY(-50%) translateY(-4px); }
+  .paradox-banner .paradox-icon { font-size: 4.5rem; }
+  .paradox-banner .paradox-text { flex: none; }
+  .paradox-banner h2 { font-size: var(--fs-xl); }
+  .paradox-banner p { font-size: var(--fs-sm); }
+  .paradox-banner .paradox-arrow { display: block; font-size: 1.4rem; margin-top: .4rem; }
+  .paradox-banner .paradox-arrow::after { content: ' Jetzt entdecken'; font-size: var(--fs-xs); font-weight: 800; letter-spacing: .03em; }
 }
 </style>
 </head>
@@ -179,7 +198,7 @@ body { background: radial-gradient(ellipse at 30% 20%, #2a1a4a 0%, #1a1f3a 60%);
       <p class="jg-desc">Daten sammeln, Zufall erleben, Wahrscheinlichkeit verstehen.</p>
       <div class="jg-tools">
         <span class="jg-tool-chip">📊 Digitale Klasse</span>
-        <span class="jg-tool-chip">🎲 Spielecke (5)</span>
+        <span class="jg-tool-chip">🎲 Spielecke</span>
         <span class="jg-tool-chip">📈 Diagramm-Labor</span>
       </div>
       <div class="jg-arrow">→</div>
@@ -193,12 +212,23 @@ body { background: radial-gradient(ellipse at 30% 20%, #2a1a4a 0%, #1a1f3a 60%);
       <div class="jg-tools">
         <span class="jg-tool-chip">🎰 Ergebnisräume</span>
         <span class="jg-tool-chip">🌳 Baumdiagramme</span>
-        <span class="jg-tool-chip gesperrt">⚖️ Laplace</span>
+        <span class="jg-tool-chip">⚖️ Laplace</span>
       </div>
       <div class="jg-arrow">→</div>
     </a>
 
   </div>
+
+  <!-- Paradox: breites Banner, jahrgangsübergreifend -->
+  <a class="paradox-banner" href="../paradox/index.html">
+    <span class="paradox-icon">🎲</span>
+    <div class="paradox-text">
+      <span class="paradox-badge">Für alle Jahrgänge</span>
+      <h2>PARADOX</h2>
+      <p>Monty Hall, Gambler's Fallacy &amp; Co. — kniffelige Denkaufgaben zur Wahrscheinlichkeit.</p>
+    </div>
+    <span class="paradox-arrow">→</span>
+  </a>
 
   <div class="roadmap-titel">DEMNÄCHST</div>
   <div class="roadmap-zeile">
@@ -218,16 +248,6 @@ body { background: radial-gradient(ellipse at 30% 20%, #2a1a4a 0%, #1a1f3a 60%);
     </div>
   </div>
 </div>
-
-<!-- Paradox Side-Banner: bewusst separat, jahrgangsübergreifend -->
-<a class="paradox-side" href="../paradox/index.html">
-  <span class="paradox-badge">Für alle Jahrgänge</span>
-  <div class="paradox-text">
-    <span class="paradox-icon">🎲</span>
-    <h2>PARADOX</h2>
-    <p>Monty Hall, Gambler's Fallacy &amp; Co. — kniffelige Denkaufgaben zur Wahrscheinlichkeit.</p>
-  </div>
-</a>
 
 <nav class="footer-nav">
   <div class="nav-links">

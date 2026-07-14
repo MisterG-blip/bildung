@@ -133,6 +133,17 @@ body { background: radial-gradient(ellipse at 30% 10%, #3a2410 0%, #1a1f3a 55%);
 <div class="m2-main" id="mainArea"></div>
 
 <script>
+/* Setzt den Inhalt von #mainArea neu, ohne dass die Seite dabei
+   nach oben springt (Höhenänderung des Inhalts verschiebt sonst
+   die Scroll-Position, weil oberhalb nichts mehr passt). */
+function setMainHTML(html) {
+  const el = document.getElementById('mainArea');
+  const y = window.scrollY;
+  el.innerHTML = html;
+  window.scrollTo(0, y);
+  requestAnimationFrame(() => window.scrollTo(0, y));
+  return el;
+}
 /* ── Experimente ── */
 const MUENZE = { typ: 'muenze', titel: 'Münze', aktion: 'eine Münze wirfst', ergebnisse: [
   { label: 'Kopf', symbol: '👑' }, { label: 'Zahl', symbol: '2️⃣' }
@@ -456,14 +467,13 @@ function baumSVGTeil1(runde, t1) {
 
 function renderTeil1() {
   const runde = TEIL1_RUNDEN[rIndex1];
-  const el = document.getElementById('mainArea');
   const baumHtml = baumSVGTeil1(runde, t1);
 
   const buehneHtml = runde.stufen.map((s, i) => buehneTeilHTML(s, String(i), runde.stufen.length > 1 ? `${i+1}. Wurf` : 'Ziehung')).join('');
 
   const kannVervollstaendigen = t1.phase === 'bauen' && t1.gezogen >= runde.minZuege;
 
-  el.innerHTML = `
+  setMainHTML(`
     <div class="m2-fortschritt">
       <span><span class="m2-teil-badge">Teil 1 von 2</span>Runde ${rIndex1 + 1} von ${TEIL1_RUNDEN.length}</span>
       <span class="m2-runde-info">${t1.gezogen}× gezogen</span>
@@ -490,7 +500,7 @@ function renderTeil1() {
         <div class="m2-weiter-row"><button class="btn btn-yellow" onclick="naechsteRundeT1()">${rIndex1 < TEIL1_RUNDEN.length - 1 ? 'Weiter →' : 'Weiter zu Teil 2 →'}</button></div>
       `}
     </div>
-  `;
+  `);
   ruhezustandSetzen(runde, t1.letzteErgebnisse);
 }
 
@@ -515,14 +525,14 @@ function naechsteRundeT1() {
 
 /* ═══════ Übergang zwischen den Teilen ═══════ */
 function zeigeUebergangZuTeil2() {
-  document.getElementById('mainArea').innerHTML = `
+  setMainHTML(`
     <div class="m2-karte m2-transition">
       <div class="m2-transition-emoji">🔨</div>
       <div class="m2-transition-titel">Jetzt drehen wir den Spieß um</div>
       <p class="m2-transition-text">Bisher ist der Baum von selbst gewachsen. Jetzt baust <strong>du</strong> ihn selbst — genau wie du in Klasse 5/6 schon eigene Diagramme gebaut hast: Äste beschriften, Wahrscheinlichkeiten eintragen, bei Bedarf verbessern.</p>
       <button class="btn btn-orange" onclick="starteTeil2()">Los geht's →</button>
     </div>
-  `;
+  `);
 }
 
 function starteTeil2() {
@@ -775,7 +785,6 @@ function bruchHTML(z, n) {
 
 function renderTeil2() {
   const runde = TEIL2_RUNDEN[rIndex2];
-  const el = document.getElementById('mainArea');
   const zweistufig = runde.stufen.length > 1;
   const svgHtml = baumSVGTeil2(runde);
 
@@ -787,7 +796,7 @@ function renderTeil2() {
   const alleRichtig = t2.ergebnis && t2.ergebnis.alleRichtig;
   const geprueftInfo = !t2.ergebnis ? '' : (alleRichtig ? '🎉 Alles richtig!' : 'Noch nicht alles richtig — rot Markiertes korrigieren und nochmal prüfen.');
 
-  el.innerHTML = `
+  setMainHTML(`
     <div class="m2-fortschritt">
       <span><span class="m2-teil-badge">Teil 2 von 2</span>Runde ${rIndex2 + 1} von ${TEIL2_RUNDEN.length}</span>
     </div>
@@ -813,7 +822,7 @@ function renderTeil2() {
         ${alleRichtig ? `<button class="btn btn-yellow" onclick="naechsteRundeT2()">${rIndex2 < TEIL2_RUNDEN.length - 1 ? 'Weiter →' : 'Zur Auswertung →'}</button>` : ''}
       </div>
     </div>
-  `;
+  `);
 }
 
 function naechsteRundeT2() {
@@ -824,14 +833,14 @@ function naechsteRundeT2() {
 
 /* ═══════ Ende ═══════ */
 function zeigeEnde() {
-  document.getElementById('mainArea').innerHTML = `
+  setMainHTML(`
     <div class="m2-karte m2-ende">
       <div class="m2-ende-emoji">🌳</div>
       <div class="m2-ende-titel">Baum gebaut, Prinzip verstanden!</div>
       <p class="m2-ende-merksatz">Merksatz: Ein Baumdiagramm zeigt alle möglichen Pfade eines mehrstufigen Zufallsexperiments. An jedem Ast steht die Wahrscheinlichkeit dieser einen Stufe — und multiplizierst du die Wahrscheinlichkeiten entlang eines Pfades, erhältst du die Wahrscheinlichkeit für genau diesen Pfad. Je mehr Stufen, desto schneller wächst der Baum — deshalb suchen wir uns später (Modul 3: Laplace) Wege, um daraus direkt eine einzelne Zahl zu berechnen, ohne jeden Ast einzeln zu betrachten.</p>
       <button class="btn btn-mint" onclick="starteAlles()">🔄 Nochmal von vorne</button>
     </div>
-  `;
+  `);
 }
 
 function starteAlles() {
