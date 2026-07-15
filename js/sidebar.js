@@ -47,8 +47,8 @@
             { typ: 'item', href: prefix + 'modul2/index.html?teil=werkstatt', label: '🔨 Werkstatt (direkt)' },
           ]
         },
-        { typ: 'locked', label: '⚖️ Modul 3 · Laplace' },
-        { typ: 'locked', label: '🔮 Modul 4 · Prognose' },
+        { typ: 'item', href: prefix + 'modul3/index.html', label: '⚖️ Modul 3: Laplace' },
+        { typ: 'item', href: prefix + 'modul4/index.html', label: '🔮 Modul 4: Prognose' },
       ]
     },
   ];
