@@ -887,7 +887,10 @@ function zeigeEnde() {
       <div class="m1-ende-titel">${spruch}</div>
       <div class="m1-ende-score">Du hast <strong>${richtigeSchaetzungen} von ${gesamt}</strong> Ergebnisräumen richtig geschätzt.</div>
       <p class="m1-ende-merksatz">Merksatz: Der Ergebnisraum beschreibt, was <em>strukturell möglich</em> ist — nicht nur das, was du zufällig schon beobachtet hast. Und: Kombinierst du zwei Experimente, wächst der Ergebnisraum multiplikativ (z.&nbsp;B. 6 × 6 = 36 beim doppelten Würfeln). Genau darauf bauen wir in Modul 2 mit dem Baumdiagramm auf.</p>
-      <button class="btn btn-mint" onclick="starteSpiel()">🔄 Nochmal von vorne</button>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:.7rem;">
+        <button class="btn btn-orange" onclick="location.href='../modul2/index.html'">🌳 Weiter zu Modul 2 →</button>
+        <button class="btn btn-mint" onclick="starteSpiel()">🔄 Nochmal von vorne</button>
+      </div>
     </div>
   `);
 }

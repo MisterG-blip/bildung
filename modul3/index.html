@@ -244,6 +244,17 @@ const RAD_UNFAIR = svgGluecksrad([
 ], 60);
 const RAD_8 = svgGluecksrad(Array(8).fill().map((_, i) => ({ anteil: 1 / 8, farbe: RAD_FARBEN[i] })), 40);
 const RAD_8_KLEIN = svgGluecksrad(Array(8).fill().map((_, i) => ({ anteil: 1 / 8, farbe: RAD_FARBEN[i] })), 22);
+const RAD_12 = svgGluecksrad(Array(12).fill().map((_, i) => ({ anteil: 1 / 12, farbe: RAD_FARBEN[i % RAD_FARBEN.length] })), 40);
+const RAD_12_KLEIN = svgGluecksrad(Array(12).fill().map((_, i) => ({ anteil: 1 / 12, farbe: RAD_FARBEN[i % RAD_FARBEN.length] })), 22);
+
+/* ── Zahlen-Würfel (z.B. 10-seitig) als einfaches Zahlenfeld statt Augen-Muster ── */
+function svgZahlWuerfel(zahl, groesse) {
+  return `<svg viewBox="0 0 46 46" width="${groesse}" height="${groesse}" style="display:block;flex-shrink:0;">
+    <rect x="4" y="4" width="38" height="38" rx="8" fill="#F0F0FF" stroke="#1a1f3a" stroke-width="2.5"/>
+    <text x="23" y="29" font-size="17" font-weight="800" text-anchor="middle" fill="#1a1f3a" font-family="Nunito, sans-serif">${zahl}</text>
+  </svg>`;
+}
+const D10_KLEIN = svgZahlWuerfel('10', 22);
 
 /* ── Urne als SVG zeichnen (statt Tasche 👜 — "Kugelbeutel" heißt eigentlich Urne) ── */
 function svgUrne(groesse) {
@@ -418,47 +429,142 @@ function zeigeUebergangZuMerksatz() {
   `);
 }
 
-/* ═══════════════════════ Teil 2: Ergebnisse zu Ereignissen zählen ═══════════════════════ */
-const TEIL2_RUNDEN = [
+/* ═══════════════════════ Teil 2: Ergebnisse zu Ereignissen zählen ═══════════════════════
+   9 Experimente im Pool, jedes mit mehreren möglichen Ereignis-Fragen (Vielfache, kleiner/
+   größer als, zwischen ... und ...). Pro Durchlauf werden 6 Experimente zufällig ausgewählt
+   UND pro Experiment eine zufällige Ereignis-Variante gezogen — so wiederholt sich nicht
+   immer dieselbe Frage zum selben Experiment. */
+const TEIL2_POOL = [
   {
-    experiment: '🎲 Würfel (fair)', titel: 'Gerade Zahl würfeln', kurzlabel: 'eine gerade Zahl',
-    ereignis: 'Du würfelst mit einem fairen Würfel. Wie groß ist die Wahrscheinlichkeit für eine <span>gerade Zahl</span>?',
-    ergebnisse: [1,2,3,4,5,6].map(n => ({ label: String(n), symbol: '⚀⚁⚂⚃⚄⚅'[n-1], guenstig: n % 2 === 0 })),
-  },
-  {
-    experiment: '🎲 Würfel (fair)', titel: 'Zahl größer als 4', kurzlabel: 'eine Zahl größer als 4',
-    ereignis: 'Du würfelst mit einem fairen Würfel. Wie groß ist die Wahrscheinlichkeit für eine <span>Zahl größer als 4</span>?',
-    ergebnisse: [1,2,3,4,5,6].map(n => ({ label: String(n), symbol: '⚀⚁⚂⚃⚄⚅'[n-1], guenstig: n > 4 })),
-  },
-  {
-    experiment: `<span style="display:inline-flex;align-items:center;gap:.35rem;vertical-align:middle;">${RAD_8_KLEIN} Glücksrad (8 gleich große Felder)</span>`, titel: 'Zahl teilbar durch 3', kurzlabel: 'eine durch 3 teilbare Zahl',
-    ereignis: 'Ein faires Glücksrad hat 8 gleich große Felder, nummeriert von 1 bis 8. Wie groß ist die Wahrscheinlichkeit, dass die Zahl <span>durch 3 teilbar</span> ist?',
-    ergebnisse: [1,2,3,4,5,6,7,8].map(n => ({ label: String(n), symbol: RAD_8, guenstig: n % 3 === 0 })),
-  },
-  {
-    experiment: `<span style="display:inline-flex;align-items:center;gap:.35rem;vertical-align:middle;">${URNE_KLEIN} Kugelbeutel (10 Kugeln)</span>`, titel: 'Rote Kugel ziehen', kurzlabel: 'eine rote Kugel',
-    ereignis: 'Ein Beutel enthält 10 gleich große Kugeln: 4 rote, 3 blaue, 3 gelbe. Du ziehst blind eine Kugel. Wie groß ist die Wahrscheinlichkeit für <span>Rot</span>?',
-    ergebnisse: [
-      ...Array(4).fill().map((_, i) => ({ label: 'rot', symbol: '🔴', guenstig: true })),
-      ...Array(3).fill().map((_, i) => ({ label: 'blau', symbol: '🔵', guenstig: false })),
-      ...Array(3).fill().map((_, i) => ({ label: 'gelb', symbol: '🟡', guenstig: false })),
+    experiment: '🎲 Würfel (fair)', intro: 'Du würfelst mit einem fairen Würfel.', numerisch: true,
+    ergebnisseBasis: [1,2,3,4,5,6].map(n => ({ label: String(n), symbol: '⚀⚁⚂⚃⚄⚅'[n-1] })),
+    varianten: [
+      { titel: 'Gerade Zahl würfeln', kurzlabel: 'eine gerade Zahl', test: n => n % 2 === 0 },
+      { titel: 'Zahl größer als 4', kurzlabel: 'eine Zahl größer als 4', test: n => n > 4 },
+      { titel: 'Zahl kleiner als 3', kurzlabel: 'eine Zahl kleiner als 3', test: n => n < 3 },
+      { titel: 'Zahl zwischen 2 und 5', kurzlabel: 'eine Zahl zwischen 2 und 5', test: n => n >= 2 && n <= 5 },
     ],
   },
   {
-    experiment: '🃏 Kartenfarbe', titel: 'Rote Farbe ziehen', kurzlabel: 'eine rote Farbe',
-    ereignis: 'Du ziehst blind eine Karte und schaust nur auf die Farbe. Wie groß ist die Wahrscheinlichkeit für <span>Rot (Herz oder Karo)</span>?',
-    ergebnisse: [
-      { label: 'Pik', symbol: '♠', guenstig: false }, { label: 'Herz', symbol: '♥', guenstig: true },
-      { label: 'Karo', symbol: '♦', guenstig: true }, { label: 'Kreuz', symbol: '♣', guenstig: false },
+    experiment: `<span style="display:inline-flex;align-items:center;gap:.35rem;vertical-align:middle;">${RAD_8_KLEIN} Glücksrad (8 gleich große Felder)</span>`,
+    intro: 'Ein faires Glücksrad hat 8 gleich große Felder, nummeriert von 1 bis 8.', numerisch: true,
+    ergebnisseBasis: [1,2,3,4,5,6,7,8].map(n => ({ label: String(n), symbol: RAD_8 })),
+    varianten: [
+      { titel: 'Zahl teilbar durch 3', kurzlabel: 'eine durch 3 teilbare Zahl', test: n => n % 3 === 0 },
+      { titel: 'Gerade Zahl', kurzlabel: 'eine gerade Zahl', test: n => n % 2 === 0 },
+      { titel: 'Zahl höchstens 5', kurzlabel: 'eine Zahl höchstens 5', test: n => n <= 5 },
+      { titel: 'Zahl zwischen 3 und 6', kurzlabel: 'eine Zahl zwischen 3 und 6', test: n => n >= 3 && n <= 6 },
+    ],
+  },
+  {
+    experiment: `<span style="display:inline-flex;align-items:center;gap:.35rem;vertical-align:middle;">${URNE_KLEIN} Kugelbeutel (10 Kugeln)</span>`,
+    intro: 'Ein Beutel enthält 10 gleich große Kugeln: 4 rote, 3 blaue, 3 gelbe. Du ziehst blind eine Kugel.', numerisch: false,
+    ergebnisseBasis: [
+      ...Array(4).fill().map(() => ({ label: 'rot', symbol: '🔴' })),
+      ...Array(3).fill().map(() => ({ label: 'blau', symbol: '🔵' })),
+      ...Array(3).fill().map(() => ({ label: 'gelb', symbol: '🟡' })),
+    ],
+    varianten: [
+      { titel: 'Rote Kugel ziehen', kurzlabel: 'eine rote Kugel', test: l => l === 'rot' },
+      { titel: 'Blaue Kugel ziehen', kurzlabel: 'eine blaue Kugel', test: l => l === 'blau' },
+      { titel: 'Keine rote Kugel', kurzlabel: 'keine rote Kugel', test: l => l !== 'rot' },
+      { titel: 'Gelbe oder rote Kugel', kurzlabel: 'eine gelbe oder rote Kugel', test: l => l === 'gelb' || l === 'rot' },
+    ],
+  },
+  {
+    experiment: '🃏 Kartenfarbe', intro: 'Du ziehst blind eine Karte und schaust nur auf die Farbe.', numerisch: false,
+    ergebnisseBasis: [
+      { label: 'Kreuz', symbol: '♣' }, { label: 'Pik', symbol: '♠' },
+      { label: 'Herz', symbol: '♥' }, { label: 'Karo', symbol: '♦' },
+    ],
+    varianten: [
+      { titel: 'Rote Farbe ziehen', kurzlabel: 'eine rote Farbe (Herz oder Karo)', test: l => l === 'Herz' || l === 'Karo' },
+      { titel: 'Schwarze Farbe ziehen', kurzlabel: 'eine schwarze Farbe (Kreuz oder Pik)', test: l => l === 'Kreuz' || l === 'Pik' },
+      { titel: 'Kreuz ziehen', kurzlabel: 'ein Kreuz', test: l => l === 'Kreuz' },
+      { titel: 'Nicht Karo ziehen', kurzlabel: 'keine Karo-Karte', test: l => l !== 'Karo' },
+    ],
+  },
+  {
+    experiment: `<span style="display:inline-flex;align-items:center;gap:.35rem;vertical-align:middle;">${RAD_12_KLEIN} Glücksrad (12 gleich große Felder)</span>`,
+    intro: 'Ein faires Glücksrad hat 12 gleich große Felder, nummeriert von 1 bis 12.', numerisch: true,
+    ergebnisseBasis: Array.from({length:12}, (_, i) => i+1).map(n => ({ label: String(n), symbol: RAD_12 })),
+    varianten: [
+      { titel: 'Vielfaches von 3', kurzlabel: 'ein Vielfaches von 3', test: n => n % 3 === 0 },
+      { titel: 'Gerade Zahl', kurzlabel: 'eine gerade Zahl', test: n => n % 2 === 0 },
+      { titel: 'Zahl höchstens 4', kurzlabel: 'eine Zahl höchstens 4', test: n => n <= 4 },
+      { titel: 'Zahl zwischen 5 und 9', kurzlabel: 'eine Zahl zwischen 5 und 9', test: n => n >= 5 && n <= 9 },
+    ],
+  },
+  {
+    experiment: '🎟️ Los-Trommel (15 Lose)', intro: 'Eine Los-Trommel enthält 15 gleich gefaltete Lose: 3 Gewinn-Lose und 12 Nieten.', numerisch: false,
+    ergebnisseBasis: [
+      ...Array(3).fill().map(() => ({ label: 'Gewinn', symbol: '🎉' })),
+      ...Array(12).fill().map(() => ({ label: 'Niete', symbol: '⬜' })),
+    ],
+    varianten: [
+      { titel: 'Ein Gewinn-Los ziehen', kurzlabel: 'ein Gewinn-Los', test: l => l === 'Gewinn' },
+      { titel: 'Eine Niete ziehen', kurzlabel: 'eine Niete', test: l => l === 'Niete' },
+    ],
+  },
+  {
+    experiment: `<span style="display:inline-flex;align-items:center;gap:.35rem;vertical-align:middle;">${D10_KLEIN} Zehnseitiger Würfel</span>`,
+    intro: 'Ein fairer zehnseitiger Würfel zeigt die Zahlen 1 bis 10.', numerisch: true,
+    ergebnisseBasis: Array.from({length:10}, (_, i) => i+1).map(n => ({ label: String(n), symbol: svgZahlWuerfel(n, 40) })),
+    varianten: [
+      { titel: 'Zahl mindestens 7', kurzlabel: 'eine Zahl mindestens 7', test: n => n >= 7 },
+      { titel: 'Gerade Zahl', kurzlabel: 'eine gerade Zahl', test: n => n % 2 === 0 },
+      { titel: 'Zahl kleiner als 4', kurzlabel: 'eine Zahl kleiner als 4', test: n => n < 4 },
+      { titel: 'Zahl zwischen 3 und 6', kurzlabel: 'eine Zahl zwischen 3 und 6', test: n => n >= 3 && n <= 6 },
+    ],
+  },
+  {
+    experiment: '🏺 Kugelbeutel (12 Kugeln)', intro: 'Ein Beutel enthält 12 gleich große Kugeln: 5 grüne, 4 gelbe, 3 lila. Du ziehst blind eine Kugel.', numerisch: false,
+    ergebnisseBasis: [
+      ...Array(5).fill().map(() => ({ label: 'grün', symbol: '🟢' })),
+      ...Array(4).fill().map(() => ({ label: 'gelb', symbol: '🟡' })),
+      ...Array(3).fill().map(() => ({ label: 'lila', symbol: '🟣' })),
+    ],
+    varianten: [
+      { titel: 'Gelbe Kugel ziehen', kurzlabel: 'eine gelbe Kugel', test: l => l === 'gelb' },
+      { titel: 'Grüne Kugel ziehen', kurzlabel: 'eine grüne Kugel', test: l => l === 'grün' },
+      { titel: 'Keine lila Kugel', kurzlabel: 'keine lila Kugel', test: l => l !== 'lila' },
+      { titel: 'Lila oder gelbe Kugel', kurzlabel: 'eine lila oder gelbe Kugel', test: l => l === 'lila' || l === 'gelb' },
+    ],
+  },
+  {
+    experiment: '🎫 Zahlenlose (1–20)', intro: 'In einer Box liegen 20 gleich gefaltete Lose, nummeriert von 1 bis 20.', numerisch: true,
+    ergebnisseBasis: Array.from({length:20}, (_, i) => i+1).map(n => ({ label: String(n), symbol: '🎫' })),
+    varianten: [
+      { titel: 'Durch 4 teilbare Zahl', kurzlabel: 'eine durch 4 teilbare Zahl', test: n => n % 4 === 0 },
+      { titel: 'Durch 5 teilbare Zahl', kurzlabel: 'eine durch 5 teilbare Zahl', test: n => n % 5 === 0 },
+      { titel: 'Zahl höchstens 6', kurzlabel: 'eine Zahl höchstens 6', test: n => n <= 6 },
+      { titel: 'Zahl zwischen 8 und 13', kurzlabel: 'eine Zahl zwischen 8 und 13', test: n => n >= 8 && n <= 13 },
     ],
   },
 ];
+
+let TEIL2_RUNDEN = [];
+function baueRundeAusExperiment(exp) {
+  const variante = exp.varianten[Math.floor(Math.random() * exp.varianten.length)];
+  const testFn = exp.numerisch ? (label => variante.test(Number(label))) : (label => variante.test(label));
+  return {
+    experiment: exp.experiment,
+    titel: variante.titel,
+    kurzlabel: variante.kurzlabel,
+    ereignis: `${exp.intro} Wie groß ist die Wahrscheinlichkeit für <span>${variante.kurzlabel}</span>?`,
+    ergebnisse: exp.ergebnisseBasis.map(e => ({ ...e, guenstig: testFn(e.label) })),
+  };
+}
+function baueTeil2Runden() {
+  TEIL2_RUNDEN = shuffle(TEIL2_POOL).slice(0, 6).map(baueRundeAusExperiment);
+}
 
 let rIndex2 = 0;
 let t2 = { ausgewaehlt: new Set(), geprueft: null };
 
 function starteTeil2() {
   rIndex2 = 0;
+  baueTeil2Runden();
   starteRundeT2();
 }
 
@@ -530,7 +636,6 @@ function renderTeil2() {
     </div>
     <div class="m3-karte">
       <div class="m3-experiment-row"><span class="m3-experiment-badge">${runde.experiment}</span></div>
-      <div class="m3-titel">${runde.titel}</div>
       <div class="m3-ereignis-frage">${runde.ereignis}</div>
 
       <div class="m3-outcome-grid">${tilesHtml}</div>
@@ -563,8 +668,10 @@ function zeigeEnde() {
       <div class="m3-ende-emoji">⚖️</div>
       <div class="m3-ende-titel">Aus Struktur wird eine Zahl!</div>
       <p class="m3-ende-merksatz">Merksatz: Bei einem Laplace-Experiment (alle Ergebnisse gleich wahrscheinlich) kannst du jede gesuchte Wahrscheinlichkeit als Verhältnis berechnen: Anzahl der günstigen Ergebnisse durch Anzahl der möglichen Ergebnisse. Wichtig bleibt: Diese Formel funktioniert nur, wenn das Experiment wirklich fair ist — sonst musst du die Wahrscheinlichkeiten einzeln kennen. Als Nächstes (Modul 4) schauen wir uns an, was passiert, wenn man ein Experiment sehr oft wiederholt: Trifft die berechnete Wahrscheinlichkeit dann auch ungefähr zu?</p>
-      <button class="btn btn-orange" onclick="location.href='../modul4/index.html'">🔮 Weiter zu Modul 4 →</button>
-      <button class="btn btn-mint" onclick="starteAlles()" style="margin-top:.7rem;">🔄 Nochmal von vorne</button>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:.7rem;">
+        <button class="btn btn-orange" onclick="location.href='../modul4/index.html'">🔮 Weiter zu Modul 4 →</button>
+        <button class="btn btn-mint" onclick="starteAlles()">🔄 Nochmal von vorne</button>
+      </div>
     </div>
   `);
 }

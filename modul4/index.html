@@ -124,6 +124,14 @@ body { background: radial-gradient(ellipse at 30% 10%, #3a2410 0%, #1a1f3a 55%);
 
 .m4-sim-hinweis { font-size: var(--fs-2xs); color: var(--muted); text-align: center; font-style: italic; margin-bottom: .8rem; }
 
+.m4-beobachten-box {
+  display: flex; align-items: center; justify-content: center; gap: .5rem; flex-wrap: wrap;
+  background: rgba(78,205,196,0.1); border: 2px solid rgba(78,205,196,0.35);
+  border-radius: 12px; padding: .55rem 1rem; margin: 0 auto 1.1rem; max-width: 480px;
+  font-size: var(--fs-xs); font-weight: 700; color: var(--text); text-align: center;
+}
+.m4-beobachten-box .marke { color: var(--mint); }
+
 /* ══════ Vergleich ══════ */
 .m4-vergleich-tabelle { width: 100%; max-width: 560px; margin: 0 auto 1.2rem; border-collapse: separate; border-spacing: 0 .5rem; }
 .m4-vergleich-tabelle td { padding: .75rem .9rem; font-size: var(--fs-sm); }
@@ -138,6 +146,10 @@ body { background: radial-gradient(ellipse at 30% 10%, #3a2410 0%, #1a1f3a 55%);
   font-size: var(--fs-sm); color: var(--text); line-height: 1.6;
 }
 .m4-vergleich-fazit.knifflig { background: rgba(192,132,252,0.08); border-color: rgba(192,132,252,0.3); }
+
+.m4-schaetzung-badge { text-align: center; font-size: var(--fs-sm); color: var(--muted); margin-bottom: 1rem; }
+.m4-schaetzung-badge strong { font-size: var(--fs-md); font-family: 'Fredoka One', cursive; }
+.m4-schaetzung-badge .klein { font-size: var(--fs-2xs); color: var(--muted); display: block; margin-top: .2rem; font-weight: 400; }
 
 /* ══════ Auswertung am Ende ══════ */
 .m4-uebersicht-karte { background: var(--surface2); border-radius: 16px; padding: 1rem 1.2rem; margin-bottom: .8rem; text-align: left; }
@@ -228,6 +240,20 @@ function svgKarteGezogen(symbol, farbe, groesse) {
     <text x="23" y="30" font-size="20" text-anchor="middle" fill="${farbe}">${symbol}</text>
   </svg>`;
 }
+/* Großer, klickbarer Beutel — exakt dasselbe Modell wie im Kugelbeutel der
+   Spielecke (Klasse 5/6), damit man ihn sofort wiedererkennt. */
+function svgBeutelGross(farben3) {
+  const pos = [{cx:78,cy:38,r:15},{cx:102,cy:30,r:15},{cx:124,cy:40,r:15}];
+  const circles = farben3.map((f,i) => pos[i] ? `<circle cx="${pos[i].cx}" cy="${pos[i].cy}" r="${pos[i].r}" fill="${f}" stroke="#1a1f3a" stroke-width="3"/>` : '').join('');
+  return `<svg viewBox="0 0 200 220" xmlns="http://www.w3.org/2000/svg">
+    <path d="M35,70 Q10,70 10,95 Q10,115 35,115" fill="none" stroke="#1a1f3a" stroke-width="6"/>
+    <path d="M165,70 Q190,70 190,95 Q190,115 165,115" fill="none" stroke="#1a1f3a" stroke-width="6"/>
+    <path d="M48,50 Q25,75 25,130 Q25,175 55,195 Q100,208 145,195 Q175,175 175,130 Q175,75 152,50 Z" fill="#B87355" stroke="#1a1f3a" stroke-width="4"/>
+    <ellipse cx="100" cy="50" rx="52" ry="16" fill="#8A5638" stroke="#1a1f3a" stroke-width="4"/>
+    ${circles}
+    <text x="100" y="150" font-size="40" text-anchor="middle">❓</text>
+  </svg>`;
+}
 function sektorPfad(cx, cy, r, start, ende) {
   const x1 = cx + r * Math.cos(start), y1 = cy + r * Math.sin(start);
   const x2 = cx + r * Math.cos(ende),  y2 = cy + r * Math.sin(ende);
@@ -312,9 +338,10 @@ function svgBecher(pos, groesse) {
 /* ═══════════════════════ Verlaufsdiagramm (SVG, live) ═══════════════════════ */
 function svgVerlauf(punkte, refs, w, h) {
   w = w || 620; h = h || 230;
-  const padL = 42, padR = 16, padT = 16, padB = 30;
+  const padL = 42, padR = 16, padT = 16, padB = 42;
   const plotW = w - padL - padR, plotH = h - padT - padB;
   const maxN = punkte.length ? punkte[punkte.length - 1].n : 1;
+  const achsY = h - padB;
   const x = n => padL + (maxN <= 1 ? 0 : (n / maxN) * plotW);
   const y = rel => padT + (1 - rel) * plotH;
 
@@ -324,6 +351,32 @@ function svgVerlauf(punkte, refs, w, h) {
     raster += `<line x1="${padL}" x2="${w - padR}" y1="${yy}" y2="${yy}" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>`;
     labels += `<text x="${padL - 8}" y="${Number(yy) + 3}" font-size="9" fill="#A6AEDB" text-anchor="end">${Math.round(f * 100)}%</text>`;
   });
+
+  /* x-Achse: Einteilung wächst mit der Anzahl der Versuche mit, damit Kinder
+     visuell sehen, wie weit die Simulation schon gekommen ist. */
+  let xRaster = '', xLabels = '';
+  if (punkte.length) {
+    function schoeneSchrittweite(roh) {
+      if (roh <= 0) return 1;
+      const exponent = Math.floor(Math.log10(roh));
+      const basis = Math.pow(10, exponent);
+      const anteil = roh / basis;
+      const schoenerAnteil = anteil <= 1 ? 1 : anteil <= 2 ? 2 : anteil <= 5 ? 5 : 10;
+      return schoenerAnteil * basis;
+    }
+    const schritt = Math.max(1, Math.round(schoeneSchrittweite(maxN / 5)));
+    for (let t = schritt; t < maxN; t += schritt) {
+      const xx = x(t).toFixed(1);
+      xRaster += `<line x1="${xx}" x2="${xx}" y1="${padT}" y2="${achsY}" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>`;
+      xRaster += `<line x1="${xx}" x2="${xx}" y1="${achsY}" y2="${achsY + 4}" stroke="rgba(255,255,255,0.35)" stroke-width="1.5"/>`;
+      xLabels += `<text x="${xx}" y="${achsY + 15}" font-size="9" fill="#A6AEDB" text-anchor="middle">${t}</text>`;
+    }
+    // aktueller Stand (n) immer als eigene, farbig hervorgehobene Marke
+    const xxEnde = x(maxN).toFixed(1);
+    xRaster += `<line x1="${xxEnde}" x2="${xxEnde}" y1="${padT}" y2="${achsY}" stroke="rgba(96,165,250,0.3)" stroke-width="1.5" stroke-dasharray="3,3"/>`;
+    xRaster += `<line x1="${xxEnde}" x2="${xxEnde}" y1="${achsY}" y2="${achsY + 4}" stroke="#60A5FA" stroke-width="2"/>`;
+    xLabels += `<text x="${xxEnde}" y="${achsY + 15}" font-size="9.5" font-weight="800" fill="#60A5FA" text-anchor="middle">${maxN}</text>`;
+  }
 
   let kurve = '', punktMarker = '';
   if (punkte.length) {
@@ -343,15 +396,15 @@ function svgVerlauf(punkte, refs, w, h) {
     refLinien += `<line x1="${padL}" x2="${w - padR}" y1="${yy}" y2="${yy}" stroke="${r.farbe}" stroke-width="2.4" stroke-dasharray="7,5"/>`;
   });
 
-  const nLabel = punkte.length ? `n = ${maxN}` : 'noch keine Versuche';
+  const achsentitel = punkte.length ? 'Anzahl der Versuche' : 'Anzahl der Versuche — noch keine Versuche';
 
   return `<svg viewBox="0 0 ${w} ${h}" width="100%" height="${h}" style="display:block;">
-    ${raster}${labels}
+    ${raster}${xRaster}${labels}${xLabels}
     <line x1="${padL}" x2="${padL}" y1="${padT}" y2="${h - padB}" stroke="rgba(255,255,255,0.18)" stroke-width="1.5"/>
     <line x1="${padL}" x2="${w - padR}" y1="${h - padB}" y2="${h - padB}" stroke="rgba(255,255,255,0.18)" stroke-width="1.5"/>
     ${refLinien}
     ${kurve}${punktMarker}
-    <text x="${w / 2}" y="${h - 6}" font-size="10" fill="#A6AEDB" text-anchor="middle">Anzahl Versuche  —  ${nLabel}</text>
+    <text x="${w / 2}" y="${h - 6}" font-size="10" fill="#A6AEDB" text-anchor="middle">${achsentitel}</text>
   </svg>`;
 }
 
@@ -365,12 +418,13 @@ const RUNDEN_VORLAGEN = [
     theoretisch: 4/9,
     kurzlabel: 'eine grüne Kugel',
     icon: () => svgUrneMulti([F.gruen,F.gruen,F.gruen,F.gruen,F.lila,F.lila,F.lila,F.orange], 68),
+    bigIcon: () => svgBeutelGross([F.gruen, F.lila, F.orange]),
     aufbauHTML: `In der Urne liegen <strong>9 Kugeln</strong>: 4 grüne, 3 lila und 2 orangene. Nach jedem Zug wird die Kugel zurückgelegt.`,
     legende: [ {farbe:F.gruen,label:'grün · 4'}, {farbe:F.lila,label:'lila · 3'}, {farbe:F.orange,label:'orange · 2'} ],
     ereignisHTML: `Wie wahrscheinlich ist es, <span>eine grüne Kugel</span> zu ziehen?`,
     ziehen() {
       const key = gewichteteWahl([{key:'gruen',w:4},{key:'lila',w:3},{key:'orange',w:2}]);
-      return { treffer: key === 'gruen', visual: svgKugel(F[key], 54), label: key[0].toUpperCase()+key.slice(1) };
+      return { treffer: key === 'gruen', visual: svgKugel(F[key], 54), farbe: F[key], label: key[0].toUpperCase()+key.slice(1) };
     },
   },
   /* ── berechenbar: Kartenziehung ── */
@@ -487,8 +541,7 @@ function zeigeIntro() {
     <div class="m4-karte m4-transition">
       <div class="m4-transition-emoji">🔮</div>
       <div class="m4-transition-titel">Schätzen, rechnen, ausprobieren</div>
-      <p class="m4-transition-text">Bei jedem der folgenden drei Zufallsexperimente machst du zuerst eine <strong>Vorüberlegung</strong>: Wie wahrscheinlich ist ein bestimmtes Ereignis? Manchmal lässt sich das genau berechnen — manchmal kannst du es nur schätzen.</p>
-      <p class="m4-transition-text">Danach <strong>simulierst</strong> du das Experiment ganz oft und schaust: Wie nah kommt die tatsächliche relative Häufigkeit an deine Vorhersage heran?</p>
+      <p class="m4-transition-text">Bei jedem Experiment schätzt oder berechnest du zuerst eine <strong>Wahrscheinlichkeit</strong> — und testest sie danach durch echtes <strong>Simulieren</strong>: Wie nah kommt die tatsächliche relative Häufigkeit an deine Vorhersage heran?</p>
       <button class="btn btn-orange" onclick="starteRunde(0)">Los geht's →</button>
     </div>
   `);
@@ -582,7 +635,12 @@ function renderSimulation() {
   if (v.theoretisch !== null) refs.push({ rel: v.theoretisch, farbe: '#4ECDC4' });
   if (r.schaetzProzent !== null) refs.push({ rel: r.schaetzProzent / 100, farbe: '#FFD93D' });
 
-  const letzterZugHtml = r.letzterZug
+  const letzterZugHtml = v.bigIcon
+    ? `<div class="beutel-wrap" style="gap:.6rem;">
+         <div class="beutel-svg-wrap" id="beutelStage" style="width:130px;" onclick="ziehBeutelKlick()">${v.bigIcon()}</div>
+         ${r.letzterZug ? `<div class="gezogene-kugel" style="background:${r.letzterZug.farbe || '#A6AEDB'};"></div><div class="m4-letzter-zug-ergebnis ${r.letzterZug.treffer ? 'treffer' : ''}">${r.letzterZug.label}${r.letzterZug.treffer ? ' ✓' : ''}</div>` : `<div class="m4-hinweis-klein" style="margin:0;">Klick auf den Beutel zum Ziehen!</div>`}
+       </div>`
+    : r.letzterZug
     ? `<div class="m4-letzter-zug">
          <div class="m4-letzter-zug-label">Letzter Zug</div>
          ${r.letzterZug.visual}
@@ -595,11 +653,11 @@ function renderSimulation() {
   setMainHTML(`
     <div class="m4-fortschritt">
       <span><span class="m4-runde-badge">Runde ${spiel.idx + 1} von ${spiel.runden.length}</span>Simulation</span>
-      <span class="m4-phase-info">${v.ereignisHTML.replace(/<[^>]+>/g,'')}</span>
+      <span class="m4-phase-info">Du zählst: ${v.kurzlabel}</span>
     </div>
     <div class="m4-karte">
       <div class="m4-titel">Jetzt wird ausprobiert</div>
-      <div class="m4-beschreibung">Ziehe/wirf so oft du willst und beobachte, wie sich die relative Häufigkeit einpendelt.</div>
+      <div class="m4-beobachten-box">🔍 Du zählst: <span class="marke">${v.kurzlabel}</span></div>
 
       <div class="m4-sim-stage">${letzterZugHtml}</div>
 
@@ -625,6 +683,8 @@ function renderSimulation() {
         </div>
       </div>
 
+      ${r.n > 0 ? `<div class="m4-weiter-row" style="margin-bottom:.8rem;"><button class="btn btn-ghost" onclick="setzeSimulationZurueck()">🔄 Zurücksetzen</button></div>` : ''}
+
       ${!kannWeiter ? `<div class="m4-sim-hinweis">Mach mindestens ${MIN_ZUEGE_VOR_VERGLEICH} Versuche, bevor du zum Vergleich weitergehst — sonst sagt die Häufigkeit noch nicht viel aus.</div>` : ''}
 
       <div class="m4-weiter-row">
@@ -632,6 +692,12 @@ function renderSimulation() {
       </div>
     </div>
   `);
+}
+
+function ziehBeutelKlick() {
+  const el = document.getElementById('beutelStage');
+  if (el) { el.classList.remove('shaking'); void el.offsetWidth; el.classList.add('shaking'); }
+  setTimeout(() => ziehe(1), 350);
 }
 
 function ziehe(anzahl) {
@@ -650,6 +716,25 @@ function ziehe(anzahl) {
 }
 
 /* ── Phase 3: Vergleich ── */
+function bewerteSchaetzung(diff) {
+  if (diff <= 5) return { label: 'Gut', farbe: '#4ECDC4' };
+  if (diff <= 15) return { label: 'Mittel', farbe: '#FFD93D' };
+  return { label: 'Schlecht', farbe: '#F87171' };
+}
+
+function setzeSimulationZurueck() {
+  const r = aktRunde();
+  r.n = 0; r.treffer = 0; r.verlauf = []; r.letzterZug = null;
+  renderSimulation();
+}
+
+function wiederholeRunde() {
+  const r = aktRunde();
+  r.schaetzProzent = null; r.schaetzHaeufigkeit = null;
+  r.n = 0; r.treffer = 0; r.verlauf = []; r.letzterZug = null;
+  renderVorueberlegung();
+}
+
 function renderVergleich() {
   const r = aktRunde();
   const v = r.vorlage;
@@ -670,6 +755,14 @@ function renderVergleich() {
     }
   }
 
+  let schaetzungBadgeHtml = '';
+  if (r.schaetzProzent !== null) {
+    const referenz = theoProzent !== null ? theoProzent : relIst * 100;
+    const diff = Math.abs(r.schaetzProzent - referenz);
+    const bewertung = bewerteSchaetzung(diff);
+    schaetzungBadgeHtml = `<div class="m4-schaetzung-badge">Deine Schätzung war: <strong style="color:${bewertung.farbe};">${bewertung.label}</strong><span class="klein">Abweichung: ${rund1(diff)} Prozentpunkte gegenüber ${theoProzent !== null ? 'der berechneten Wahrscheinlichkeit' : 'der tatsächlichen relativen Häufigkeit'}</span></div>`;
+  }
+
   let fazit;
   if (v.typ === 'berechenbar') {
     const diff = Math.abs(relIst*100 - theoProzent);
@@ -688,10 +781,12 @@ function renderVergleich() {
     </div>
     <div class="m4-karte">
       <div class="m4-titel">Wie nah lagst du dran?</div>
+      ${schaetzungBadgeHtml}
       <table class="m4-vergleich-tabelle">${zeilen}</table>
       <div class="m4-vergleich-fazit ${v.typ === 'knifflig' ? 'knifflig' : ''}">${fazit}</div>
-      <div class="m4-weiter-row">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:.7rem;">
         <button class="btn btn-orange" onclick="${istLetzte ? 'zeigeAuswertung()' : `starteRunde(${spiel.idx + 1})`}">${istLetzte ? 'Zur Auswertung →' : 'Nächste Runde →'}</button>
+        <button class="btn btn-ghost" onclick="wiederholeRunde()">🔄 Diese Runde wiederholen (inkl. neuer Schätzung)</button>
       </div>
     </div>
   `);
@@ -732,10 +827,12 @@ function zeigeMerksatz() {
         <p><strong>Gesetz der großen Zahlen:</strong> Je öfter man ein Zufallsexperiment wiederholt, desto mehr nähert sich die relative Häufigkeit einer festen Zahl an. Bei einem einzelnen Versuch oder wenigen Versuchen kann das Ergebnis aber trotzdem stark abweichen — Zufall bleibt Zufall.</p>
       </div>
 
-      <p class="m4-transition-text">Damit hast du den vollen Kreis geschafft: Struktur aufbauen (Modul 1), übersichtlich darstellen (Modul 2), daraus eine Wahrscheinlichkeit berechnen (Modul 3) — und jetzt geprüft, ob diese Vorhersage auch wirklich eintrifft.</p>
+      <p class="m4-transition-text">Damit hast du den Kreis geschlossen: Struktur (Modul 1), Darstellung (Modul 2), Wahrscheinlichkeit berechnen (Modul 3) — und jetzt geprüft, ob sie auch wirklich eintrifft.</p>
 
-      <button class="btn btn-mint" onclick="starteSpiel(); starteRunde(0);">🔁 Nochmal mit neuen Runden</button>
-      <button class="btn btn-ghost" onclick="location.href='../jahrgang/Jg78.html'" style="margin-top:.7rem;">← Zurück zur Übersicht</button>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:.7rem;">
+        <button class="btn btn-mint" onclick="starteSpiel(); starteRunde(0);">🔁 Nochmal mit neuen Runden</button>
+        <button class="btn btn-ghost" onclick="location.href='../jahrgang/Jg78.html'">← Zurück zur Übersicht</button>
+      </div>
     </div>
   `);
 }

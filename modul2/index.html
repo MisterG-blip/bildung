@@ -150,8 +150,8 @@ const MUENZE = { typ: 'muenze', titel: 'Münze', aktion: 'eine Münze wirfst', e
 ]};
 const WUERFEL = { typ: 'wuerfel', titel: 'Würfel', aktion: 'würfelst', ergebnisse: [1,2,3,4,5,6].map(n => ({ label: String(n), symbol: '⚀⚁⚂⚃⚄⚅'[n-1] })) };
 const KARTE = { typ: 'karte', titel: 'Kartenfarbe', aktion: 'eine Karte ziehst und nur auf die Farbe schaust', ergebnisse: [
-  { label: 'Pik', symbol: '♠', farbe: '#c9c9e0' }, { label: 'Herz', symbol: '♥', farbe: '#ff6b6b' },
-  { label: 'Karo', symbol: '♦', farbe: '#ff6b6b' }, { label: 'Kreuz', symbol: '♣', farbe: '#c9c9e0' }
+  { label: 'Kreuz', symbol: '♣', farbe: '#c9c9e0' }, { label: 'Pik', symbol: '♠', farbe: '#c9c9e0' },
+  { label: 'Herz', symbol: '♥', farbe: '#ff6b6b' }, { label: 'Karo', symbol: '♦', farbe: '#ff6b6b' }
 ]};
 
 /* ── Teil 1: Kennenlernen (automatisch mitwachsend) ── */
@@ -169,13 +169,16 @@ const TEIL1_RUNDEN = [
 /* ── Teil 2: Selbst bauen (Werkstatt) ──
    Die Experimente werden bei jedem Einstieg neu zufällig aus Münze/Karte kombiniert
    (bewusst ohne Würfel — der hätte 6 Äste und würde die Werkstatt zu unübersichtlich machen).
-   Möglich sind z.B. Karte→Münze, Münze→Karte, Münze→Münze oder Karte→Karte. */
+   Möglich sind Karte→Münze, Münze→Karte oder Münze→Münze. Karte→Karte fällt bewusst weg:
+   4 × 4 = 16 Pfade wären als Baum in der Werkstatt zu klein/unübersichtlich dargestellt. */
 const WERKSTATT_EXPERIMENTE = [MUENZE, KARTE];
 let TEIL2_RUNDEN = [];
 
 function baueTeil2Runden() {
   const e1 = WERKSTATT_EXPERIMENTE[Math.floor(Math.random() * WERKSTATT_EXPERIMENTE.length)];
-  const e2 = WERKSTATT_EXPERIMENTE[Math.floor(Math.random() * WERKSTATT_EXPERIMENTE.length)];
+  // e2 frei wählen, aber Karte→Karte ausschließen (siehe Kommentar oben)
+  const e2Optionen = e1.typ === 'karte' ? [MUENZE] : WERKSTATT_EXPERIMENTE;
+  const e2 = e2Optionen[Math.floor(Math.random() * e2Optionen.length)];
   TEIL2_RUNDEN = [
     { key: 'r1', titel: `${e1.titel} — einstufig`, stufen: [e1],
       text: `Du ${e1.aktion}. Baue den Baum selbst: Ziehe jede Kachel auf einen freien Ast — welche Kachel auf welchen Ast kommt, ist egal, Hauptsache jede taucht genau einmal auf. Danach trägst du pro Ast die Wahrscheinlichkeit ein.` },
@@ -640,27 +643,40 @@ function wsBruchKlick(id) {
   renderTeil2();
 }
 
-/* ── Prüfen: vergleicht ALLE Äste + Wahrscheinlichkeiten auf einmal, erst auf Klick ── */
+/* ── Prüfen: vergleicht ALLE Äste + Wahrscheinlichkeiten auf einmal, erst auf Klick ──
+   Wichtig: Innerhalb einer Gruppe (z.B. alle Äste einer Stufe) ist die REIHENFOLGE
+   der Kacheln egal — geprüft wird nur, ob jede geforderte Kachel genau einmal vorkommt
+   (genau wie bei Kopf/Zahl: es ist egal, welcher Ast zuerst gezeichnet wird). */
 function wsPruefen() {
   const runde = TEIL2_RUNDEN[rIndex2];
   const proSlot = {}, proP = {};
   let alleRichtig = true;
-  function pruefeSlot(id, ziel, zielDen) {
-    const p = t2.platzierungen[id];
-    if (!p) { proSlot[id] = 'leer'; alleRichtig = false; }
-    else if (p.label === ziel.label) { proSlot[id] = 'ok'; }
-    else { proSlot[id] = 'falsch'; alleRichtig = false; }
-
-    const b = t2.platzierungenP[id];
-    if (!b) { proP[id] = 'leer'; alleRichtig = false; }
-    else if (bruchGleich(b.num, b.den, 1, zielDen)) { proP[id] = 'ok'; }
-    else { proP[id] = 'falsch'; alleRichtig = false; }
+  function pruefeGruppe(ids, requiredLabels, zielDen) {
+    const platziert = ids.map(id => t2.platzierungen[id] ? t2.platzierungen[id].label : null);
+    ids.forEach((id, idx) => {
+      const label = platziert[idx];
+      if (label === null) {
+        proSlot[id] = 'leer'; alleRichtig = false;
+      } else {
+        const anzahlGleich = platziert.filter(l => l === label).length;
+        if (requiredLabels.includes(label) && anzahlGleich === 1) { proSlot[id] = 'ok'; }
+        else { proSlot[id] = 'falsch'; alleRichtig = false; }
+      }
+      const b = t2.platzierungenP[id];
+      if (!b) { proP[id] = 'leer'; alleRichtig = false; }
+      else if (bruchGleich(b.num, b.den, 1, zielDen)) { proP[id] = 'ok'; }
+      else { proP[id] = 'falsch'; alleRichtig = false; }
+    });
   }
   if (runde.stufen.length === 1) {
-    runde.stufen[0].ergebnisse.forEach((e, i) => pruefeSlot('s1_' + i, e, runde.stufen[0].ergebnisse.length));
+    const ids = runde.stufen[0].ergebnisse.map((e, i) => 's1_' + i);
+    const labels = runde.stufen[0].ergebnisse.map(e => e.label);
+    pruefeGruppe(ids, labels, runde.stufen[0].ergebnisse.length);
   } else {
+    const labels2 = runde.stufen[1].ergebnisse.map(e => e.label);
     runde.stufen[0].ergebnisse.forEach((e1, i) => {
-      runde.stufen[1].ergebnisse.forEach((e2, j) => pruefeSlot('s2_' + i + '_' + j, e2, runde.stufen[1].ergebnisse.length));
+      const ids = runde.stufen[1].ergebnisse.map((e2, j) => 's2_' + i + '_' + j);
+      pruefeGruppe(ids, labels2, runde.stufen[1].ergebnisse.length);
     });
   }
   t2.ergebnis = { proSlot, proP, alleRichtig };
@@ -838,7 +854,10 @@ function zeigeEnde() {
       <div class="m2-ende-emoji">🌳</div>
       <div class="m2-ende-titel">Baum gebaut, Prinzip verstanden!</div>
       <p class="m2-ende-merksatz">Merksatz: Ein Baumdiagramm zeigt alle möglichen Pfade eines mehrstufigen Zufallsexperiments. An jedem Ast steht die Wahrscheinlichkeit dieser einen Stufe — und multiplizierst du die Wahrscheinlichkeiten entlang eines Pfades, erhältst du die Wahrscheinlichkeit für genau diesen Pfad. Je mehr Stufen, desto schneller wächst der Baum — deshalb suchen wir uns später (Modul 3: Laplace) Wege, um daraus direkt eine einzelne Zahl zu berechnen, ohne jeden Ast einzeln zu betrachten.</p>
-      <button class="btn btn-mint" onclick="starteAlles()">🔄 Nochmal von vorne</button>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:.7rem;">
+        <button class="btn btn-orange" onclick="location.href='../modul3/index.html'">⚖️ Weiter zu Modul 3 →</button>
+        <button class="btn btn-mint" onclick="starteAlles()">🔄 Nochmal von vorne</button>
+      </div>
     </div>
   `);
 }
